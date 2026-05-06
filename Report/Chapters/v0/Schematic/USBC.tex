@@ -1,0 +1,18 @@
+The USB-C connector was implemented as a source of power for the breakout board. Instead of needing to rely on FPC connectors or headers to jumper +3V3 power lines, I can simply use the power pins on the USBC connector.
+This enabled us to make use of other power supplies like powerbanks, rather than relying on stray wires or peripheral PCBs.
+\nl
+The schematic was referenced from the ADCS Integration Test Board. Unused pins were either left as NCs or pulled to ground.
+Test points were added on the main power levels (GND, VBUS, VIN, 3V3) to confirm potential readings during testing.
+\nl
+The ferrite bead and capacitors form a pi-filter (C-L-C) network. The input capacitor shunts high-frequency noise from the connector before it can reach the PCB.
+The ferrite bead acts as a supressor to high-frequency noise (low-pass filter) by absorbing the signal and dissipating it as heat. At DC and low frequencies, it acts as a short-circuit, allowing typical signals to pass.
+The output capacitor provides local decoupling for the PCB and helps smooth out any remaining noise. Using two different valued capacitors help increase its performance over a wider range of frequencies.
+With an inductor value of $L=190\texttt{nH}$, I chose capacitor values of $C_1=100\texttt{nF}$ and $C_2=10\mu\texttt{F}$ (\autoref{sec:clc-values}) to create a cut-off frequency of $1.2\texttt{MHz}$.
+I chose these values over others since they were seperated by two magnitudes and these values were already being ordered, which saves on unique component quantity, and the maximum value I can select for a capacitor on a USB line is $10\mu\texttt{F}$.
+\nl
+To introduce surge protection for electrostatic discharge, the schottky diode helps clamp voltage spikes to ground to protect other components in the PCB from being damaged. Although voltage spikes may not immediately break components, over time, they can wear down.
+\nl
+Lastly, I needed an effective and reliable method to maintain a +3V3 potential. If $\texttt{V}_{\texttt{DDCORE}}$ requires 1500mW at its peak, I can estimate that the internal SMPS will require 2000mW to create the power domain (at 75\% efficiency - Figure 18 of the STM datasheet illustrates the efficiency is ~85\%, however, I have selected 75\% for padded margins).
+From the \href{https://www.st.com/resource/en/application_note/an6000-how-to-build-the-discrete-power-supply-for-stm32n6-mcus-stmicroelectronics.pdf}{N6 power supply guide}, our maximum power draw is approximately 2500mW (worst-case scenario).
+At a 3V3 voltage supply, this corresponds to 750mA of current (no losses). Unfortunately, the LDOs used in \autoref{sec:schematic-ldos} can only output a maximum of 200mA of current. Although I could chain multiple in parallel to reach the required current, I found it best to continue with a more efficient buck converter.
+I selected the \href{https://au.mouser.com/ProductDetail/Texas-Instruments/TPS62056DGS?qs=sGAEpiMZZMvAX9OfPh%252B2NdYypUYwsctEmJ%252Bpz3ULnU8%3D}{TPS62056DGS} as the buck converter to supply the main power domain to the PCB. It can output 800mA at 3V3 with an input of 2.7-10V at a very low operating supply current (12uA).

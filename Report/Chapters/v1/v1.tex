@@ -1,0 +1,120 @@
+\textit{Any proprietary information has been excluded.}
+\nl
+Version 1 (v1) of C2S focuses on developing a CubeSat prototype - an early functional model built to test functionality. One major difference in this version explores a top-down systems-engineering approach, something that lacked in versions 0 and 0.1. Previously, all systems were developed in parallel to each other, meaning my component selection for the MCU was occuring at the same time I was selecting the CMOS Image Sensor (CIS). At first glance, this may seem fine, but this parallel approach fails to consider the system requirements. The CIS is the main component that everything should be designed around, not the other way around. To avoid this problem, certain goals were put in place to ensure this version was mission-oriented:
+
+\begin{enumerate}
+    \item \textbf{Systems Planning}
+    \\ Consulting with manufacturers, techical documentation, and Subject Matter Experts (SMEs) to develop a trade study. Identify system requirements, map connections, data flows, and interactions between different subsystems to ensure all parts are compatible.
+    \item \textbf{Comms \& Mechanical Capabilities}
+    \\ Understanding and defining the camera's CubeSat limitations - dimensions, download rate, etc.
+    \item \textbf{CIS Agreements}
+    \\ Ensuring Non Disclosure Agreements (NDAs) are signed, so any proprietary information can be easily accessed at any time.
+    \item \textbf{Component Selection}
+    \\ Selecting all other components based on the system requirements.
+    \item \textbf{Development}
+    \\ Creating schematics, PCBs, manufacturing, etc.
+\end{enumerate}
+
+These goals were developed from my experiences of what had and hadn't worked with the previous versions, so they may not be perfect, but these are what I found to be the most important steps in camera development. Additionally, it makes writing and, in your case, reading, a lot easier to digest.
+
+% -----------------------
+% Systems Planning
+% -----------------------
+\subsection{Systems Planning}\label{sec:v1-planning}
+
+    \subsubsection{Trade Study}
+        \subimport{./Planning/}{Trade.tex}
+
+    \subsubsection{System Requirements}\label{sec:v1-requirements}
+        \subimport{./Planning/}{Requirements.tex}
+
+    \subsubsection{Systems Integration Diagram}
+        \subimport{./Planning/}{Planning.tex}
+
+    \subsubsection{Capabilities}
+        \subimport{./Planning/}{Capabilities.tex}
+
+% -----------------------
+% Schematic and Component Selection
+% -----------------------
+\subsection{Schematic Design \& Component Selection}\label{sec:v1-schematic}
+
+    \subsubsection{MCU}\label{sec:v1-schematic-mcu}
+        \subimport{./Hardware/Schematic/}{MCU.tex}
+
+    \subsubsection{Sensor}\label{sec:v1-schematic-sensor}
+        \subimport{./Hardware/Schematic/}{Sensor.tex}
+
+    \subsubsection{Memory}
+        \subimport{./Hardware/Schematic/}{Memory.tex}
+
+    \subsubsection{microSD}
+        \subimport{./Hardware/Schematic/}{microSD.tex}
+
+    \subsubsection{Connectors}
+        \subimport{./Hardware/Schematic/}{Connectors.tex}
+
+    \subsubsection{Power}\label{sec:v1-schematic-power}
+        \subimport{./Hardware/Schematic/}{Power.tex}
+
+    \subsubsection{USB-C}
+        \subimport{./Hardware/Schematic/}{USBC.tex}
+
+    \subsubsection{STLINK}\label{sec:v1-schematic-stlink}
+        \subimport{./Hardware/Schematic/}{STLINK.tex}
+
+    \subsubsection{Clocks}
+        \subimport{./Hardware/Schematic/}{Clocks.tex}
+
+    \subsubsection{Button}
+        \subimport{./Hardware/Schematic/}{Button.tex}
+
+    \subsubsection{LEDs}
+        \subimport{./Hardware/Schematic/}{LEDs.tex}
+
+    \subsubsection{Test Points}
+        \subimport{./Hardware/Schematic/}{TP.tex}
+
+% -----------------------
+% PCB Design
+% -----------------------
+\subsection{PCB Design}\label{sec:v1-pcb}
+
+    The following sections will exclusively refer to C2Sv1.0 processor PCB. The bridge PCB consisted of a 2-layer PCB designed alongside the considerations of the processor PCB i.e., the same design considerations applied to both boards.
+
+    \subsubsection{Stackup}
+        \subimport{./Hardware/PCB/}{Stackup.tex}
+
+    \subsubsection{Layout}\label{sec:v1-layout}
+        \subimport{./Hardware/PCB/}{Layout.tex}
+
+    \subsubsection{Routing}\label{sec:v1-routing}
+        \subimport{./Hardware/PCB/}{Routing.tex}
+
+    \subsubsubsection{Coupling}\label{sec:v1-coupling}
+        \subimport{./Hardware/PCB/}{Coupling.tex}
+
+    \subsubsection{Vias}
+        \subimport{./Hardware/PCB/}{Vias.tex}
+
+    \subsubsection{Power Pad}
+        \subimport{./Hardware/PCB/}{Power Pad.tex}
+
+    \subsubsection{Silkscreen}
+        \subimport{./Hardware/PCB/}{Silkscreen.tex}
+
+    \subsubsection{Mounting}
+        \subimport{./Hardware/PCB/}{Mounting.tex}
+
+
+% -----------------------
+% Manufacturing
+% -----------------------
+\subsection{Manufacturing}\label{sec:v1-manufacturing}
+    \subimport{./Manufacturing/}{Manufacturing.tex}
+
+% -----------------------
+% Software
+% -----------------------
+\subsection{Software}\label{sec:v1-software}
+    \subimport{./Software/}{Software.tex}

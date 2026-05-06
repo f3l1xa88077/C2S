@@ -1,0 +1,43 @@
+The MCU is a critical part of the hardware design process, responsible for interfacing with all the peripherals. FPGAs and other branded MCUs are not considered as STM32s are the standard processor for PAST projects. Although an FPGA would most likely be more efficient, it is far more complex to implement, making it unfeasible. The following table explores the trade offs between ST MCUs that support DCMI and QSPI.
+\nl
+The most critical design expectation of this prototype is keeping power consumption to a minimum, so the typical power usage heavily influences the part selection. Additionally, faster operating speeds means the MCU will be active for less time, although this factor is bottlenecked by the performance of peripherals. While significant, it remains a secondary constraint compared to power efficiency. Selecting an MCU within the operating ranges of space is ideal so the chip can be recycled for future iterations of the project, but not vital as most ST MCUs meet these operating ranges. Although price is important in a budget-restricted design, the processor is arguably the most important component that does not cost as much as image sensors. 
+
+\begin{indentedfigure}
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|l|}
+        \hline
+        \textbf{Criteria} & \textbf{Weight} & \textbf{L496} & \textbf{H562} & \textbf{H563} & \textbf{H573} & \textbf{H7A} \\
+        \hline
+        Cost & 1 & 5 & 5 & 5 & 4 & 3 \\
+        \hline
+        Speed & 3 & 1 & 4 & 4 & 4 & 5 \\
+        \hline
+        Power Consumption & 5 & 2 & 1 & 1 & 2 & 3 \\
+        \hline
+        Temperature Rating & 2 & 5 & 1 & 1 & 1 & 1 \\
+        \hline \hline
+        \textbf{Total Score} & & \textbf{28} & \textbf{24} & \textbf{24} & \textbf{28} & \textbf{35} \\
+
+        \hline \hline
+
+        \textbf{} & \textbf{} & \textbf{} & \textbf{U535} & \textbf{U545} & \textbf{U575} & \textbf{U585} \\
+        \hline
+        Cost & 1 &  & 5 & 4 & 4 & 3 \\
+        \hline
+        Speed & 3 & & 2 & 2 & 2 & 2 \\
+        \hline
+        Power Consumption & 5 &  & 4 & 4 & 4 & 4 \\
+        \hline
+        Temperature Rating & 2 &  & 5 & 5 & 5 & 5 \\
+        \hline \hline
+        \textbf{Total Score} & & & \textbf{41} & \textbf{40} & \textbf{40} & \textbf{39} \\
+        \hline
+    \end{tabular}
+    
+    \caption{C2Sv1 MCU trade study between different processor lines on a scale (1-5).}
+    \label{tab:v1-trade-mcu}
+\end{indentedfigure}
+
+The STM32H7A is the best middle ground, while the U-series is the efficiency leader. The H7A is the only chip in the tradeoff that packs a hardware JPEG codec, which is a massive win for handling image data without pinning the CPU. Although, it pulls $90\mu$A/MHz compared to the U5's $26\mu$A/MHz, and does not operate within the required -40°C to 120°C temperature range.
+\nl
+If we disregard the hardware JPEG codec, the STM32U5 is the clear winner for this mission. With a run mode current of $26\mu$A/MHz, it's nearly four times more efficient than the H-series, which is a dealbreaker for our EPS constraints. Since we can handle compression in software or just dump raw frames to the Renesas SPI flash, the U5's superior thermal rating and power profile make it the most reliable choice for the space environment. As each processor ranked similarly, the specific processor is decided in \autoref{sec:v1-schematic-mcu} based on pin availability.

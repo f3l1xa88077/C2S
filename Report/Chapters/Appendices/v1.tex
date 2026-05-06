@@ -1,0 +1,91 @@
+\subsection{Pin Justification Tables}
+
+% ------------------------
+% STM32U575RI 144-Pin Justification Tables
+% ------------------------
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{3cm}|p{6cm}|p{4.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        1 & VBAT & Backup power supply for RTC and backup registers & nil. \\ \hline
+        2 & SHUTTER & Close to camera module trigger interface & Requires an external interrupt pin \\ \hline
+        3 & RCC\_OSC32\_IN & Input for the low-speed external 32.768 kHz crystal & 32.768kHz \\ \hline
+        4 & LED\_MCU & Status indicator for MCU operation & GPIO \\ \hline
+        5 & RCC\_OSC\_IN & Input for the high-speed external oscillator & 4-50MHz \\ \hline
+        6 & LED\_ERR & Error status indicator & GPIO \\ \hline
+        7 & NRST & System reset pin (active low) & nil. \\ \hline
+        8 & OCTOSPIM\_P1\_IO7 & Auto assigned by STM32CubeIDE after selecting 'PORT1 IO[7:4]' on Data [3:0] \hypertarget{octo-io-8}{[1]} & nil. \\ \hline
+        9 & OCTOSPIM\_P1\_IO4 & \hyperlink{octo-io-8}{1} & nil. \\ \hline
+        10 & OCTOSPIM\_P1\_IO5 & \hyperlink{octo-io-8}{1} & nil. \\ \hline
+        11 & OCTOSPIM\_P1\_IO6 & \hyperlink{octo-io-8}{1} & nil. \\ \hline
+        12 & VSSA & Analog ground reference & Tie to VSS/GND \\ \hline
+        13 & VDDA & Analog power supply & 1.62-3.6V \\ \hline
+        14 & PA0 & nil. & nil. \\ \hline
+        15 & SPI1\_SCK & Auto assigned by STM32CubeIDE after selecting 'Full-Duplex Master' on Mode & nil. \\ \hline
+        16 & OCTOSPIM\_P1\_NCS & Auto assigned by STM32CubeIDE after selecting 'Port1 NCS' on 'Chip Select' & nil. \\ \hline
+        17 & OCTOSPIM\_P1\_CLK & Auto assigned by STM32CubeIDE after selecting 'Port1 CLK' on Clock & nil. \\ \hline
+        18 & VSS & Digital ground & nil. \\ \hline
+        19 & VDD & Digital power supply & 1.71-3.6V \\ \hline
+        20 & DCMI\_HSYNC & Auto assigned by STM32CubeIDE after selecting 'Slave 12 bits' on DCMI \hypertarget{dcmi-reason}{[2]} & nil. \\ \hline
+        21 & DCMI\_GPIO0 & General purpose control for camera sensor & GPIO \\ \hline
+        22 & DCMI\_PIXCLK & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        23 & SPI1\_MOSI & Auto assigned by STM32CubeIDE after selecting 'Full-Duplex Master' on Mode & nil. \\ \hline
+        24 & DCMI\_GPIO1 & General purpose control for camera sensor & GPIO \\ \hline
+        25 & DCMI\_GPIO2 & General purpose control for camera sensor & GPIO \\ \hline
+        26 & DCMI\_GPIO3 & General purpose control for camera sensor & GPIO \\ \hline
+        27 & PB1 & nil. & nil. \\ \hline
+        28 & PB2 & nil. & nil. \\ \hline
+        29 & I2C2\_SCL & Auto assigned by STM32CubeIDE after selecting 'I2C2' & nil. \\ \hline
+        30 & VCAP & Internal regulator filtering & External capacitor required \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U575RITx (Pins 1-30).}
+    \label{tab:stm32u575-pin-justification-1}
+\end{table}
+
+\begin{table}[H]
+    \ContinuedFloat
+    \centering
+    \begin{tabular}{|l|p{3cm}|p{6.5cm}|p{3.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        31 & VSS & Digital ground & nil. \\ \hline
+        32 & VDD & Digital power supply & 1.71-3.6V \\ \hline
+        33 & SPI2\_CS & Close to connector & nil. \\ \hline
+        34 & SPI2\_SCK & Auto assigned by STM32CubeIDE after selecting 'Full-Duplex Master' & nil. \\ \hline
+        35 & I2C2\_SDA & Auto assigned by STM32CubeIDE after selecting 'I2C2' & nil. \\ \hline
+        36 & SPI2\_MOSI & Auto assigned by STM32CubeIDE after selecting 'Full-Duplex Master' & nil. \\ \hline
+        37 & DCMI\_D0 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        38 & DCMI\_D1 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        39 & DCMI\_D2 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        40 & DCMI\_D3 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        41 & DCMI\_MCLK & Master clock output for camera sensor (MCO) & nil. \\ \hline
+        42 & WAKEUP & Input for system wakeup from low power modes & Wakeup pin. \\ \hline
+        43 & SPI1\_CS & Close to connector & nil. \\ \hline
+        44 & USB\_OTG\_FS\_DM & Dedicated USB Full Speed differential pair & nil. \\ \hline
+        45 & USB\_OTG\_FS\_DP & Dedicated USB Full Speed differential pair & nil. \\ \hline
+        46 & DEBUG\_JTMS-SWDIO & Serial Wire Debug Data line & nil. \\ \hline
+        47 & VSS & Digital ground & nil. \\ \hline
+        48 & VDDUSB & Digital power supply & Must be connected to VDD if transceiver not used \\ \hline
+        49 & DEBUG\_JTCK-SWCLK & Serial Wire Debug Clock line & nil. \\ \hline
+        50 & PA15 & NC & nil. \\ \hline
+        51 & DCMI\_D8 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        52 & DCMI\_D4 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        53 & DCMI\_D9 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        54 & DCMI\_D11 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        55 & DEBUG\_JTDO-SWO & Serial Wire Output for tracing & nil. \\ \hline
+        56 & SPI1\_MISO & Auto assigned by STM32CubeIDE after selecting 'Full-Duplex Master' & nil. \\ \hline
+        57 & DCMI\_D10 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        58 & DCMI\_D5 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        59 & DCMI\_VSYNC & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        60 & PH3 & nil. & nil. \\ \hline
+        61 & DCMI\_D6 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        62 & DCMI\_D7 & \hyperlink{dcmi-reason}{2} & nil. \\ \hline
+        63 & VSS & Digital ground & nil. \\ \hline
+        64 & VDD & Digital power supply & 1.71-3.6V \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U575RITx (continued, Pins 31-64).}
+\end{table}

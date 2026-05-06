@@ -1,0 +1,16 @@
+The STM32U5Gxxx does not have a large enough internal memory to buffer a full-resolution image. I selected 256Mb of memory compared to a value closer to the approximate image size (32Mb) just so I did not have to worry about running out of memory. The overhead increases the price by approximately \$3AUD which is almost negligible. If testing had taken place, I I would have measured the consumed memory so the next version uses only as much memory as it needs.
+\nl
+I opted for QuadSPI (QSPI) over alternative options like SDRAM, and OctalSPI (OSPI) because of pin count and package issues:
+\begin{itemize}
+    \item Initially, I proceeded with SDRAM, but this required nearly 30 delay matched traces, which quickly became far too difficult to achieve in a somewhat compact board without serious coupling risks.
+    \item OSPI was the next best option, however, all the components I had come across all used BGA packages, so they were not further considered.
+\end{itemize}
+Although QSPI isn't the fastest memory option, the selected component has a maximum clock speed of 133 MHz which is fast enough for the camera, I didn't believe that my PCB design skills could support DCMI speeds faster than QSPI \cite{stm-dcmi}.
+\nl
+Of the potential components with a 256Mbit capacitor or greater, the \href{https://www.renesas.com/en/products/at25sf2561c/part-details/at25sf2561c-mwub-t}{AT25SF2561C-MWUB-T} was the cheapest option.
+\nl
+The QSPI was configured according to \cite{qspi-interface} (section 3.2.3). Section 4.3 was helpful for developing the schematic \cite{qspi-interface}, as well as using \cite{qspi-reference-schematic} as a reference. The interface was configured in the STM32CubeIDE via OSPIM1 \cite{ST_forum_u5g9vjtxq_quadspi} \cite{ST_wiki_XSPI_interoperability}.
+It should be noted that the QSPI SS and DQ lines should all be length matched to less than $\pm50$ps, and all lines should be length matched within $\pm250$ps. \cite{QSPI-length-match} \cite{high-speed-layout}.
+
+\paragraph{Remark}\label{sec:v0.1-memory-remark}
+I added pull up resistors according to the schematic symbol rather than the datasheet. The auto-generated symbol showed the WP/IO2 pin having a bar over both WP and IO2, which I interpreted as both pins requiring a pull up regardless of the operational mode. If I had properly read the datasheet, Chapter 2 (Pin Descriptions) states that IO2 \textbf{is not} an inverted pin and the inverted pins each have internal pull ups that are enabled/disabled depending on the status of the QE bit, meaning external pull ups on the data lines are not required. Fortunately, accidentally adding this resistor did not affect the component's behaviour, but this mistake should not be made in future designs. The datasheet did not say that the NCS line had a pull up resistor, so either the external pull up can be kept, or an internal pull up on the STM can be used instead.

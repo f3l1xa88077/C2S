@@ -1,0 +1,3 @@
+The SDMMC interface is responsible for writing to the uSD card. Change the mode to 'SD 4 bits Wide bys with auto dir voltage converter' and change the 'SDMMC clock divide factor' to 16.
+Lastly, enable the global interrupt in the 'NVIC Settings'.
+You do not need to set the GPIO pins to pull up since the PCB already has pull up resistors, but you can change the 'Maximum Output Speed' to 'High' or 'Very High'.

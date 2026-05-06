@@ -1,0 +1,73 @@
+A lot of consideration was placed into the selection of the image processor. Initially, I investigated ASICs suited for image processing. I found that most active and supported imaging ASICs are manufactured for larger scopes i.e., video and AI processing, which exceeded the current power and thermal requirements of the project.
+Most ASICs that fit the current scope are more dated and less-supported. For example, the ADSP-BF70x line were prime candidates at the start of the project since their attributes fit the current scope and aren't "overkill". They processed low-resolution images at a high-energy efficiency, could utilise external RAM and interfaced with CMOS senors with PPI.
+Despite this, the line (as of mid-2025) is more than a decade old and has limited support. Other processors from NXP, Microchip and Texas Instruments either showed the same limited support or lacked imaging processing capabilities (most designed for power systems).
+After consulting with online forums like \href{https://www.reddit.com/r/ECE/comments/1mizdoo/best_asic_for_image_processing/}{r/ECE} and \href{https://www.reddit.com/r/embedded/comments/1mfv3zn/comment/n6kd7jb/}{r/embedded}, as well as with Dr. Robert Howie regarding his students' previous star tracker project, it was decided that a general processor like the STM32 was best suited for the current application.
+\nl
+STM32s have been widely used in CubeSat applications over the years and have become a widely supported platform for ameteur aerospace applications. Unlike FPGAs, which can compute parallel processing, STM32s use high-level languages like C/++, have faster development cycles and have a larger community. They are typically more power efficient and can have built-in image processing and encoders.
+Amongst the STM32 line, I selected the STM32N6 as the image processor over others like the H7 for the following reasons:
+\begin{itemize}
+    \item Supports DCMI as well as MIPI CSI-2. H7s do not support the latter.
+    \item Uses an image signal processor (ISP), digital signal processor (DSP) and neural processing unit (NPU) for processing unlike a traditional software-powered CPU.
+    \item Has hardware-accelerated subsampling techniques, whereas others use software.
+    \item Has a higher power efficiency compared to the H7 (and can be underclocked to save more power).
+    \item More recent and will be supported for longer.
+\end{itemize}
+The following table explores some of the key differences between the STM32 processors:
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{2cm}|p{3.75cm}|p{3.75cm}|p{3.75cm}|}
+\hline
+\textbf{Feature} & \textbf{STM32N6 Series} & \textbf{STM32H7 Series} & \textbf{STM32F4 Series} \\
+\hline
+Core & Arm Cortex-M55 + Neural ART NPU & Arm Cortex-M7 (single or dual-core M7/M4) & Arm Cortex-M4 \\
+\hline
+Performance & Up to 480 MHz (core), includes vector extensions & Up to 550 MHz (M7), strong DSP/float perf & Up to 180 MHz, moderate DSP capability \\
+\hline
+Memory (RAM/Flash) & Up to 4 MB SRAM, 4 MB Flash & Up to 1 MB SRAM, 2 MB Flash & Up to 256 KB SRAM, 2 MB Flash \\
+\hline
+Imaging Interfaces & DCMI, SPI, QuadSPI, JPEG Codec, Chrom-ART, DMA2D & DCMI, JPEG Codec, Chrom-ART, DMA2D & DCMI (on select models), basic DMA \\
+\hline
+Subsampling / Encoding & Hardware JPEG with native Y'UV support & Hardware JPEG + DMA2D for YUV & Software-based only \\
+\hline
+Power Efficiency & Moderate to High (based on workload + NPU efficiency) & Moderate (high-performance, higher dynamic power) & Good (lower performance = lower power) \\
+\hline
+Target Applications & AI vision, edge inference, intelligent sensors, imaging pipelines & High-performance imaging, audio, motor control, GUI apps & General-purpose MCU, audio, lower-end imaging \\
+\hline
+Availability & Early access or newly launched (as of 2025) & Mature and widely supported & Legacy but stable \\
+\hline
+\end{tabular}
+\caption{Comparison of STM32N6, STM32H7, and STM32F4 Microcontroller Families}
+\label{tab:stm32-family-comparison}
+\end{table}
+I selected the \href{https://au.mouser.com/ProductDetail/STMicroelectronics/STM32N657I0H3Q?qs=a2MtRaTmNOQAexZMsq8u8A%3D%3D}{STM32N657I0H3Q} as the image processor for the breakout board. I opted for this processor amongst its other counterparts (like the \href{https://au.mouser.com/ProductDetail/STMicroelectronics/STM32N657X0H3Q?qs=%252BXxaIXUDbq0JgAtfYs%252BpjA%3D%3D}{STM32N657X0H3Q}) because of a similar feature-list at a lower price and significantly lower pin count.
+Although this component is designed for more complex- and intense-tasks, I will be able to evaluate which features will be utilised and which won't be, which will aid in selecting the optimal processor for the prototype. It serves as a solid middle ground between the more extensive and cheaper counterparts
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|p{8cm}|}
+    \hline
+\textbf{Segment} & \textbf{Code} & \textbf{Meaning / Explanation} \\
+\hline
+Manufacturer Family & STM32 & STMicroelectronics 32-bit microcontroller family \\
+\hline
+Series & N6 & STM32N6 series - based on Arm Cortex-M55 core with Neural ART NPU \\
+\hline
+Sub-Family / Feature Set & 57 & High-end variant in the STM32N6 family (e.g., more memory, interfaces, and image processing features) \\
+\hline
+Memory / Package Variant & I0 & Midrange flash/RAM size and medium-pin-count package \\
+\hline
+Temperature Grade & H & High-temperature / industrial range (typically -40°C to +85°C or higher) \\
+\hline
+Variant Code & 3 & Specific feature or silicon variant (usually minor revisions or option sets) \\
+\hline
+Qualification Grade & Q & Automotive or industrial qualification \\
+\hline
+\end{tabular}
+\caption{Breakdown of STM32N657I0H3Q Part Number}
+\label{tab:stm32n6-partnumber-n657i0}
+\end{table}
+
+Despite the current choice, it is highly recommended that if the scope of the project were to expand in the future, further research into ASICs should be completed.
+Compared to modern SoCs or FPGAs with image processing capabilities, some ASICs provide a lower-cost entry point with greater efficiency in real-time image processing.
+\nl
+Since the selected processor has sufficient internal memory to buffer a full-resolution image, external memory is not required to support real-time image acquisition and processing.
+If future revisions of the project (i.e., the prototype) require more memory to buffer the image, the selected processor is compatible with external uSDRAM like the \href{https://au.mouser.com/ProductDetail/ISSI/IS45S16320D-7TLA2?qs=Iq7RKQRjpgqlMjstEZ4V8g%3D%3D}{IS45S16320D-7TLA2}.

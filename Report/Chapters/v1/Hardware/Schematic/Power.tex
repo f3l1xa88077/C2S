@@ -1,0 +1,19 @@
+The power circuit is responsible for sinking current and delivering stable voltages to the rest of the board. There are five clearly defined sections in the power delivery schematic.
+
+\paragraph{1a. USB-C Connection}
+A USB-C connector uses 5.1 k$\Omega$ pull down resistors (as outlined on page 54 of \cite{ti-usb-typec-guide}) to convert the load to a sink. The connector outputs +VUSB, which should be roughly 5V according to \cite{ti-usb-typec-guide}. The communication pins have been left as NC since the STLINK already provides a virtual COM port.
+
+\paragraph{1b. EPS Connection}
+Sinks a stable 5V from the EPS board, named +VEPS.
+
+\paragraph{2. Source Selection}
+A three pin header allows the power source to be selected by shorting the middle pin with either the USB or EPS voltage. The output is +VSEL (Voltage Selected).
+
+\paragraph{3. Power Measurement}
++VSHUNT is passed through a shunt resistor, where the voltage difference is recorded by an INA219 CSA (as selected in \autoref{sec:v1-trade-csa}). The CSA outputs current, voltage, and power data via I2C. The terminating side of the shunt resistor has +VCSA.
+
+\paragraph{4. Filtering}
++VCSA is then passed through a pi-filter (CLC network) to reject any high-frequency noise, with output +VFILT (Voltage Filtered). I chose capacitor values of $C_1=$100 nF and $C_2=$10 $\mu$F (\autoref{sec:clc-values}) to create a cut-off frequency $\approx$1 MHz.
+
+\paragraph{5. 3V3 Regulation}
+Lastly, +VFILT is regulated to +3V3 using a Low-Dropout (LDO) regulator, specifically, the \href{https://au.mouser.com/ProductDetail/Texas-Instruments/TPS7A2033PDBVR?qs=hd1VzrDQEGjk%2FOBnRfKB4A%3D%3D}{TPS7A2033PDBVR}. This component was selected because of its high Power Supply Rejection Ratio (PSRR), its ability to provide a low-noise DC output for sensitive analog components, and its minimal PCB footprint due to the lack of an external inductor (see \autoref{sec:v1-sensor-power} for more about the specifics of PSRR). The datasheet was followed to populate the schematic.

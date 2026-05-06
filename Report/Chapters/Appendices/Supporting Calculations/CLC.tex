@@ -1,0 +1,18 @@
+Model the ferrite bead as a series inductance L at low-mid frequencies. The two capacitors $C_1$ (input side) and $C_2$ (output side) form a pi filter with that series inductance. The pi network has a resonance frequency $f$ where the L and the effective capacitance interact:
+\begin{equation}
+    C_{eq} = \frac{C_1 \times C_2}{C_1 + C_2}
+\end{equation}
+The resonance / cutoff frequency of the $L$-$C_{eq}$ combination is:
+\begin{equation}
+    f = \frac{1}{2\pi \sqrt{L \times C_{eq}}}
+\end{equation}
+At frequencies well above $f_r$ the filter attenuates; below fr the caps and ferrite appear largely as bypasses so DC and low frequency pass through.
+\nl
+For ferrite beads, its resonant frequency is typically 100MHz (unless stated otherwise). At frequencies well below resonance, the bead behaves approximately like an inductor:
+\begin{equation}
+    Z \approx j2\pi f L
+\end{equation}
+Rearranging:
+\begin{equation}
+    L \approx \frac{Z}{2\pi f}
+\end{equation}

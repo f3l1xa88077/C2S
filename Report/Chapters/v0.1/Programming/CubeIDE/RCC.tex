@@ -1,0 +1,5 @@
+The RCC configures the external clocks. For both the high- and low-speed clocks, they should be set to 'BYPASS Clock Source'.
+\nl
+Then, in the 'Clock Configuration' menu, the 'PLL1 Source Mux' should be set to HSE and the 'RTC Clock Mux' should be set to LSE.
+If the RTC Mux is greyed out, then you must enable 'Activate Clock Source' under 'RTC' (a different tab).
+Ensure that the HSE and LSE frequencies are $40$ MHz and $32.768$ kHz, respectively.

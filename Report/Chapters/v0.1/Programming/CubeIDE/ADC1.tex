@@ -1,0 +1,3 @@
+The Current Sense Amplifier (CSA) outputs an analog signal so an ADC pin must be configured on the STM32. The CSA analog output is connected to Pin 31 of the STM32, corresponding to \verb|ADC1_IN3|.
+It is vital that the ADC Resolution matches with the divide factor in \verb|CSA_VOLTAGE()|, otherwise readings will be inaccurate. The resolution should be set to 14-bit.
+Moreover, the pin should be pulled down in the GPIO settings.

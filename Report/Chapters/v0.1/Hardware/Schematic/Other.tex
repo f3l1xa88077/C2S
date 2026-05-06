@@ -1,0 +1,109 @@
+Various LEDs were used on both boards to display the status of specific systems. In total there were 11 LEDs in total, 8 on the processor board with the other three on the sensor:
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|l|}
+    \hline
+    \textbf{LED} & \textbf{Description} \\
+    \hline
+    AR0 & Status of CIS \\
+    \hline
+    U5G & Status of MCU \\
+    \hline
+    RX & If image data is being received \\
+    \hline
+    TX & If image data is being saved/transmitted \\
+    \hline
+    DBG & A general purpose LED \\
+    \hline
+    3V3 & 3V3 status \\
+    \hline
+    2V8 & 2V8 status \\
+    \hline
+    1V8 & 1V8 status \\
+    \hline
+    TRIG & If a photo command was sent to the CIS \\
+    \hline
+    RST & If a reset command was sent to the CIS \\
+    \hline
+    STBY & If a standby command was sent to the CIS \\
+    \hline
+    \end{tabular}
+    \caption{C2Sv0.1 LEDs.}
+\end{indentedtable}
+
+I selected four bi-colour LEDs on the processor board thinking that meant bi-directional, so the AR0, U5G, RX, and TX pins each have their anodes and cathodes connected to an MCU pin.
+\nl
+The rotary encoder was meant to act as an interface to the image sensor configuration settings, allowing me to change settings like gain and exposure time easily without needing to flash the board with updated code each time I needed a change made. The dial would change the value, and the button would switch between different settings. Two capacitors were added to the data lines to prevent erratic behaviour according to this \href{https://media.jaycar.com.au/product/resources/SR1230_manualMain_94019.pdf}{Jaycar manual}. Each output was connected to an interrupt pin on the MCU.
+\nl
+The Liquid Crystal Display (LCD) allowed me to visualise the current configuration settings set by the rotary encoder. I used a standard \href{https://www.jaycar.com.au/dot-matrix-white-on-blue-lcd-16x2-character/p/QP5521}{16x2 LCD} with an I2C port expander. To connect the LCD, I added a 4-pin header with 3V3, GND, SDA, and SCL. Unfortunately, the LCD required 5V, so I used an Arduino Uno to provide VCC and connected common grounds.
+\nl
+The audio buzzer was meant to act an emergency indicator, sounding when a catastrophic failure was occuring that required immediate attention. This connected was directly to a timer pin on the MCU, instead of through a transistor like specified in the datasheet, meaning the component was inoperable. 
+\nl
+Three buttons were included: Trigger, Reset, and BOOT0. I coped over a button component from the ADCS Integration Board and connected the pins (incorrectly).
+
+\paragraph{Remark}\label{sec:v0.1-other-remark}
+The schematic for the buttons had the incorrect pinout and PCB footprint, meaning the circuit was always shorted and \href{https://au.mouser.com/ProductDetail/E-Switch/TL3305BF100QG?qs=IKkN%2F947nfDIPwqPQja%252BvQ%3D%3D&countryCode=AU&currencyCode=AUD}{new buttons} needed to be procured. To overcome this, the diagonal legs were cut-off. I also did not find myself using the buttons at all during programming (aside from the take photo button), meaning the NRST and BOOT0 buttons can probably be excluded. These pins should still be connected to the STLINK.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/Buttons_Sch.png}
+        \caption{C2Sv0.1 button schematic with incorrect pinout.}
+    \end{subfigure}
+    \vfill
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/Buttons.png}
+        \caption{View of amputated buttons.}
+    \end{subfigure}
+    \caption{Button modifications made to C2Sv0.1}
+\end{indentedfigure}
+
+Additionally, the rotary encoder's button circuit was implemented incorrectly. The button output was tied to a VSS pin of the MCU (for unknown reasons), meaning the button was functionless. I'm confident the mistake came from a mixup between pins, as I did not realise the mistake when populating the pin justification table \autoref{tab:v1-pin-justification}. The BOOT0 button was repurposed to trigger the encoder's button logic within its ISR.
+\nl
+As shown in \autoref{fig:or-gate-schematic}, the PCB included a OR gate for the power switch to ensure the processor and other components were powered down correctly. Unfortunately, the gate was included in the wrong location for the circuit to perform as expected. The MOSFET was meant to act as a secondary conducting line once the switch was opened. Since the circuit was implemented after the 3V3 LDO, the voltage drop across the MOSFET would cause the STM to lose power and eventually reset the base of the MOSFET. As you can see in \autoref{fig:or-oscilloscope}, after the switch is opened, there is single instance where VCC is equal to 3.3 minus the voltage drop across the MOSFET. Since this new VCC value falls outside the operating range of VCC for the U5, the processor powers down and the decoupling and bulk capacitors create the decay behavious seen afterwards. If this was implemented before the 3V3 LDO, the voltage drop across the MOSFET would not affect VCC since the LDO regulates the voltage down to 3V3 regardless of whether the voltage before it is 5V or 4.3V.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/or-gate.png}
+        \caption{OR Gate circuit snippet from Altium}
+        \label{fig:or-gate-schematic}
+    \end{subfigure}
+    %\hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/or-oscilloscope.jpg}
+        \caption{Oscilloscope snippet showing the behaviour of VCC after the power switch is opened}
+        \label{fig:or-oscilloscope}
+    \end{subfigure}
+    \caption{OR Gate from C2Sv0.1}
+\end{indentedfigure}
+
+The largest oversight of v0.1 was the power itself. Only a single GND pin was broken out on the LCD header which made it very difficult to program the LCD screen since the STLINK and LCD both require a ground connection each. Moreover, the LCD screen requires 5V, but the board only had 3V3 broken out. To remedy these issues, a new \textbf{Shield PCB} was designed and I procured the board myself.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/Shield PCB.png}
+        \caption{C2Sv0.1 with shield fitted.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Schematic/Stub.png}
+        \caption{View of 3D printed stub.}
+    \end{subfigure}
+    \caption{Views of the shield PCB fitted to v0.1}
+    \label{fig:shield-pcb}
+\end{indentedfigure}
+
+The board aimed to make it easier to power the LCD screen with a USBC cable rather than an external PSU, as well as being able to directly plug in an STLINK/V2 (the STLINK connector's notch lines up with the silkscreen label). The STLINK/V2 connector only used SWDIO and SWCLK communication lines as TRACESWO and NRST were not broken out on the origianl processor board. The PCB connected directly to the LCD and STLINK headers, with a mounting hole for support. The board also featured two 3V3 and GND pins for any peripheral requirements. On a personal note, being able to plug the STLINK directly into the PCB is a game-changer. It removes the stress of needing to check the connections every time you disconnect and re-connect. I highly recommend implementing this feature in any other PCBs that you may develop with an STM32 chip.
+\nl
+It was discovered that there was an error with the audio buzzer circuit. I had not realised there was a recommended circuit at the bottom of page 2 in the \href{https://au.mouser.com/datasheet/3/6118/1/cbt_09427_smt_tr.pdf}{datasheet} \cite{samesky-buzzer}. So, even though the U5G was outputting a correct PWM signal, the driving current was not enough to turn the buzzer on. Page 1 of the datasheet says that the component consumes a maximum of 110mA, whereas the \href{https://www.st.com/resource/en/datasheet/stm32u5g7vj.pdf#page=157}{U5G datasheet} says that the maximum output current sourced by and I/O pin is 20mA, far lower than 110mA (so it is expected the buzzer cannot be heard) \cite{u5-datasheet} \cite{samesky-buzzer}.
+\nl
+Lastly, I had realised I accidentally selected the wrong LEDs when designing the board. For \href{mouser.com/ProductDetail/Vishay/VLMG1300-GS08?qs=uoVnq4yU%252B9JyXEbHJ6%2FhZQ%3D%3D}{these LEDs} had mistakenly interpreted bicolor meaning two individual colours i.e., one colour when current goes in one direction and vice versa. Once I began testing, I quickly realised this was not the case.

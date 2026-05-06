@@ -1,0 +1,22 @@
+The current sense amplifier (CSA) outputs an analog value dependent on the voltage drop across the connected shunt resistor.
+\nl
+In the STM32CubeIDE, a struct was used to organise the various attributes of the IC:
+
+\begin{verbatim}
+        typedef struct {
+                float Rshunt;           // Shunt resistor value [Ohms]
+                float Vcc;              // ADC reference / supply voltage [V]
+                float Vbus;             // Bus voltage if needed [V]
+                int gain;               // CSA gain
+                volatile float adc; 	// ADC value read from pin
+                volatile float voltage; // Measured voltage across shunt [V]
+                volatile float current; // Calculated current [A]
+                volatile float power;   // Calculated power across load [W]
+                volatile float sys_power; // System power [W]
+        } CSA_HandleTypeDef;
+\end{verbatim}
+
+Moreover, various functions were constructed to generate these values, all called inside a single update function:
+\nl
+The entire system does not consume a constant amount of power, so there were fluctuations in the readings.
+To combat this issue, the CSA was sampled 100 times to obtain consistent readings.

@@ -1,0 +1,39 @@
+I used the \href{https://www.st.com/content/st_com/en/stm32-mcu-product-selector.html}{ST Product Selector} to identify potential MCUs. I applied the following filters:
+\begin{itemize}
+    \item Package: LQFP Package
+    \item Additional Interfaces: Camera Interface, Parallel Camera Interface
+    \item External Memory Interfaces: Dual Octo SPI, Dual Quad SPI, Hexa SPI, Octo SPI, Quad SPI, xSPI \\
+    For the QSPI memory.
+    \item Operating Temperature (°C) min: -40
+    \item Operating Temperature (°C) max: 125
+    \item Operating Frequency (MHz): $> 133$ \\
+    So the QSPI can operate at max frequency and DCMI is not bottlenecked by the MCU.
+    \item Supply Current (µA) Run Mode (per MHz) typ: 26 \\
+    To isolate the lowest power chips, the U5s.
+\end{itemize}
+
+This left six STM32 MCUs: U535RC, U535RE, U545RE, U575RG, U575RI, U585RI. The only difference between the chips was that the first three had the "Chrom-ART" Graphic Accelerator, whereas the latter three had "2D". Additionally, the first chip had the smallest flash size (256 kB) and the last two had the largest (2048 kB). Some additional notes included:
+
+\begin{itemize}
+    \item The package must not end in a Q e.g., STM32U545CET6\textbf{Q}. The Q denotes internal SMPS. Small-pin count U5s only support DCMI on non-SMPS products. If the last two letters are "TR", disregard this as it denotes the packaging it comes in e.g., STM32U535RET6QTR is still bad because the last letter is a Q.
+    \item The last number must be a 3 to denote industrial temperature range of -40°C to 125°C e.g., STM32U575RIT3 and not STM32U575RIT6. 6 means -40°C to 85°C which does not meet the thermal operation system requirement.
+\end{itemize}
+
+The STM32U535RC and STM32U535RE did not admit to the above requirements, which left the latter four. The U575RI and U585RI were shortlisted because they both had the largest program flash size (the only difference between the chips aside from price). The U575 and U585 are identical with the only difference being that the U585 supports cryptography (which is not needed for the project), so the \href{https://au.mouser.com/ProductDetail/STMicroelectronics/STM32U575RIT3?qs=ZcfC38r4Potww%2FVkI0y6Rw%3D%3D}{STM32U575RIT3} was chosen from a coin flip.
+\nl
+As mentioned in \href{https://deepbluembedded.com/stm32-sleep-mode-wakeup-pin-example-code/}{this guide} and in section 3.20.2 of \href{https://www.st.com/resource/en/datasheet/stm32u575ag.pdf#page=57}{the STM32U575RIT3 datasheet}, the CPU can be woken up from sleep modes through external interrupts. To implement wakeup functionality from OBC, the interrupt pin (named SLAVE) was configured to trigger on the falling edge of CS - which corresponds to OBC selecting C2S on SPI. For general programming and testing, the SLAVE pin will need to remain high or low. The SLAVE pin was connected to a three pin header, with CS and 3V3 being the adjacent pins. This allows me to short the wakeup pin with CS (for OBC control) or with 3V3 (for general programming / never enter sleep). A 470 $\Omega$ 0603 protector resistor was placed in-series with SLAVE to limit current and prevent damage to the pin - recycling LED resistors to reduce the Bill Of Materials (BOM).
+\nl
+No analog peripherals were used, so it was appropriate to tie VDDA to VDD and VSSA to VSS as according to \href{https://www.st.com/resource/en/application_note/an5373-getting-started-with-stm32u5-mcu-hardware-development-stmicroelectronics.pdf#page=10}{2.1.1}. The external decoupling capacitors were still kept as a precaution.
+\nl
+Pin assignment was decided by first generating a generic PCB layout to identify where components fit as seen in \autoref{fig:v1-init-layout}. Next, pins were assigned in STM32CubeIDE to be closest to its component, and grouped and ordered to minimise cross-over when routing.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.55\textwidth]{Images/v1/Schematic/FirstLayout.png}
+    \caption{Draft PCB layout for pin assignment identification.}
+    \label{fig:v1-init-layout}
+\end{indentedfigure}
+
+Supply voltages were configured according to \autoref{sec:app-u5-powersupply} as like in the \href{https://www.st.com/resource/en/application_note/an5373-getting-started-with-stm32u5-mcu-hardware-development-stmicroelectronics.pdf}{Getting started with STM32U5 MCU hardware development - Application note}.
+\nl
+The MCU pinout justification can be found in \autoref{tab:stm32u575-pin-justification}. SPI CS pins were configured as GPIO inputs or outputs. Button pins were set as external interrupts.

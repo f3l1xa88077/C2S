@@ -1,0 +1,5 @@
+As mentioned in \autoref{sec:v0.1-sch-other}, the wrong LEDs were selected to have the functionality of one colour lighting up when current was passed one way and vice versa. Since current can only flow one way, all the anodes in STM32CubeIDE have been set to LOW:
+\begin{verbatim}
+        HAL_GPIO_WritePin(MCU_LED_1_GPIO_Port, MCU_LED_1_Pin, 0);
+        // ... other LEDs
+\end{verbatim}

@@ -1,0 +1,26 @@
+After the schematic and PCB review, Tristan Davies suggested that a mounting pattern should be included to fit the PCB to the Spacecraft lab (AERO3001) vibration table.
+As of November 21st, 2025, the shaker bracket specifications can be found \href{https://curtin.sharepoint.com/sites/CurtinUndergraduateCubeSatTeam/Shared%20Documents/Forms/AllItems.aspx?viewid=8b71e730%2D9233%2D4789%2Da299%2Da3c91e304b13&id=%2Fsites%2FCurtinUndergraduateCubeSatTeam%2FShared%20Documents%2FGeneral%2FTechnical%20Departments%2FMechanical%20Division%2F2%2E%20Reference%20Material%2FAERO3001%20Spacecraft%20Project%20Simple%20Shaker%20Bracket%2031%20August%202023%2Epdf&parent=%2Fsites%2FCurtinUndergraduateCubeSatTeam%2FShared%20Documents%2FGeneral%2FTechnical%20Departments%2FMechanical%20Division%2F2%2E%20Reference%20Material}{here} in the PAST SharePoint (alternatively, search through the Mechanical folder if it has been moved). The mounting bracket has two mounting patterns: M3 and M2 mounts. The M3 mounts are larger and appear in the corners of the bracket, whereas the M2 mounts are located further inside the shape. The M2 mounting bracket pattern was selected for C2Sv0.1 because the M3 pattern exceeds the board dimensions. I deemed that it was not worth increasing the board shape for the M3 mount. As discussed in \autoref{sec:v0.1-silkscreen-pcb}, the vibration table mounting holes are labelled as "VTMH" on the PCB.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/v0.1/PCB/VTMH.png}
+    \caption{Mounting pattern for AERO3001 Spacecraft Project Simple Shaker Bracket}
+\end{indentedfigure}
+
+The PCB used for testing was not used on the vibrational table, instead, a functional backup board was used. This allowed me to test the performance of several components without compromising the integrity of the programming board. The sensor board did not include a mounting pattern for the vibrational table as this sensor will not be used on the CubeSat, and it is already known that BGAs have poor perfomance under vibrational tests. Additionally, increasing the PCB size to accomodate a mounting pattern would skyrocket the manufacturing cost as the sensor board required an ENIG finish.
+\nl
+Both the processor and sensor boards have a basic mounting pattern at the corners of the PCB. This allows 3D printed cases or frames to fit. The mounting pattern is not standardisted, they were just placed in the corners.
+\nl
+Lastly, the sensor's M12 mount was hand-made using \href{https://commonlands.com/products/m12-lens-mount-20mm-spacing?srsltid=AfmBOor3aHwaOKYnr8nGqjSv05lxtolFCIiZbbvI5bEoHysWK3u_fszk}{online specifications}. The dimensions were then checked by comparing it the the MIRA220 reference PCB to see if it looked okay from a surface level. It \textbf{MUST} be noted that the mount type refers to the thread and not the mount itself (see Appendix for more, \autoref{sec:appendices}). The MIRA220 uses a 22mm hole pitch spacing, whereas ours uses 20mm. The 20mm spacing requires M2 screws which PAST already had, whereas the 22mm spacing would require M2.2 which is harder to obtain. Since the 20mm spacing is correct, the lens should fit even if the border is misaligned because the only parts of the mount that need to be correct are the hole pitch and whether the sensor is in the centre:
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{Images/v0.1/PCB/Sensor Centre.png}
+    \caption{Measurements in Altium Designer confirming that the sensor is centered relative to the component origin. If the middle four balls are centered, all others must be since they are evenly spaced, therefore the sensor is centered.}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=1.0\textwidth]{Images/v0.1/PCB/Mount Dimensions.png}
+    \caption{Measurements in Altium Designer confirming the measurements to \href{https://commonlands.com/products/m12-lens-mount-20mm-spacing?srsltid=AfmBOooXtFfb6VYZ6d8rK6byYL4GV84JjD1GtErAqbrvlE-T9iPvnnyc}{these specifications}.}
+\end{indentedfigure}

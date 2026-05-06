@@ -1,0 +1,6 @@
+The TAG connector schematic was copied from v0 (\autoref{sec:schematic-tag}). No changes were made. Robert Howie had advised me that Jacob, electrical engineer from Binar, has had issues in the past with TAG connectors, so the COM port should act as a failsafe in-case the TAG connector becomes unreliable after a while.
+\nl
+Since the component is just a series of pads and the connector will not be attached to the board during any tests, the maximum characteristics are not a concern (even though they aren't listed).
+
+\paragraph{Remark}\label{sec:v0.1-tag-remark}
+The TAG connector was never used during programming. Instead, the SWDIO and SWCLK headers were used. I do not recommend the TAG connector for future projects as connecting directly via the STLINK is easier.

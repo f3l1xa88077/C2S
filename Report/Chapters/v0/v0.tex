@@ -1,0 +1,95 @@
+% -----------------------
+% Introduction
+% -----------------------
+\subsection{Introduction}
+    \import{Intro/}{Introduction.tex}
+
+% -----------------------
+% Requirements
+% -----------------------
+\subsection{Misison and System Requirements}\label{sec:v0-requirements}
+    \import{Requirements/}{Requirements.tex}
+
+% -----------------------
+% Schematic
+% -----------------------
+\subsection{Schematic Design \& Component Selection} \label{sec:v0-schematic}
+
+    % -----------------------
+    % Overview
+    % -----------------------
+    \subsubsection{Overview}
+        \subimport{./Schematic/}{Overview.tex}
+
+    % -----------------------
+    % Processor
+    % -----------------------
+    \subsubsection{Processor}\label{sec:schematic-processor}
+        \subimport{./Schematic/}{Processor.tex}
+    % -----------------------
+    % Image Sensor
+    % -----------------------
+    \subsubsection{Image Sensor} \label{sec:schematic-sensor}
+        \subimport{./Schematic/}{Sensor.tex}
+
+    % -----------------------
+    % Clock
+    % -----------------------
+    \subsubsection{Clock}\label{sec:v0-clocks}
+        \subimport{./Schematic/}{Clock.tex}
+
+    % -----------------------
+    % uSD Card
+    % -----------------------
+    \subsubsection{uSD Card}
+        \subimport{./Schematic/}{uSD.tex}
+
+    % -----------------------
+    % LDOs
+    % -----------------------
+    \subsubsection{LPS}\label{sec:schematic-ldos}
+        \subimport{./Schematic/}{LPS.tex}
+
+    % -----------------------
+    % SWD Connector
+    % -----------------------
+    \subsubsection{SWD Connector}\label{sec:schematic-tag}
+        \subimport{./Schematic/}{SWD.tex}
+
+    % -----------------------
+    % USB-C Connector
+    % -----------------------
+    \subsubsection{USB-C Connector}\label{sec:schematic-usbc}
+        \subimport{./Schematic/}{USBC.tex}
+
+    % -----------------------
+    % Power Sequencer
+    % -----------------------
+    \subsubsection{Power Sequencer}
+        \subimport{./Schematic/}{Sequencer.tex}
+
+% -----------------------
+% PCB
+% -----------------------
+\subsection{PCB Design} \label{sec:v0-pcb}
+
+\subsubsection{Selecting Manufacturers}
+    \subimport{./PCB/}{Manufacturer.tex}
+
+\subsubsection{Current Carrying Capacity}
+    \subimport{./PCB/}{Current.tex}
+
+\subsubsection{BGA Fanout}
+    \subimport{./PCB/}{BGA.tex}
+
+\subsubsection{CSI-2 Routing}
+    \subimport{./PCB/}{Routing.tex}
+
+\subsubsection{Debug LEDs}
+    \subimport{./PCB/}{Debug.tex}
+
+% -----------------------
+% REMARKS
+% -----------------------
+\subsection{Remarks}
+    \subimport{./Remarks/}{Remarks.tex}

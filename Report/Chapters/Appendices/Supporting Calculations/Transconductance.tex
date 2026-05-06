@@ -1,0 +1,15 @@
+The gain margin ratio is determined by the formula $\texttt{gain}_{\texttt{margin}} = g_m / g_{\texttt{mcrit}}$, where $g_m$ m is the oscillator transconductance specified in the STM32 datasheet. The HSE oscillator transconductance is in the range of a dozen of mA/V, while the LSE oscillator transconductance ranges from a few to a few dozens of $\mu$A/V, depending upon the product.
+$g_{\texttt{mcrit}}$ is defined as the minimal transconductance required to maintain a stable oscillation when it is a part of the oscillation loop for which this parameter is relevant. $g_{\texttt{mcrit}}$ is computed from oscillation loop passive components parameters. 
+\nl
+Assuming $C_{L1} = C_{L2}$, and that the crystal sees the same $C_L$ on its pads as the value given by the crystal manufacturer, gmcrit is expressed as follows:
+\begin{equation}
+    g_{\texttt{mcrit}} = 4\times \texttt{ESR} \times (2\pi F)^2 \times (C_0 + C_L)^2
+\end{equation} 
+where:
+\begin{itemize}
+    \item $\texttt{ESR}$ is the equivalent series resistance.
+    \item $C_0$ is the crystal shunt capacitance.
+    \item $C_L$ is the crystal nominal load capacitance.
+    \item $F$ is the crystal nominal oscillation frequency.
+\end{itemize}
+If the oscillator transconductance parameter ($g_m$) is specified, make sure that the gain margin ratio ($\texttt{gain}_{\texttt{margin}}$) is bigger than 5.

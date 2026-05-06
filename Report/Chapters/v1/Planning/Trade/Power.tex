@@ -1,0 +1,30 @@
+Two power supplies are required for the camera board. The first regulates the 5V EPS voltage down to 3V3 and the other generates the power rails for the CIS. The two most common power supplies have been explored below - a LDO regulator and buck converter.
+\nl
+Five design criterion have been considered. The least important criterion are the cost and size of the power supplies. Buck converters and LDO regulators are conventionally cheap and small, so there should not be much variation between the expected properties and those of the selected component. Next, the noise rejection, or filtering, ability of the supply is vital as the image sensor requires stable voltages for its ADC - noisy power can generate noisy images. In addition, using a power efficient component is very important as the the components will never be switched off to conserve power. The ability of the power supply to output its specified voltage is important, but not critical as most ICs have an input voltage range. 
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Criteria} & \textbf{Weight} & \textbf{LDO} & \textbf{Buck} \\
+        \hline
+        Cost & 1 & 5 & 2 \\
+        \hline
+        Size & 1 & 5 & 3 \\
+        \hline
+        Precision & 2 & 5 & 3 \\
+        \hline
+        Noise & 5 & 5 & 2 \\
+        \hline
+        Efficiency & 5 & 2 & 5 \\
+        \hline
+        \hline
+        \textbf{Total Score} &  & \textbf{55} & \textbf{46} \\
+        \hline
+    \end{tabular}
+    
+    \caption{C2Sv1 power supply trade study between an LDO regulator and buck converter on a scale (1-5).}
+    \label{tab:v1-trade-power}
+\end{indentedtable}
+
+An LDO is best to step down from EPS' 5V to 3.3V as the primary rail to maximise power efficiency because the estimated current consumption is so low, that the benefits of a buck converter are not seen. LDOs will also be used for the image sensor's power supplies to filter the switching noise from the buck, improving the Power Supply Rejection Ratio (PSRR) and avoiding noise that could cause visual artifacts or interference in the captured data.

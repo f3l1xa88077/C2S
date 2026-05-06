@@ -1,0 +1,51 @@
+Throughout the development phase of the breakout board, the project faced several scope revisions.
+\nl
+The first revision focused on the structure of the breakout board. Initially, the breakout board was fully encapsulated, meaning that all the components (processor, sensor, uSD, etc.) were all housed on a single PCB.
+I found that it made more sense to split the board into the sensor and processor, given the prototype will use the same format. Not only would this prompt design considerations for the prototype, but if the breakout boards were successful, they could be used to debug the prototype i.e., the functioning-processor breakout could be used to program the prototype sensor, and vice-versa.
+This revision did not introduce any major roadblocks or inconveniences to the development since all draft PCBs at the time either had the sensor placed in an inconventient location, or the sensor was essentially "disconnected" from the rest of the board (see \autoref{fig:draft-pcbs})
+\begin{indentedfigure}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/Schematic/PREV_PCB.png}
+        \caption{}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/Schematic/PREV_PCB2.png}
+        \caption{}
+    \end{subfigure}
+    \caption{Draft PCBs of the C2S Breakout Board.}
+    \label{fig:draft-pcbs}
+\end{indentedfigure}
+The second revision was centered around the selection of the image sensor. In \autoref{sec:start}, I selected the MIRA220 as the image sensor for both the breakout and prototype PCB, however, throughout development, I found that the component's characteristics were too fine to reasonably justify (within the project budget).
+The BGA ball diameter of the MIRA220 was 0.2mm (200$\mu$m), much smaller than JLCPCB's manufacturing capabilities. Morever, the trace widths required to route the BGA was much too thin. These tight tolerances drastically increased the manufacturing cost of the board from what I expected to be \$50AUD to \$300AUD (with some going beyond \$500AUD).
+The price to manufacture the boards with this sensor was far too expensive, so, I pivoted to the next-best sensor with larger tolerances. Although the tolerances of the new sensor was tight, the boards were now manufacturable by JLCPCB at a reasonable cost.
+\nl
+The third revision aimed at reducing the failure rate of the breakout board. In addition to splitting the PCB into the sensor and processor boards, I decided to add the STM32N6 Nucleo Board to the project scope as well. This would allow us to interface with the sensor directly even if the processor board didn't work.
+Now that the minimum success criteria of the breakout board no longer required the entire processor board to work, the risk of not meeting the minimum criteria drastically reduced.
+\nl
+The fourth revision involved reworking the naming scheme. As mentioned in \autoref{sec:start}, the first PCB was called the 'breakout' or 'breakout board'. However, as the number of PCBs in the project grew, I required a new method of referencing each board.
+In addition to the 'breakout' term, I had begun to call this version/iteration C2Sv0 to highlight on the project's initial development as a breakout board, whereas C2Sv1 would refer to the first functioning version of the project, the prototype. The terms v0 and 'breakout' have since been used interchangeably.
+Moreover, each PCB has been named according to its purpose:
+\begin{itemize}
+    \item C2Sv0-P: (P)rocessor.
+    \item C2Sv0-S: (S)ensor.
+    \item C2Sv0-A: (A)daptor.
+\end{itemize}
+The fifth revision was dedicated to saving costs on the manufacturing process. After factoring in all of the component and manufacturing costs, I were facing approximately \$813AUD and \$1042AUD for one and two PCB sets (with one set of components for redundancy) respectively.
+This was far too expensive for just the breakout board, so modifications to v0 were required. To cut down on the cost, I decided to re-combine the processor and sensor board onto one PCB (with break points) to avoid the double-fee for tight tolerances and only be charged for tight tolderances on one PCB instead.
+Since JLCPCB does check the boards for this type of 'manipulation', I added some fake components and silk-screen onto the tabs (section to be snapped) to make it seem like it was one coherent PCB instead of two that were clearly going to be split after production.
+\nl
+On September 23rd, 2025, \textbf{this version was shelved} because of its high price point. After discussing the project with Trsitan Davies and Robert Howie, I concluded that the cost of the PCB (\$750AUD) was far too great to justify for a single revision with one person working on it, given mutliple revisions may be required.
+The PCB was complete however, and the gerber files along with the components can be found on the C2S SharePoint folder in-case the version is picked up again in the future.
+\nl
+From v0, the most notable lessons learnt were:
+\begin{itemize}
+    \item Keeping the image sensor and processor on separate PCBs. Although this version can no longer use a nucleo board like the N6 for debugging, working v0.1 PCBs can be used to debug prototype (v1) PCBs.
+    \item Spending more time planning out where to place the components before routing. With v0, I only landed on the desired PCB layout after three previous attempts at making a PCB because I was very eager to finish the PCB and very quickly got stuck in a tangled mess of an unplanned layout and wasted many hours on un-used PCBs.
+    I found it best just to copy the PCB layout into Adobe Photoshop or MS Paint and draw out the lines to see if they'd actually work before doing so (Photoshop is unconventional, but was effective). Although I did end up changing my original layout for v0.1, I only required minor modifications, so the planning was an excellent step. This also helps prioritise the signal integrity of more important traces first, like camera and memory lines.
+    \item Finding and using reference schematics was a time-saver. Although it may sometimes feel like cheating when following another design, it can save a lot of mistakes. If I hadn't found the MIRA220 reference schematic before starting v0, I would have struggled a lot with developing the schematic, and even more when trying to debug my errors.
+    Especially for a new topic like camera design, having reference schematics is a must - it prevents pin mapping errors. Despite this, I still try and develop the schematic myself, and use the reference as a checklist/guide to know whether I've made any mistakes or not.
+    \item Utilising free resources and documents. There are plenty of complete-documents published by ST, TI, etc. that go in-depth with some critical pieces of knowledge. Before starting v0, I had never known about DGND and AGND, but I read through the TI document and learnt more about what they are, how they differ, and what to do with them \cite{dgnd-agnd}.
+    ST has released lots of resources as well, virtually every topic has been covered by them (especially in camera design).

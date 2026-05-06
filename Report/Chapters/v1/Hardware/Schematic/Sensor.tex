@@ -1,0 +1,100 @@
+The \href{https://core-electronics.com.au/vga-ov7670-camera-module-i2c-640x480.html}{VGA OV7670 Camera Module I2C 640X480} was selected for the camera module as it was the only DCMI-interface module I could find. Since DCMI is a legacy interface, most sensors and modules had exited the production market so I found my choice extremely limiting. Fortunately, this camera module uses the desired interface and was only \$5.55 AUD (inc. GST) which was beyond ideal for a budget-friendly version. It was anticipated that image quality would not be great, but it simply needed to send image sensor data over DCMI to meet the system requirements (a quality CIS can be used in future versions where the main priority is quality rather than validation). Datasheet can be found \href{https://web.mit.edu/6.111/www/f2016/tools/OV7670_2006.pdf}{here}.
+
+\subsubsubsection{Breadboarding}\label{sec:v1-sensor-breadboard}
+
+To verify the connector schematic, the camera module was procured (out of pocket) and tested on a breadboard using an Arduino Uno clone. \href{https://www.youtube.com/watch?v=R94WZH8XAvM}{This YouTube video} was used to set-up the hardware and software, alternatively, \href{https://circuitjournal.com/arduino-OV7670-to-pc}{this article can be followed}. Aside from the direct pin-to-pin connections made, the only requirements were two $10$k$\Omega$ pull-up resistors to 3V3 for the I2C lines, and a voltage divider for the external clock (since the Uno operates on 5V logic, whereas the module works on 3V3). Ignoring the clock divider (since the selected MCU runs on the same 3V3 logic level), this test showed that the only external components required were two I2C pull-up resistors.
+\nl
+This testing showed that I could communicate to the camera module, and that the hardware could easily be replicated for the PCB. \autoref{fig:OV7670-Breadboard-Results} illustrates some of the images gathered. From \autoref{fig:ov7670-mono} we can clearly see that the grayscale displays adequately, where the only issues appear to be a limited dynamic range between the dark areas of my hair and the whites of the ceiling light (the apparent bluriness is from the low resolution, so it is not an inherent issue with the sensor). Focusing on the colour (RGB) test, we saw that there were clear problems with the tint (green/magenta colour) and temperature (yellow/blue colour) and some horizontal banding (potentially from low signal integrity through the jumper wires). Applying colour adjustments in Camera Raw Filter to \autoref{fig:ov7670-colour} produced \autoref{fig:ov7670-colour-adjusted}. We see here that there are still fragments of potential tinting problems, but overall, the output was much clearer and colour-accurate than the initial output. In summary, the camera module is capable of producing accurate mono/RGB images but requires correct software implementation like auto-white-balance and auto-exposure.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.55\textwidth]{Images/v1/Schematic/OV7670_Breadboard.jpg}
+    \caption{OV7670 Camera module implemented on a breadboard.}
+    \label{fig:OV7670-Breadboard}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Schematic/OV7670_Colour.png}
+        \caption{RGB.}
+        \label{fig:ov7670-colour}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Schematic/OV7670_Colour_Fixed.png}
+        \caption{RGB Colour-Adjusted.}
+        \label{fig:ov7670-colour-adjusted}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.25\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Schematic/OV7670_Mono.png}
+        \caption{Mono.}
+        \label{fig:ov7670-mono}
+    \end{subfigure}
+    \caption{OV7670 camera module breadboard test in different colour modes.}
+    \label{fig:OV7670-Breadboard-Results}
+\end{indentedfigure}
+
+\subsubsubsection{Power Supply}\label{sec:v1-sensor-power}
+
+The dynamic load range of CMOS Image Sensor is mainly between 10 kHz and 1 MHz. Therefore, high PSRR can improve image quality at higher frequencies. In addition, the PSRR is actively controlled by LDO; while in the frequency above 100 kHz, the PSRR is more impacted by the passive components in the system (capacitors, load current, PCB layout). \href{https://way-on.com/en_technical/show-25981.html}{This application note}  provides solutions for powering the high-performance CMOS image sensors of industrial machine vision cameras or vision sensors for factory automation and control applications. Moreover, \href{https://www.reddit.com/r/AskElectronics/comments/l1x9iw/image_sensor_power_supply_choice/}{this Reddit post} explores noise targets and PSRR for camera applications, specifically the OV4689 image sensor, and \href{https://docs.ampnuts.ru/ti.com.datasheet/LM3880/Application_note_SBVA059A.PDF}{this application note} discusses high-performance power supplies in camera and vision applications. \href{https://toshiba.semicon-storage.com/info/TCR5BM10_application_note_en_20210326_AKX00309.pdf?did=67686&prodName=TCR5BM10}{This Toshiba application note} concludes how using an ouput capacitor with maximal capacitance and low series resistance improves PSRR, but may increase supply current because of the higher DC gain and frequency resposne of the internal amplifier. This \href{https://www.renesas.com/en/document/apn/cm-400-noise-component-role-forming-image-quality}{Renesas application note} experimentally explores the impact that Vin noise (RMS ripple) to an LDO has on the image quality. As analysed and discussed in \href{https://www.ti.com/lit/ta/ssztb42/ssztb42.pdf?ts=1775541051914&ref_url=https%253A%252F%252Fwww.google.com%252F}{this Texas Instruments technical article}, LDOs are the preferred choice for power generation, \say{When it comes to camera applications, using an LDO voltage regulator produces more accessible and improved digital imaging solutions. LDOs can offer superior performing elements, while also being highly compact}.
+\nl
+The selected LDO for powering the camera module, as discussed in \autoref{sec:v1-schematic-power}, was the \href{https://au.mouser.com/ProductDetail/Texas-Instruments/TPS7A2033PDBVR?qs=hd1VzrDQEGjk%2FOBnRfKB4A%3D%3D}{TPS7A2033PDBVR}. The main, most difficult, consideration when selecting an LDO was the PSRR. Most LDOs list their PSRR as the highest possible under ideal conditions, even though it severely degrades with changing input voltage and output current. For example, the TPS7A20 in \autoref{fig:LDO-PSRR} has a peak PSRR of ~105 dB at Iout=20 mA, whereas this changes to ~83 dB when Iout=100 mA. Despite this, I found that the TPS7A20 had the best PSRR performance over other LDOs, as some LDOs with a PSRR rated near 70 dB drop down to 30-40 dB at 1 kHz. Although the PSRR of the TPS7A20 drops below 50 dB around frequencies of 50 kHz, the Pi Network/Filter placed immediately before the LDO should filter out most of the high-frequency noise, so the high-frequency rippling that does make it through the LDO should be attenuated.
+\nl
+The only concern I had with this component was the maximum output current of 300 mA. I concluded that this would not be an issue given that most of the components (MCU, LEDs, LDO, etc.) consume less than 10 mA each, so this current output limit should not be reached - although, it would have been preferred if all peripherals of v0.1 had worked so a proper current budget could be build and used for reference.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/v1/Schematic/TI_LDO.png}
+    \caption{PSRR Characteristics of TPS7A20 LDO.}
+    \label{fig:LDO-PSRR}
+\end{indentedfigure}
+
+\subsubsubsection{Connector}\label{sec:v1-sensor-connector}
+
+A common issue faced during the hardware design stage I found was working with various different camera connectors, some FFC/FPC, some ZIF, some headers, each with different pin counts because of different interfaces. To resolve this recurring issue, I created a universal camera connector for C2S that would easily allow the processor board to interface with any compatible image sensor. I called it the PAST Parallel Camera Connector (PPCC) 1.0 interface. This 32-pin interface has been designed specifically around the TC358748XBG CSI/DCMI bridge, meaning in theory, all future processor and camera boards should be compatible.
+\nl
+To maximise signal integrity, a ground pin was placed between each pin set i.e., ground separation between MCLK and DCMI\_D[11:0], to help prevent coupling. Moreover, to minimise any potential shorting, the outer pins were set to be VCC, meaning the circuit does not short if the connector is reversed. NC pins separate VCC from all other pins as a precaution to misalignment.
+
+\begin{itemize}
+    \item \textbf{Parallel Interface (DCMI\_D[11:0]):} Consists of 12 data pins dedicated to parallel image transmission.
+    \item \textbf{Clock and Sync Signals (PCLK, HSYNC, VSYNC):} Essential timing signals used to coordinate the flow and alignment of image data.
+    \item \textbf{Control Interface (SCL, SDA):} I$^2$C clock and data lines utilized for sensor configuration and command communication.
+    \item \textbf{Master Clock (MCLK):} An external clock signal generated via the STM32 MCO pin; it features a configurable frequency and can be sourced from the HSE for increased stability.
+    \item \textbf{General Purpose I/O (GPIO[3:0]):} Four auxiliary pins available for flexible configuration, intended to support additional sensor requirements such as those for the AR0141CS.
+\end{itemize}
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|l||l|l||l|l||l|l|}
+        \hline
+        \textbf{Pin} & \textbf{Desc.} & \textbf{Pin} & \textbf{Desc.} & \textbf{Pin} & \textbf{Desc.} & \textbf{Pin} & \textbf{Desc.} \\
+        \hline
+        1 & VCC  & 9  & SCL & 17 & D6  & 25 & MCLK  \\
+        \hline
+        2 & NC   & 10 & SDA & 18 & D5  & 26 & GND   \\
+        \hline
+        3 & GND  & 11 & GND & 19 & D4  & 27 & PCLK  \\
+        \hline
+        4 & GPIO0 & 12 & D11 & 20 & D3  & 28 & VSYNC \\
+        \hline
+        5 & GPIO1 & 13 & D10 & 21 & D2  & 29 & HSYNC \\
+        \hline
+        6 & GPIO2 & 14 & D9  & 22 & D1  & 30 & GND   \\
+        \hline
+        7 & GPIO3 & 15 & D8  & 23 & D0  & 31 & NC    \\
+        \hline
+        8 & GND  & 16 & D7  & 24 & GND & 32 & VCC   \\
+        \hline
+    \end{tabular}
+    \caption{C2Sv1 PPCC 1.0 Pinout (32-pin mapping).}
+    \label{tab:camera-pinout-32}
+\end{indentedtable}
+
+The universal connector does not address the glaring issue of incompatible connector types, as mentioned, pin-counts and connector types differ. To make each camera board compatible with PPCC 1.0 a bridge PCB must be developed. Now, you're probably thinking \say{why bother with this new interface if you just need to make another PCB to interface them, why not skip this step and just use the same connector the camera uses?} and it's a genuinely valid thought, but the real purpose behind a universal connector comes in its compatability. Say in a few months time I get the budget to use a CSI-2 image sensor, if this PCB uses the same connector as the OV7670, then I would need to manufacture an entirely new processor board but with a different camera connector. This process of procuring more processor PCBs would become increasingly tedious and expensive if we were to use several unique image sensors over the project's lifetime. By having a single interface that boards use, we only need to spend a few dollars making a bridge PCB, saving costs in the long run and making it easier to swap cameras.
+\nl
+The bridge PCB simply consists of a 32-pin FFC/FPC connector (PPCC 1.0) and 9x2 0.1inch headers for the OV7670 camera module. A decoupling capacitor was not placed near the 3V3 pin of the OV7670 since all camera modules already include them on the module's PCB.

@@ -1,0 +1,16 @@
+Unlike other STM32 MCUs like the H7, the N6 processors require a specific startup pattern to properly boot.
+As found on \href{https://www.st.com/resource/en/datasheet/stm32n657a0.pdf}{pg. 27} of the datasheet and \href{https://www.st.com/resource/en/application_note/an5967-getting-started-with-hardware-development-for-stm32n6-mcus-stmicroelectronics.pdf}{pg. 9-10} of the getting started handbook, the startup sequence is:
+\begin{enumerate}
+    \item $V_{DD}$ and $V_{DDA18ON}$
+    \item $V_{DDSMPS}$ via PWR\_ON
+\end{enumerate}
+From the power sequencer schematic, the component sequentially enables the FLAG3, FLAG2, FLAG1 pins.
+These enable pins are connected to the base of MOSFETs (see MCU schematic), which allow the sequencer to turn the power lines on and off in the required pattern. 
+FLAG1 has been left as an NC since the final enable trigger is instead from PWR\_ON. The PWR\_ON pin connects to the base of the MOSFET on the VDDSMPS line to drive high SMPS when the MCU requires it.
+\nl
+To prevent the STM32 from prematurely shutting down from a hard-reset (switching the power switch, S1, off), a soft-reset function has been added. This means that the power sequencer, IC1, is controlled by two components, the switch and a MOSFET.
+Once the PCB is first turned on by closing the switch, the power regulator circuit properly boots the STM32. Once the STM is operational, it will drive the base of the MOSFET high via MCU\_SEQ.
+This means that even if the power switch is opened, the sequencer remains enabled because the STM is holding the MOSFET circuit. To ensure that the STM actually shuts down, the MCU\_SEQ\_S (S meaning STATE) carries the state of the switch to the STM.
+This effectively tells the STM "it's time to shut down", allowing it to finalise everything before disabling the MCU\_SEQ pin and shutting down.
+\nl
+Since there did not appear to be any voltage drop across the switch stated in the datasheet, a voltage divider was used to read the state to protect the GPIO from any surges. A large value $R_2$ was selected since the net is connected to the main input power and little current is required to read the voltage.

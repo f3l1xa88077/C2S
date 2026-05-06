@@ -1,0 +1,33 @@
+The CSA must be capable of providing accurate and precise consumption data that can be used to quantify the power performance of the board - a vital statistic for wider Electrical Power Systems (EPS) integration. There are two main common types of CSAs are analog and I2C outputs.
+\nl
+Three design criterion are considered: cost, size, and accuracy. C2Sv1 has a fixed budget, so keeping the bill of materials as cheap as possible is ideal, but most CSAs are not expensive, so the price does not greatly influence the interface decision. Larger packages consume more physical space on the board, which makes the PCB design process more difficult. Lastly, the CSA must be highly accurate, as the generated data is highly influencial on power budgets for the CubeSat.
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Criteria} & \textbf{Weight} & \textbf{Analog (INA181)} & \textbf{I2C (INA219)} \\
+        \hline
+        Cost & 1 & 4 & 2 \\
+        \hline
+        Size & 2 & 4 & 2 \\
+        \hline
+        Accuracy & 5 & 3 & 5 \\
+        \hline
+        \hline
+        \textbf{Total Score} &  & 27 & 31 \\
+        \hline
+    \end{tabular}
+    
+    \caption{C2Sv1 CSA trade study (1-5). The \href{https://www.ti.com/product/INA181?keyMatch=INA181&tisearch=universal_search&usecase=GPN-ALT}{INA181} and \href{https://www.ti.com/product/INA219?litpdf=sboa203}{INA219} are used as references for analog and I2C CSAs, respectively.}
+    \label{tab:v1-trade-csa}
+\end{indentedtable}
+
+I2C CSAs are selected as the better suited architecture despite the higer unit cost and larger footprint. The primary drivers for this decision were:
+
+\begin{itemize}
+    \item Utilises internal 12-bit ADC which eliminates errors introduced by PCB trace noise and MCU reference voltage fluctuations, giving it a higher accuracy score.
+    \item The INA181 only provides a voltage proportional to the current, whereas the INA219 calculates the voltage, current, and power.
+\end{itemize}
+
+For systems that require less accuracy, both systems are great choices, however, the INA219 is the clear candidate for the current application.

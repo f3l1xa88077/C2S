@@ -1,0 +1,16 @@
+The C2S Breakout Board required three individual clocks for operation:
+\begin{itemize}[noitemsep]
+    \item High-speed 24MHz (HSE) oscillator for the STM32.
+    \item Low-speed 32.768KHz (LSE) oscillator for the STM32.
+    \item High speed 24MHZ external oscillator for the AR0147 image sensor (discussed in \autoref{sec:schematic-sensor}, not here).
+\end{itemize}
+For the HSE configuration, I referred to the \href{https://www.st.com/resource/en/application_note/an2867-guidelines-for-oscillator-design-on-stm8afals-and-stm32-mcusmpus-stmicroelectronics.pdf}{"Oscillator design guide"} for STM32 clocks and obtained the following system requirements:
+For the N6 series (Table 6 of oscillator guide), I require a frequency range of 16-48MHz which is further verified in the datasheet with a typical frequency of 40MHz (Table 49 of datasheet). Additionally, they must operate at 3V3 or 1V8 supply voltage (since those are the only two supplies available pre-boot).
+\nl
+I selected the \href{https://au.mouser.com/ProductDetail/ECS/ECS-TXO-2016-33-400-TR?qs=PzGy0jfpSMtctR53CPxRHg%3D%3D}{ECS-TXO-2016-33-400-TR} TCXO oscillator to provide the HSE clock signal. I opted for a 40MHz oscillator opposed to the 24MHz selected in Phase 1 since the guides recommended to use 40MHz.
+I were not able to calculate $g_{\texttt{mcrit}}$ since the $\texttt{ESR}$ is not specified on the datasheet. However, since other ECS oscillators are recommended like the \href{https://au.mouser.com/datasheet/2/122/ECX_16-845175.pdf}{ECS-.327-6-16-TR3}, I have assumed it is compatible.
+For the LSE oscillator, I selected the \href{https://au.mouser.com/datasheet/2/122/ECS_327TXO-1595920.pdf}{ECS-327TXO-33-TR}. I opted for this component over others since it was the only available ECS TCXO oscillator in-stock at that frequency.
+\nl
+Since all three oscillators are TCXO, they already include internal circuitry (like the capacitor configuration) and simply need to be connected to the input and output pins of the STM32.
+\nl
+Each oscillator should continuously produce a clock signal from boot that doesn't interrupt start-up or shut-down sequences.

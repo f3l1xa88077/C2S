@@ -1,0 +1,16 @@
+The main image sensor picked out for the breakout board was the \href{https://ams-osram.com/products/sensor-solutions/cmos-image-sensors/ams-mira220}{MIRA220} (datasheet found \href{https://look.ams-osram.com/m/7591efdbe4af32dc/original/Mira220-1-2-7-2-2-MP-NIR-enhanced-global-shutter-image-sensor.pdf}{here}).
+It is a widely used image sensor, particularly in applications requiring high-speed, low-light, and near-infrared (NIR) imaging. Its key features include:
+\begin{itemize}
+\item 2.2 MP NIR-enhanced global shutter CMOS sensor, ideal for capturing motion without distortion and low-light near-infrared applications (see \autoref{sec:appendices} for more).
+\item It offers a flexible bit depth (8, 10, or 12 bits) and supports up to 90 fps at full resolution, allowing for high-quality imaging and fast frame capture.
+\item The sensor is available in monochrome, RGB, and RGBIR variants, enabling both colour and NIR-sensitive imaging options.
+\item Compact package and MIPI CSI-2 interface simplify board integration and compatibility with modern processors and FPGAs.
+\item Moderate power consumption (350 mW active) balances performance with CubeSat power constraints.
+\item Pixel size of 2.79 µm provides a good balance between resolution and light sensitivity for CubeSat imaging needs.
+\item Its global shutter with correlated double sampling reduces noise and improves image quality under variable lighting conditions.
+\end{itemize}
+While other sensors may offer advantages such as lower power consumption or smaller pixel sizes, the MIRA220 meets the key requirements for the breakout board, particularly its NIR sensitivity and global shutter capabilities which are valuable for enhanced surface imaging.
+Using a more specialised or lower-power sensor at this stage would significantly increase costs and design complexity, making the MIRA220 a practical choice for prototype development with room for upgrades in subsequent revisions.
+\nl
+Although the MIRA220 uses a different interface than LVDS, it maintains low power and complexity, which supports efficient prototyping without compromising image quality or system integration.
+It has native CSI-2, which means it can easily interface with the selected image processor \autoref{sec:image-processor} without any external components like LVDS drivers and receivers that consume significant amounts of power. Moreover, AMS Osram have open sourced their camera board designs (found \href{https://github.com/ams-OSRAM/MIRA_camera_rpi/tree/main}{here}), which means the reference schematic and PCB will make the development process much smoother and less prone to errors.

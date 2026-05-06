@@ -1,0 +1,67 @@
+After conducting the research in \autoref{sec:appendices}, the following requirements for C2S were established:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{10cm}|}
+    \hline
+    \textbf{No.} & \textbf{Description} \\
+    \hline
+    1 & A pixel resolution of 500-750 metres was chosen to capture major urban areas, such as Perth, in a single frame. This resolution balances ground coverage and system simplicity by avoiding deployable or extendable lenses. \\
+    \hline
+    2 & A fixed focal length lens simplifies the optical system and ensures consistent sharpness at the set focal distance. This reduces complexity, mass, and power needs, making it suitable for compact CubeSat prototypes. \\
+    \hline
+    3 & The system will use YUV format with chroma subsampling and JPEG compression to reduce file size while maintaining image quality, optimising bandwidth for CubeSat transmission. \\
+    \hline
+    4 & A CMOS image sensor was chosen for its lower power use, faster readout, and easier digital integration compared to CCDs. This suits compact, power-sensitive platforms like CubeSats. \\
+    \hline
+    5 & If the imaging sensor exceeds 1MP, pixel binning will allow switching between high-resolution and lower-resolution images with improved quality through increased light sensitivity and reduced noise. \\
+    \hline
+    6 & Although lenses won't be investigated in this milestone, the breakout board must allocate space for M12 lenses to mount for later milestones. \\
+    \hline
+    \end{tabular}
+    \caption{C2Sv0 mission and system requirements as of August '25.}
+    \label{tab:v0-requirements}
+\end{table}
+
+Please note, the following components are not heavily optimised for the system and can be improved. They were selected because they fit the requirements and scope of the breakout board.
+Further investigation into components will be conducted for the prototype.
+\nl
+\textit{This section was reviewed by Dr. Robert Howie on August 12th, 2025.}
+
+% -----------------------
+% Power
+% -----------------------
+\subsubsection{Local Power Supply}
+\subimport{./}{Components/LPS.tex}
+
+% -----------------------
+% Sensor
+% -----------------------
+\subsubsection{Imaging Sensor}
+\subimport{./}{Components/Sensor.tex}
+
+% -----------------------
+% Lens
+% -----------------------
+
+\subsubsection{Lens}
+\subimport{./}{Components/Lens.tex}
+
+% -----------------------
+% Image Processor
+% -----------------------
+\subsubsection{Image Processor} \label{sec:image-processor}
+\subimport{./}{Components/Processor.tex}
+
+% -----------------------
+% uSD Card Reader
+% -----------------------
+\subsubsection{SD Card Reader}
+\subimport{./}{Components/SD.tex}
+
+
+% -----------------------
+% Clock
+% -----------------------
+\subsubsection{External Clock}\label{sec:ext-clk}
+\subimport{./}{Components/Clock.tex}

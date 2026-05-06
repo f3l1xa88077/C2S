@@ -1,0 +1,27 @@
+The rotary encoder, or dial, was essential for changing the sensor's configuration parameters without re-flashing the code. As explored in \autoref{sec:v0.1-sch-other}.A struct was used to store all the variables for the encoder, just to keep the software organised. The configuration (cfg) settings (values to be changed) are nested within another struct just to keep the cfg variables in one place.
+
+\begin{verbatim}
+        #define MAX_SETTINGS 3
+        #define STARTING_SETTING 0
+
+        typedef struct {
+                int num; 		// Number of settings
+                int arr[MAX_SETTINGS]; 	// Array of settings containing values
+                volatile int idx;	// Settings index
+        } Settings_HandleTypeDef;
+
+        // Encoder handle structure
+        typedef struct {
+                Settings_HandleTypeDef cfg;
+                volatile uint8_t enc_a;
+                volatile uint8_t enc_b;
+                volatile uint8_t step;
+                GPIO_TypeDef* pinA_port;
+                uint16_t pinA;
+                GPIO_TypeDef* pinB_port;
+                uint16_t pinB;
+        } Encoder_HandleTypeDef;
+\end{verbatim}
+
+Debouncing was a critical step to make the encoder work properly. Its mechanical design causes each conducting pad to vibrate and bounce, causing the encoder's natural behaviour to be unpredictable.
+\href{https://www.youtube.com/watch?v=sQNPAsZKnDw}{This video} suggested using pattern recognition to debounce the encoder. Assuming 'A' is going high and 'a' is going low, the encoder must follow 'A-B-a-b' to go clockwise and 'B-A-b-a' for anti-clockwise: Testing showed that there was no debouncing and I could spin the dial quickly with minimal tracking error.

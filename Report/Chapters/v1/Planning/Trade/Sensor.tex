@@ -1,0 +1,46 @@
+The CIS captures and pushes image data to the MCU over a specific link, typically MIPI CSI-2 or DCMI. The main difference is that CSI-2 uses LVDS (serial), whereas DCMI uses a parallel interface. Even though DCMI is an older "legacy" style, CSI-2 is now the global standard for mobile or high-performance applications. Cameras can be developed using bespoke, custom-made PCBs, or commercial camera modules.
+\nl
+In regards to Version 1, the camera interface has three main expectations. The interface should be widely supported so future versions can re-use the design and product selection is not limited - both DCMI and CSI-2 are currently supported, so this is not the most important consideration. The next expectation is that the interface should be cost-effective, as I would not be able to design a board around an interface I cannot afford. The last, most important aspect, focuses on the typical image quality of sensors that use the interface. If the CIS has poor pixel architecture, then the captured images will not look great, especially in an extreme environment like space.
+\nl
+Focusing on the hardware integration of the CIS (sensor or module), the first expectation is that the camera board and lens is small to fit on HABs or in a CubeSat payload bay for integration. As this is a prototype, this consideration is not particularly important. The next desired property is that the sensor can be integrated with easily, using a common or universal connector that would enable the board to be repurposed as a functioning module for future revisions of the processor board. The last considerations regard the cost and risk of each process. The risk is weighted stronger than the cost, as a disfunctional board will be worthless.
+
+\begin{indentedtable}   
+    \centering
+        \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{Criteria} & \textbf{Weight} & \textbf{DCMI} & \textbf{CSI-2} \\
+        \hline
+        Support & 3 & 3 & 5 \\
+        \hline
+        Sensor Quality & 5 & 3 & 4 \\
+        \hline
+        Cost & 4 & 5 & 1 \\
+        \hline
+        \hline
+        \textbf{Total Score} &  & 44 & 39 \\
+        \hline
+        \hline
+        \textbf{} & \textbf{} & \textbf{Module} & \textbf{Bespoke} \\
+        \hline
+        Size & 1 & 4 & 2 \\
+        \hline
+        Risk & 5 & 4 & 1 \\
+        \hline
+        Cost & 4 & 2 & 3 \\
+        \hline
+        Flexible & 2 & 2 & 5 \\
+        \hline
+        \hline
+        \textbf{Total Score} &  & 36 & 29 \\
+        \hline
+    \end{tabular}
+    
+    \caption{C2Sv1 CIS trade study.}
+    \label{tab:v1-trade-cis}
+\end{indentedtable}
+
+A DCMI module was selected as the best type of camera for the current application because of its low-risk and cost. Although CSI-2 supports modern sensors with improved pixel architecture, DCMI is still supported by ST and will most likely be the main camera interface for the CubeSat. CSI-2 to DCMI bridges/adaptors do exist, and can be used to facilitate MIPI-based sensors in the future.
+\nl
+Moreover, camera modules provide a risk-free way of testing image sensors. Although bespoke camera boards offer more flexibility and control with the hardware, this is not required for a prototype. If the project were to be sponsored, then it would be reasonable to develop a custom board for the CubeSat, otherwise, modules have mounting patterns that make it easy to attach to frames like a HAB or CubeSat payload.
+\nl
+As custom boards are more expensive than most modules, like seen in Version 0.1, it is highly advised to use cheaper, low-end modules to stay within budget restrictions. Further versions of the project, like the flight model for the CubeSat, may use modules or bespoke boards housing better CISs.

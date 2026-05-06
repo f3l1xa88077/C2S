@@ -1,0 +1,3 @@
+The six-layer PCB stackup uses two ground layers and one power layer. The two grounds were stitched using Altium Designer's stitching tool, a via diameter of 1.0/0.5mm and grid spacing of 5mm were selected. A spacing of 10mm was selected because using \autoref{sec:stitching-calc}, the required spacing for up to 160MHz (QSPI speeds) is ~60mm, but the board was too small to have a 60mm spacing so 10mm was a good compromise.
+\nl
+The power layer used one large 3V3 polygon pour with the other voltage domains poured over local areas. To ensure that the 3V3 pour was uniformly connected, any long traces (like those reaching from the LDOs to the sensor connector) were placed on the signal layers.

@@ -1,0 +1,47 @@
+The OSPI interface must be configured to QuadSPI to be compatible with the external QSPI memory:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Parameter} & \textbf{Value} \\
+        \hline
+        Mode & Quad SPI \\
+        Clock & Port 1 CLK \\
+        Device Size & Port1 NCS \\
+        Data [3:0] & Port 1 IO[3:0] \\
+        Fifo Threshold & 1 \\
+        Dual Quad Mode & Disable \\
+        Memory Type & Micron \\
+        Device Size & 24 \\
+        Chip Select High Time & 3 \\
+        Free Running Clock & Disable \\
+        Clock Mode & Low \\
+        Wrap Size & Not Supported \\
+        Clock Prescaler & 5 \\
+        Sample Shifting & Half Cycle \\
+        Delay Hold Quarter Cycle & Disable \\
+        Chip Select Boundary & 0 \\
+        Maximum Transfer & 0 \\
+        Refresh Rate & 0 \\
+        Status (DLYB) & Bypassed \\
+        \hline
+    \end{tabular}
+    \caption{QSPI generic configuration parameters from STM32CubeIDE.}
+\end{table}
+Navigate to the 'Clock Configuration' menu and locate the PLL2 section. Then, set the following:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Parameter} & \textbf{Value} \\
+        \hline
+        PLL3 Source Mux & HSE \\
+        PLL3M & / 10 \\
+        *N & X 133 \\
+        /R & /2 \\
+        /Q & /4 \\
+        \hline
+    \end{tabular}
+    \caption{QSPI Clock Configuration.}
+\end{table}
+You should now have $266$ MHz on 'PLL2R' and $133$ MHz on PLL2Q (the QSPI clock).

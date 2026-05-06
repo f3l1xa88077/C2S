@@ -1,0 +1,40 @@
+There were four STM32 families to pick from that met the requirements of the system; (1) F4; (2) F7; (3) H7; (4) U5G.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{2.5cm}|p{2.5cm}|p{2.5cm}|p{2.5cm}|}
+    \hline
+    \textbf{} & \textbf{STM32F4} & \textbf{STM32F7} & \textbf{STM32H7} & \textbf{STM32U5} \\
+    \hline
+    \textbf{Core} & Cortex-M4, 168 MHz & Cortex-M7, 216 MHz & Cortex-M7, up to 480 MHz & Cortex-M33, up to 160 MHz \\
+    \hline
+    \textbf{Current (mA)} & 100-120 & 120-160 & 200-300 & 45-80 \\
+    \hline
+    \textbf{Price} & \$5-10 AUD & \$20-30 AUD & \$15-25 AUD & \$15-20 AUD \\
+    \hline
+    \end{tabular}
+    \caption{Comparison of DCMI compatible STM MCUs}
+    \label{tab:stm32-dcmi-breakdown}
+\end{table}
+
+Although the H7 offered more features and higher processing efficiency, its significantly larger power consumption made it unreasonable for a payload processor.
+The F4 is older than the other options and the F7 provided an excellent middle ground, delivering many of the H7's advantages whilst remaining comparable to the F4 in power consumption.
+Despite this, the U5 posed as the most promising candidate. As an ultra-low power processor, the U5 still delivers the same (or even more) high-performance features as the F7 at a low price. A slower MCU has its drawbacks like the data rate, but it still meets requirements of processing a single image rather. I selected the 144-pin U5 since the 100-pin option did not have enough GPIO pins to accomodate all the peripherals. The L4 was a potential candidate that shared similar characteristics to the U5, however, the U5 was selected because of its faster clock speed.
+\nl
+I followed \cite{u5-getting-started} and \cite{u5-datasheet} to connect all the pins (\autoref{tab:stm32u5-pin-justification}). Page 41 of \cite{u5-datasheet} included a very handy reference guide which made the pin mapping process swifter.
+\nl
+Three standard transmission protocols were selected for testing. These standard protocols were selected over others because they are widely supported, easy to implement and are reliable.
+\begin{itemize}
+    \item \textbf{UART} \\
+    If the UART protocol is a good candidate for the prototype, it will require little shielding because of its low speed, and between transmissions it can double as a serial port for communicating to the flight computer.
+
+    \item \textbf{SPI} \\
+    A de facto standard for synchronous serial communication. SPI is significantly faster than UART, so the elapsed transmission time will be much shorter.
+    It is only being used to transmit data, so in the STM32CubeIDE, the SPI mode has been set to 'Transmit Only Master'
+
+    \item \textbf{I2C} \\
+    Although it is slower than SPI, it uses fewer wires, which could be beneficial in a tight-PCB.
+\end{itemize}
+
+\paragraph{Remark}
+It would be beneficial to test the different MCU lines (L4, F4, F7, H7) and gather data about image processing performance as each processor has its benefits. This testing could probably be executed using development boards to save costs.

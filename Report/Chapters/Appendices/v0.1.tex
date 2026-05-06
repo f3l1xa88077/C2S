@@ -1,0 +1,322 @@
+%\subsection{Schematic Sheets}
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/Schematic-toplevel.png}
+%     \caption{Top-Level schematic sheet from C2Sv0.1 Breakout Board Project. Only critical paths were included on the Top-Level schematic. Routes like general power and ground were not included}
+%     \label{fig:v0.1-schematic-toplevel}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/C2Sv0-1 Block.png}
+%     \caption{General block diagram of C2Sv0.1 breakout board. Components like resistors, capacitors and suggested circuits have been omitted from the diagram. This is meant to show the core functionality between the core components.}
+%     \label{fig:c2sv0.1-block-diagram}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/Sensor.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-sensor}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/MCU.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-mcu}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/Memory.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-memory}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/USB-C.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-usbc}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/uSD.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-usd}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/LPS.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-lps}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0.1/Schematic/TAG.png}
+%     \caption{Image sensor schematic sheet from C2Sv0.1.}
+%     \label{fig:v0.1-schematic-tag}
+% \end{indentedfigure}
+
+\subsection{STM32U5 Power Management}
+
+\subsubsection{Power Supplies}\label{sec:app-u5-powersupply}
+    The STM32U5 requires various independent supplies for specific peripherals. The following breakdown is a justification of the list from page 3 of the getting started guide.
+    \begin{itemize}
+        \item \textbf{$V_{DD}$ = 3.3V} \\
+        $V_{DD}$ serves as the primary digital power domain for the STM32U5, supplying the processor core's internal regulator, general-purpose I/O banks, and most on-chip peripherals. A 3.3V rail was selected as it represents the most common logic level for mixed-signal embedded systems and is natively supported by all external components in the design, including the SPI flash memory, sensor control lines, and voltage-level interfaces. 
+        Selecting 3.3V simplifies the power architecture by allowing a single shared rail across the majority of devices, avoiding the need for intermediate level shifters and reducing regulator count. It also provides greater noise margin and signal integrity on high-speed digital traces compared to lower-voltage domains, at a modest increase in power consumption. The choice therefore balances component compatibility, design simplicity, and system robustness.
+    
+        \item \textbf{$V_{DDA}$ = 1.8V} \\
+        $V_{DDA}$ is the external-analog power supply for A/D converters, D/A converters, voltage reference buffer, operational amplifiers, and comparators \cite{u5-getting-started}. It must be independent from $V_{DD}$ when the mentioned peripherials are used \cite{u5-getting-started}.
+        Selecting 1.8V helps reduce the number of different voltage sources, and subsequently number of components, on the board since 1.8V is already a power supply for the image sensor. Moreover, the lower voltage helps reduce overall power consumption.
+
+        \item \textbf{$V_{DDSMPS}$ = 3.3V} \\
+        $V_{DDSMPS}$ is the external power supply for the SMPS step-down converter \cite{u5-getting-started}. When in use, it must be connected to the same pin as $V_{DD}$ \cite{u5-getting-started}. So, its voltage is the same as $V_{DD}$, 3.3V.
+
+        \item \textbf{$V_{LXSMPS}$ = $V_{DDCORE}$} \\
+        This is the output pin from the internal SMPS step-down converter and has a typical voltage of 1.21V (pg. 166 \cite{u5-datasheet}) \cite{u5-getting-started}.
+
+        \item \textbf{$V_{DD11} = V_{DDCORE}$} \\
+        This is the digital core supply for the processor and is supplied by $V_{LXSMPS}$ \cite{u5-getting-started}. It requires a total of $4.7\mu F$ external capacitors, two $2.2\mu F$ bulk capacitors and $100nF$ decoupling capacitor for each pin (in this case) \cite{u5-datasheet} \cite{u5-getting-started}
+
+        \item \textbf{$V_{CAP}$ = UNAVAILABLE} \\
+        These pins are not offered on the selected U5G processor.
+
+        \item \textbf{$V_{DDUSB}$ = 3.3V} \\
+        This is the external-independent power supply for USB transceivers \cite{u5-getting-started}. Since the USB-C connector is only being used to supply power, the transceiver functionality was not applicable, so, the pin was connected to $V_{DD}$ as specified by \cite{u5-getting-started}.
+
+        \item \textbf{$V_{DD11USB}$ = UNAVAILABLE} \\
+        This pin is not offered on the selected U5G processor.
+
+        \item \textbf{$V_{DDIO2}$ = $V_{DDCORE}$} \\
+        $V_{DDIO12}$ is the external power supply for 14 I/Os (port G[15:2]) and its voltage level is independent from the $V_{DD}$ voltage \cite{u5-getting-started}. It was connected to $V_{DDA}$ since we require the I2C lines on PG13 and PG14 to run at 3V3 logic. If these I2C lines were not connected, $V_{DDIO2}$ would be connected to $V_{DDCORE}$:
+        The 1.8V and 2.8V voltage levels are produced by the local LDOs, whereas the $V_{DDCORE}$ voltage is produced by a much more efficient SMPS step-down converter \cite{stm-power}, which means there are less losses between regulating from SMPS than an LDO. This also allows the pin to still be powered if there are any issues with the 2.8V LDO (if the 1.8V LDO had issues, VREF+ would not be in its operating range and the processor would not function).
+
+        \item \textbf{$V_{BAT}$ = 3.3V} \\
+        This is the power supply when $V_DD$ is not present for RTC, TAMP, LSE, backup registers and optionally backup SRAM \cite{u5-getting-started}. The pin has been shorted to $V_DD$ since the camera will not be placed in any situation where it still needs to operate without $V_DD$ (if the main power goes out on the CubeSat of HAB, the camera cannot do anything until the main power comes back).
+
+        \item \textbf{$V_{REF-}$ = 1.8V} \\
+        $V_{REF-}$ is the ground reference voltage for the processor. When the VREF+ pin is double-bonded to $V_{DDA}$ in a package, the internal VREFBUF is not available, and must be kept disabled, $V_{REF-}$ must always be equal to $V_{SSA}$ \cite{u5-getting-started}.
+
+        \item \textbf{$V_{REF+}$ = 1.8V} \\
+        As outlined in \cite{stm-power}, the simplest solution to provide $V_{REF}$ is to use $V_{DDA}$, 1.8V. Since it is connected to $V_{DDA}$, it admits to the 0.4V voltage difference between $V_{REF}$ and $V_{DDA}$ (pg. 163 \cite{u5-datasheet}).
+
+        \item \textbf{$V_{DDDSI}$ = 3.3V} \\
+        This is the external power supply for the DSI controller \cite{u5-getting-started}. It is provided externally through the $V_{DDDSI}$ supply pin, and must be connected to the same supply as $V_{DD}$ pin \cite{u5-getting-started}.
+
+        \item \textbf{$V_{DD11DSI} = V_{DDCORE}$} \\
+        This is the external power supply for the DSI transceiver and must be connected to $V_{DD11}$ \cite{u5-getting-started}.
+    \end{itemize}
+\subsubsection{Decoupling Capacitors}
+    The decoupling capacitors followed the getting started guide and datasheet power supply schemes (pg. 14 \cite{u5-getting-started} and pg. 161 \cite{u5-datasheet}).
+    The 0603 package was used for all decoupling and capacitors and inductors to comply with the PAST Avionics standard.
+     
+    \begin{indentedfigure}
+        \includegraphics[width=1\linewidth]{Images/Appendices/v0.1//Power Scheme.png}
+        \caption{STM32U5GxxxxxQ power supply scheme (with SMPS)}
+    \end{indentedfigure}
+
+\subsection{Pin Justification Tables}
+
+% ------------------------
+% STM32U5G 144-Pin Justification Tables 
+% ------------------------
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{3cm}|p{6cm}|p{4.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        1 & SCROLL A & Close to where rotary encoder was placed & Requires an interrupt pin (all GPIOs on this processor can be set as interrupts) \\ \hline
+        2 & OCTOSPIM P1 DQS & Auto assigned by STM32CubeIDE after selecting 'PORT1 DQS' Data Strobe & nil. \\ \hline
+        3 & DCMI D4 & Auto assigned by STM32CubeIDE after selecting 'Slave 12 bits External Synchro' on DCMI \hypertarget{dcmi-reason}{[1]} & nil. \\ \hline
+        4 & DCMI D6 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        5 & DCMI D7 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        6 & 3V3 & No external battery used & Tie to VCC if no external battery. \\ \hline
+        7 & SCROLL B & Close to where rotary encoder was placed & Requires an interrupt pin (all GPIOs on this processor can be set as interrupts) \\ \hline
+        8 & LSE IN & Input pin for low speed clock & 32.768kHz \\ \hline
+        9 & NC & Output of LSE & Leave NC if using a single output oscillator (see Table 3 of getting started guide) \\ \hline
+        10 & I2C2 SDA & Auto assigned by STM32CubeIDE after selecting 'I2C2' & nil. \\ \hline
+        11 & I2C2 SCL & Auto assigned by STM32CubeIDE after selecting 'I2C2' & nil. \\ \hline
+        12 & NC & nil. & nil. \\ \hline
+        13 & 3V3 & Same as VCC & Must be connected to same supply as VCC \\ \hline
+        14 & VDDCORE & Same voltage as VDDCORE & Must be connected to same supply as VDD11 \\ \hline
+        15 & NC & nil. & nil. \\ \hline
+        16 & NC & nil. & nil. \\ \hline
+        17 & GND & VSS pin = GND & nil. \\ \hline
+        18 & NC & nil. & nil. \\ \hline
+        19 & NC & nil. & nil. \\ \hline
+        20 & VDDCORE & Same voltage as VDDCORE & Must be connected to same supply as VDD11 \\ \hline
+        21 & NC & nil. & nil. \\ \hline
+        22 & NC & nil. & nil. \\ \hline
+        23 & GND & VSS pin = GND & nil. \\ \hline
+        24 & GND & VSS pin = GND & nil. \\ \hline
+        25 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        26 & HSE IN & Input pin for HSE & 4-50MHz \\ \hline
+        27 & NC & Output of HSE & Leave NC if using a single output oscillator (see Table 3 of getting started guide) \\ \hline
+        28 & NRST & nil. & Active low \\ \hline
+        29 & PWR ACTION & Close to MOSFET & nil. \\ \hline
+        30 & PWR STATE & Close to MOSFET & nil. \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U5 (Pins 1-30).}
+    \label{tab:stm32u5-pin-justification}
+\end{table}
+
+\begin{table}[H]
+    \ContinuedFloat
+    \centering
+    \begin{tabular}{|l|p{3cm}|p{6.5cm}|p{3.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        31 & CSA OUT & Close to Current Sense Amplifier & Must be analog GPIO \\ \hline
+        32 & NC & nil. & nil. \\ \hline
+        33 & GND & VSS pin = GND & nil. \\ \hline
+        34 & 1V8 & Same supply as VDDA & Connect to VDDA \\ \hline
+        35 & 3V3 & Common power domain & 1.62-3.6V \\ \hline
+        36 & NC & nil. & nil. \\ \hline
+        37 & SPI1 CLK & Auto assigned by STM32CubeIDE after selecting 'Half-Duplex Master' on Mode & nil. \\ \hline
+        38 & USART2 TX & Auto assigned by STM32CubeIDE after selecting 'Asynchronous' on Mode & nil. \\ \hline
+        39 & USART2 RX & Auto assigned by STM32CubeIDE after selecting 'Asynchronous' on Mode & nil. \\ \hline
+        40 & GND & VSS pin = GND & nil. \\ \hline
+        41 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        42 & DCMI HSYNC & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        43 & NC & nil. & nil. \\ \hline
+        44 & DCMI CLK & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        45 & OCTIOSPIM P1 IO2 & Auto assigned by STM32CubeIDE after selecting 'PORT1 IO[3:0]' on Data [3:0] \hypertarget{octo-io-4+}{[2]} & . \\ \hline
+        46 & OCTIOSPIM P1 IO1 & Auto assigned by STM32CubeIDE after selecting 'PORT1 IO[3:0]' on Data [3:0] \hypertarget{octo-io-4-}{[3]} & nil. \\ \hline
+        47 & OCTIOSPIM P1 IO0 & \hyperlink{octo-io-4-}{3} & nil. \\ \hline
+        48 & NC & nil. & nil. \\ \hline
+        49 & NC & nil. & nil. \\ \hline
+        50 & SENSOR RST TP & Near available space for test points & GPIO \\ \hline
+        51 & NC & nil. & nil. \\ \hline
+        52 & NC & nil. & nil. \\ \hline
+        53 & TIM1 CH1 (Buzzer) & Auto assigned by STM32CubeIDE after selecting 'PWM Generation CH1' on Channel1 & nil. \\ \hline
+        54 & GND & VSS pin = GND & nil. \\ \hline
+        55 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        56 & OCTOSPIM P1 CLK & Auto assigned by STM32CubeIDE after selecting 'Port1 CLK' on Clock & nil. \\ \hline
+        57 & OCTOSPIM P1 NCS & Auto assigned by STM32CubeIDE after selecting 'Port1 NCS' on 'Chip Select' & nil. \\ \hline
+        58 & NC & nil. & nil. \\ \hline
+        59 & SENSOR LED 2 & Near LED array & GPIO \\ \hline
+        60 & SENSOR LED 1 & Near LED array & GPIO \\ \hline
+        61 & OCTIOSPIM P1 IO3 & Auto assigned by STM32CubeIDE after selecting 'PORT1 IO[3:0]' on Data [3:0] \hypertarget{octo-io-4+}{[2]} & . \\ \hline
+        62 & I2C4 SDA & Auto assigned by STM32CubeIDE after selecting 'I2C4' & nil. \\ \hline
+        63 & I2C4 SCL & Auto assigned by STM32CubeIDE after selecting 'I2C4' & nil. \\ \hline
+        64 & VDDCORE & Source of VDDCORE & nil. \\ \hline
+        65 & 3V3 & Same source as VDD & Connect to VDD \\ \hline
+        66 & GND & VSS pin = GND & nil. \\ \hline
+        67 & VDDCORE & Same source as VLXSMPS & Connect to VLXSMPS \\ \hline
+        68 & GND & VSS pin = GND & nil. \\ \hline
+        69 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U5 (continued, Pins 31-69).}
+\end{table}
+
+\begin{table}[H]
+    \ContinuedFloat
+    \centering
+    \begin{tabular}{|l|p{3cm}|p{6.5cm}|p{3.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        70 & NC & nil. & nil. \\ \hline
+        71 & MCU LED 1 & Near LED array & GPIO \\ \hline
+        71 & MCU LED 2 & Near LED array & GPIO \\ \hline
+        73 & READ LED 1 & Near LED array & GPIO \\ \hline
+        74 & READ LED 2 & Near LED array & GPIO \\ \hline
+        75 & WRITE LED 1 & Near LED array & GPIO \\ \hline
+        76 & WRITE LED 2 & Near LED array & GPIO \\ \hline
+        77 & DEBUG LED & Near LED array & GPIO \\ \hline
+        78 & NC & nil. & nil. \\ \hline
+        79 & 3V3 LED & Near LED array & GPIO \\ \hline
+        80 & NC & nil. & nil. \\ \hline
+        81 & 81 & Originally a HSPI pin, repurposed as a broken out GPIO & GPIO \\ \hline
+        82 & GND & VSS pin = GND & nil. \\ \hline
+        83 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        84 & 84 & Originally a HSPI pin, repurposed as a broken out GPIO & GPIO \\ \hline
+        85 & 85 & Originally a HSPI pin, repurposed as a broken out GPIO & GPIO \\ \hline
+        86 & DCMI D3 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        87 & NC & nil. & nil. \\ \hline
+        88 & GND & VSS pin = GND & nil. \\ \hline
+        89 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        90 & NC & nil. & nil. \\ \hline
+        91 & DCMI D11 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        92 & NC & nil. & nil. \\ \hline
+        93 & DCMI D8 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        94 & GND & VSS pin = GND & nil. \\ \hline
+        95 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        96 & DCMI D9 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        97 & 97 & Originally a HSPI pin, repurposed as a broken out GPIO & GPIO \\ \hline
+        98 & DCMI D0 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        99 & DCMI D1 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        100 & SDMMC1 DAT0 & Auto assigned after selecting 'SD 4 bits Wide with auto dir voltage converter' on Mode \hypertarget{sdmmc1}{[5]} & nil. \\ \hline
+        101 & SDMMC1 DAT1 & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        102 & NC & nil. & nil. \\ \hline
+        103 & USART1 TX & Auto assigned by STM32CubeIDE after selecting 'Asynchronous' on Mode & nil. \\ \hline
+        104 & USART1 RX & Auto assigned by STM32CubeIDE after selecting 'Asynchronous' on Mode & nil. \\ \hline
+        105 & NC & nil. & nil. \\ \hline
+        106 & SPI1 MOSI & Auto assigned by STM32CubeIDE after selecting 'Half-Duplex Master' on Mode & nil. \\ \hline
+        107 & SWDIO & Auto assigned by STM32CubeIDE after sleecting 'Serial Wire' on Debug & nil. \\ \hline
+        108 & 3V3 & USB not used as a transceiver & Must be connected to VDD if transceiver not used \\ \hline
+        109 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        110 & GND & VSS pin = GND & nil. \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U5 (continued, Pins 70-110).}
+\end{table}
+
+\begin{table}[H]
+    \ContinuedFloat
+    %\centering
+    \begin{tabular}{|l|p{3cm}|p{6.5cm}|p{3.5cm}|}
+        \hline
+        \textbf{Pin} & \textbf{Function} & \textbf{Reason} & \textbf{Requirements} \\
+        \hline
+        111 & SWDCLK & Auto assigned by STM32CubeIDE after sleecting 'Serial Wire' on Debug & nil. \\ \hline
+        112 & NC & nil. & nil. \\ \hline
+        113 & SDMMC1 DAT2 & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        114 & SDMMC1 DAT3 & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        115 & SDMMC1 CLK & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        116 & NC & nil. & nil. \\ \hline
+        117 & NC & nil. & nil. \\ \hline
+        118 & SDMMC1 CMD & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        119 & DCMI D5 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        120 & NC & nil. & nil. \\ \hline
+        121 & NC & nil. & nil. \\ \hline
+        122 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+        123 & DMCI D10 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        124 & NC & nil. & nil. \\ \hline
+        125 & NC & nil. & nil. \\ \hline
+        126 & NC & nil. & nil. \\ \hline
+        127 & NC & nil. & nil. \\ \hline
+        128 & I2C1 SDA & Auto assigned by STM32CubeIDE after selecting 'I2C1' & nil. \\ \hline
+        129 & I2C1 SCL & Auto assigned by STM32CubeIDE after selecting 'I2C1' & nil. \\ \hline
+        130 & GND & VSS pin = GND & nil. \\ \hline
+        131 & 3V3 & PG[15:2] doesn't require a different power domain, I2C commonly runs on 3V3 logic & 1.08-3.6V. Independent from VDD when PG[15:2] in use, tie to VDD when not in use \\ \hline
+        132 & STANDBY & Close to sensor connector & GPIO \\ \hline
+        133 & RESET & Close to sensor connector & GPIO \\ \hline
+        134 & TRIGGER & Close to sensor connector & GPIO \\ \hline
+        135 & NC & nil. & nil. \\ \hline
+        136 & SHUTTER & lose to sensor connector & GPIO \\ \hline
+        137 & DCMI VSYNC & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        138 & BOOT0 & nil. & Active high \\ \hline
+        139 & SDMMC1 CLKIN & \hyperlink{sdmmc1}{5} & nil. \\ \hline
+        140 & NC & nil. & nil. \\ \hline
+        141 & DCMI D2 & \hyperlink{dcmi-reason}{1} & nil. \\ \hline
+        142 & VDDCORE & Same voltage as VDDCORE & Must be connected to same supply as VDD11 \\ \hline
+        143 & SCROLL BUTTON & Close to where rotary encoder was placed & Requires an interrupt pin (all GPIOs on this processor can be set as interrupts) \\ \hline
+        144 & 3V3 & Common power domain & 1.71-3.6V \\ \hline
+    \end{tabular}
+    \caption{Pin justification for STM32U5 (continued, Pins 111-144).}
+    \label{tab:v1-pin-justification}
+\end{table}
+
+\subsection{PCB Layout}
+
+\begin{indentedfigure}
+    \includegraphics[width=0.6\linewidth]{Images/v0.1/PCB/length rule.png}
+    \caption{FMC length match design rule.}
+    \label{fig:length-rule}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \includegraphics[width=0.6\linewidth]{Images/v0.1/PCB/parallel routing.png}
+    \caption{Parallel routes from C2Sv0.1 PCB.}
+    \label{fig:parallel-routing}
+\end{indentedfigure}

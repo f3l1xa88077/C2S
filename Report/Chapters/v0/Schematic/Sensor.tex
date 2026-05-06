@@ -1,0 +1,10 @@
+Like the STM32N6, I followed the \href{https://edit.wpgdadawant.com/uploads/news_file/program/2021/36761/tech_files/program_36761_suggest_other_file.PDF?}{AR0147 datasheet} on how to properly create the image sensor schematic.
+Although it wasn't specified in the datasheet, I included common mode chokes on the differential lines like the MIRA220 schematic.
+\nl
+For the connector to the processor, \href{https://blog.arducam.com/raspberry-pi-camera/connector-type-pinout/}{this guide} was followed on how to properly set the pinout. I set every third connection to ground to ensure a reliable return path for all signals.
+\nl
+The most important design consideration with this schematic was the requirement of digital and analog ground (DGND/AGND). To understand how to work with different signal planes, the following resources from TI were used: \href{https://www.ti.com/lit/an/slyt499/slyt499.pdf?ts=1756814995128&ref_url=https%3A%2F%2Fwww.google.com%2F}{1} and \href{https://www.ti.com/lit/an/slyt512/slyt512.pdf?ts=1756824651700&ref_url=https%3A%2F%2Fwww.google.com%2F}{2}.
+To connect both grounds, I used a simple star connection with a NetTie. I also set DGND as the equivalent ground on the processor PCB (GND=DGND on the connector).
+\nl
+I selected the \href{https://au.mouser.com/ProductDetail/ECS/ECS-TXO-3225MV-240-TR?qs=d0WKAl%252BL4KYXn7UuwSFJGQ%3D%3D&srsltid=AfmBOoqlFJCYyqd6MzLT63_Pw_wqXWR5Bv4SHlYdyhoVLS8l8SGV9TkK}{ECS-TXO-3225MV-240-TR} as the external PLL oscillator for the image sensor. This component can be operated on 3V3, however, I chose 2V8 so the oscillator will only start when the sensor's specific power domains are provided and doesn't 'burn' power when the sensor is not in use.
+Page 22 of the sensor datasheet specifies that the tEXTCLK signal must have a rise/fall of between 0.2ns and 12.5ns (12.5ns extrapolated from 0.3*tEXTCLK). These requirements are met by the selected oscillator since the oscillator datasheet says it has a rise/fall time of 5$\pm$0.5ns. Since the generated signal is a clipped sine wave, I can estimate the duty cycle is 50\% since it's symmetric.

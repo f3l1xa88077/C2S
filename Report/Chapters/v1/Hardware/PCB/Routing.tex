@@ -1,0 +1,16 @@
+The reduced pin count of the STM32U575 and fewer subsystems meant that there were fewer traces to route compared to version 0.1.
+As discussed in \autoref{sec:v1-coupling}, important traces where signal integrity was a priority like DCMI and QSPI were all routed first.
+When exiting closely spaced pins, like those on the FPC/FFC connector and STM32, the traces were spaced out to increase seperation distance and reduce coupling voltage when routing on the back layer.
+According to \href{https://www.reddit.com/r/embedded/comments/1ozbddc/for_dcmi_pcb_routing_using_ov2640_camera_on_stm32/}{this Reddit post}, the signal integrity of PCLK should be prioritised, so PCLK was routed first with no layer transitions.
+
+usb data lines, talk about altium stackup impedance calculator, differential routing tool.
+
+Talk about DCMI and keeping them close together.
+
+transfer vias.
+
+why delay matching was not used on this board, why it wasn't used on the bridge. at what length mismatch would the delay be catastrophic, could this catastrophe be acheived with these boards not being delay matched?
+
+
+
+Although 90° are not always bad for signal integrity, as explained in \href{https://resources.altium.com/p/pcb-routing-angle-myths-45-degree-angle-versus-90-degree-angle}{tjis Altium article}, I took the precaution of two 45° angle corners.

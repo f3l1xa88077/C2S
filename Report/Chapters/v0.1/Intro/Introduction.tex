@@ -1,0 +1,32 @@
+As mentioned in \autoref{sec:c2sv0}, Version 0 was shelved because of the high price point. Unlike Version 0 which used MIPI CSI-2, v0.1 focuses on the Digital Camera Media Interface (DCMI) interface (for more information about DCMI, \href{https://www.st.com/resource/en/application_note/an5020-introduction-to-digital-camera-interface-dcmi-for-stm32-mcus-stmicroelectronics.pdf}{read here}).
+DCMI is an older and slower interface for select STM32 chips, so, it's cheaper than a fast and modern interface like CSI-2. Although it is slower, DCMI can still provide 720p at 30fps, which greatly exceeds the project requirements of buffering a single frame aperiodically.
+\nl
+Unlike CSI-2, processors that have DCMI typically have non-BGA packages, which means I can avoid using the ENIG surface finish across the entire processor PCB, and use much larger via sizes. Using LQFP or QFP packages for the processor also removes the AT\&MWA placement fee entirely for the processor, meaning we can test and verify the processor without additional costs. Although the image sensor still requires a BGA package, sensors that use DCMI often tend to have larger packages because they are older, which means I can use larger vias to save more money. Moreover, I had selected components with the space requirements in mind (vacuum compatible, large operating temperature range, etc.) so that circuit known to work can be recycled for the prototype. Digressing from BGA packages was the first step, removing the electrolytic capacitors was the second. Ceramic capacitors were chosen for vacuum resiliense since they avoid any risk of a severaly lowered life expectancy and potential explosion in altitude conditions \cite{electro-cap-guidelines}.
+\nl
+Overall, this version has an arbitrary limit of \$250AUD (inclusive of all costs: components, manufacturing, shipping, etc) for a single PCB set (one sensor and processor PCB fully assembled with all components). Exceeding this budget limit would make the budget on future revisions much tighter, especially if this version doesn't fully work and needs to be revised. Fortunately, the expenses came out to just under \$260 AUD (under \$270 AUD if you count all expenses).
+\begin{table}[H]
+    \centering
+    \begin{threeparttable}
+        \begin{tabular}{|l|l|}
+            \hline
+            \textbf{Item} & \textbf{Cost (\$AUD)} \\
+            \hline
+            PCBs (shipping inc.) & 119.12 \\
+            \hline
+            AT\&MWA BGA Fee & 77 \\
+            \hline
+            Components\tnote{1} & 340.03 \\
+            \hline
+            \hline
+            \textbf{Total} & 536.15 \\
+            \hline
+        \end{tabular}
+        \caption{Cost breakdown of C2Sv0.1.}
+        \begin{tablenotes}
+            \item[1] \$24.50 AUD of this amount was spent out of pocket.
+        \end{tablenotes}
+    \end{threeparttable}
+    \label{tab:c2sv0.1-costbreakdown}
+\end{table}
+
+\end{itemize}

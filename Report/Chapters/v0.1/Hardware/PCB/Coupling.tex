@@ -1,0 +1,13 @@
+Coupling, or cross-talk, refers to the injection of electromagnetic (EM) energy from one trace to another \cite{Ritchey2020CrosstalkAltium} \cite{Kay2022Crosstalk}.
+In PCBs like C2Sv0.1, coupling is a factor that can greatly impact the performance of the board \cite{Kay2022Crosstalk}. Although its impacts are more apparent in analog circuits, neglecting its presence could lead to unexpected behaviour.
+\nl
+Coupling was found to be an issue when routing the DCMI and other sensor traces. Since the traces were tightly packed together on the STM chip and FFC connector, early versions of the board were suceptible to coupling issues as seen in \autoref{fig:bad-coupling}. Using the Saturn PCB Toolkit, with an original trace spacing of 0.5mm, coupled distance of 40mm, rise/fall time of ~4.2ns (according to a maximum 64Mhz DCMI clock speed on the U5 and $V_{DDIO2}$ voltage of 3.3V, with a minimum load capacitance), the coupled voltage would be 2.3V. Increasing this spacing to 0.75mm changes the coupling voltage to 1.67V. According to Table 95 of \cite{u5-datasheet}, the minimum voltage to register a high-level input is 2.1V, greater than the maximum coupling voltage of 1.67V, so there should not be any coupling issues. Additionally, the calculated 1.67V only corresponds to the maximum coupling voltage. If the DCMI clock frequency was reduced, then the coupling voltage would be around 0.9V, safe from triggering high-level inputs.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/v0.1/PCB/Bad Coupling.png}
+    \caption{Example of bad spacing on DCMI traces in an early version of C2Sv0.1.}
+    \label{fig:bad-coupling}
+\end{indentedfigure}
+
+All other routes were able to adhere to adequate trace spacing.

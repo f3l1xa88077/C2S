@@ -1,0 +1,273 @@
+\ProvidesPackage{style}
+
+% -----------------------
+% Package Imports
+% -----------------------
+\RequirePackage{graphicx}
+\RequirePackage{geometry}
+\RequirePackage{fancyhdr}
+\RequirePackage{lmodern}
+\RequirePackage{hyperref}
+\RequirePackage{float}
+\RequirePackage{xcolor}
+\RequirePackage{ragged2e}
+\RequirePackage{enumitem}
+\RequirePackage{subcaption}
+\RequirePackage{titlesec}
+\RequirePackage{etoolbox}
+\RequirePackage{tocloft}
+\RequirePackage{import}
+\RequirePackage{threeparttable}
+\RequirePackage{dirtytalk} % Quotation using \say
+
+% -----------------------
+% References
+% -----------------------
+\RequirePackage[
+    backend=biber,
+    style=ieee,
+    sorting=nty,
+]{biblatex}
+
+% -----------------------
+% Censor
+% -----------------------
+\RequirePackage{censor}
+% \StopCensoring % Uncomment to censor confidential information
+
+% -----------------------
+% Tikz Diagram
+% -----------------------
+\RequirePackage{circuitikz}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning}
+
+% -----------------------
+% Header
+% -----------------------
+\RequirePackage{caption}
+
+\definecolor{tableHeader}{RGB}{211, 47, 47}
+\definecolor{tableLineOne}{RGB}{245, 245, 245}
+\definecolor{tableLineTwo}{RGB}{224, 224, 224}
+
+\newcommand{\tableHeaderStyle}{
+    \rowfont{\leavevmode\color{white}\bfseries}
+    \rowcolor{tableHeader}
+}
+
+% -----------------------
+% List of Abbreviations Style
+% -----------------------
+\newlist{abbreviations}{description}{1}
+\setlist[abbreviations,1]{%
+    font=\sffamily\bfseries, % Matches your berasans/bold style
+    labelwidth=3em,          % Adjust based on longest acronym (e.g., PAST)
+    leftmargin=4em,          % Aligns with your subsection indentation
+    itemsep=0.5\listsep,     % Scales with your custom \listsep
+    parsep=0pt
+}
+
+
+% -----------------------
+% Font & Colors
+% -----------------------
+% \RequirePackage[scaled]{helvet} % Helvetica font
+% \renewcommand{\familydefault}{\sfdefault} % Set Helvetica as default
+\RequirePackage[T1]{fontenc}
+\RequirePackage{berasans}
+\setlist[itemize]{noitemsep, topsep=0pt, parsep=0pt, partopsep=0pt}
+
+\RequirePackage{etoolbox}   % For hooks
+\RequirePackage{changepage} % For adjustwidth
+\RequirePackage{float}      % For [H] placement
+\RequirePackage{titlesec}   % For title formatting
+
+% -----------------------
+% Heading Formatting 
+% -----------------------
+
+\newlength{\numberwidth}
+\setlength{\numberwidth}{2em} % horizontal position of all numbers
+
+% Section
+\titleformat{\section}[hang]
+  {\normalfont\Large\bfseries}  % formatting
+  {\llap{\thesection\hspace{1.5em}}}  % number flush left
+  {0pt}                          % no extra space between number and text
+  {}
+
+% Subsection
+\titleformat{\subsection}[hang]
+  {\normalfont\large\bfseries}
+  {\llap{\thesubsection\hspace{1.5em}}}
+  {0pt}
+  {\hspace{2em}} % optional indentation for subsection text
+
+% Subsubsection
+\titleformat{\subsubsection}[hang]
+  {\normalfont\normalsize\bfseries}
+  {\llap{\thesubsubsection\hspace{1.5em}}}
+  {0pt}
+  {\hspace{3.5em}} % optional indentation for subsubsection text
+
+
+% -----------------------
+% Further Heading Depth
+% -----------------------
+
+% 1. Define the new level and its counter
+\titleclass{\subsubsubsection}{straight}[\subsubsection]
+\newcounter{subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection.\arabic{subsubsubsection}}
+
+% 2. Apply your custom style to match sections/subsections
+\titleformat{\subsubsubsection}[hang]
+  {\normalfont\normalsize\bfseries\subsubsubsectionindent} % Trigger indent here
+  {\llap{\thesubsubsubsection\hspace{5.5em}}}
+  {0pt}
+  {\hspace{-0.5em}}
+
+\titlespacing*{\subsubsubsection}
+  {0pt}
+  {3.25ex plus 1ex minus .2ex}
+  {1.5ex plus .2ex}
+
+% 3. Update depth counters so the new level is numbered and in TOC
+\setcounter{secnumdepth}{4} 
+\setcounter{tocdepth}{4}
+
+% 4. Fix paragraph/subparagraph inheritance (Optional)
+% This ensures level 5 (paragraph) numbers correctly if you use them
+\makeatletter
+\renewcommand\theparagraph{\thesubsubsubsection.\arabic{paragraph}}
+\makeatother
+
+% 1. Define the name for \autoref
+\newcommand{\subsubsubsectionautorefname}{Section} 
+% Or use "Sub-sub-subsection" if you prefer
+
+% 2. Link the counter to the name (required for custom levels)
+\makeatletter
+\newcommand{\toclevel@subsubsubsection}{4} % Tells hyperref this is level 4
+\makeatother
+
+
+% -----------------------
+% Indentation Helpers
+% -----------------------
+\newcommand{\sectionindent}{\setlength{\leftskip}{2em}}
+\newcommand{\subsectionindent}{\setlength{\leftskip}{3em}}
+\newcommand{\subsubsectionindent}{\setlength{\leftskip}{4em}}
+\newcommand{\subsubsubsectionindent}{\setlength{\leftskip}{5em}}
+\newcommand{\resetindent}{\setlength{\leftskip}{0pt}}
+
+% Track current heading level
+\newcounter{headinglevel}
+\setcounter{headinglevel}{1} % default: section
+
+% Hook into headings
+\preto\section{\resetindent\setcounter{headinglevel}{1}}
+\preto\subsection{\subsectionindent\setcounter{headinglevel}{2}}
+\preto\subsubsection{\subsubsectionindent\setcounter{headinglevel}{3}}
+\preto\subsubsubsection{\subsubsubsectionindent\setcounter{headinglevel}{4}}
+
+% -----------------------
+% Figures and Tables that follow indentation
+% -----------------------
+\RequirePackage{changepage} % ensure adjustwidth is loaded
+\RequirePackage{float}      % for [H] placement
+
+\newenvironment{indentedfigure}
+{%
+    \begin{figure}[H]
+    \ifnum\value{headinglevel}=1
+        \begin{adjustwidth}{0pt}{0pt}%
+    \else\ifnum\value{headinglevel}=2
+        \begin{adjustwidth}{2em}{0pt}%
+    \else\ifnum\value{headinglevel}=3
+        \begin{adjustwidth}{4em}{0pt}%
+    \else\ifnum\value{headinglevel}=4
+        \begin{adjustwidth}{6em}{0pt}% <-- Level 4
+    \else
+        \begin{adjustwidth}{0pt}{0pt}% Fallback
+    \fi\fi\fi\fi
+    \centering 
+}
+{%
+    \end{adjustwidth}
+    \end{figure}
+}
+
+\newenvironment{indentedtable}
+{%
+    \begin{table}[H]
+    \ifnum\value{headinglevel}=1
+        \begin{adjustwidth}{0pt}{0pt}%
+    \else\ifnum\value{headinglevel}=2
+        \begin{adjustwidth}{2em}{0pt}%
+    \else\ifnum\value{headinglevel}=3
+        \begin{adjustwidth}{4em}{0pt}%
+    \else\ifnum\value{headinglevel}=4
+        \begin{adjustwidth}{6em}{0pt}% <-- Level 4
+    \else
+        \begin{adjustwidth}{0pt}{0pt}% Fallback
+    \fi\fi\fi\fi
+    \centering 
+}
+{%
+    \end{adjustwidth}
+    \end{table}
+}
+
+
+
+% -----------------------
+% Figures
+% -----------------------
+\RequirePackage{caption}
+\captionsetup[figure]{font=small, labelfont=bf, indention=0pt} % aligns figure captions nicely
+
+% -----------------------
+% Adjustable list spacing
+% -----------------------
+\newlength{\listsep}
+\setlength{\listsep}{3pt} 
+
+% Helper to set list indentation based on heading level
+\newcommand{\setlistindent}{
+    \ifnum\value{headinglevel}=1
+        \setlist[itemize]{leftmargin=2em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+        \setlist[enumerate]{leftmargin=2em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+    \else
+        \ifnum\value{headinglevel}=2
+            \setlist[itemize]{leftmargin=4em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+            \setlist[enumerate]{leftmargin=4em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+        \else
+            \ifnum\value{headinglevel}=3
+                \setlist[itemize]{leftmargin=6em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+                \setlist[enumerate]{leftmargin=6em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+            \else
+                \ifnum\value{headinglevel}=4
+                    \setlist[itemize]{leftmargin=8em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+                    \setlist[enumerate]{leftmargin=8em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+                \else
+                    % Default (no heading)
+                    \setlist[itemize]{leftmargin=2em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+                    \setlist[enumerate]{leftmargin=2em, topsep=\listsep, partopsep=0pt, parsep=0pt, itemsep=\listsep}
+                \fi % ends level 4
+            \fi % ends level 3
+        \fi % ends level 2
+    \fi % ends level 1
+}
+
+% Apply hooks
+\preto\section{\resetindent\setcounter{headinglevel}{1}\setlistindent}
+\preto\subsection{\subsectionindent\setcounter{headinglevel}{2}\setlistindent}
+\preto\subsubsection{\subsubsectionindent\setcounter{headinglevel}{3}\setlistindent}
+
+
+% -----------------------
+% New commands
+% -----------------------
+\newcommand{\nl}{\newline \newline}

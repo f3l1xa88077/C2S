@@ -1,0 +1,3 @@
+Set 'DCMI' to 'Slave 12 bits External Synchro' after configuring all other peripherals. If you have enabled DCMI before other interfaces like USART and I2C, you may find that some pins are not in the correct location.
+If this is the case, please refer to the STM32 pinout and move the pins around.
+After this, you should set 'Vertical synchronization polarity' to 'Active High' under the parameter settings and enable the global interrupt in the 'NVIC Settings'.

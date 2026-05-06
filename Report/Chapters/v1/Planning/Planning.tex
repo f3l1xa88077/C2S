@@ -1,0 +1,85 @@
+My vision focused on developing a integration-ready board that could still be easily debugged, this meant the board was going to include: (a) all of the CubeSat-critical components like the MCU and memory, and (b) peripherals like USB-C and microSD.
+If developed properly, the flight-ready model (v2) would simply be the prototype without the peripherals i.e., C2Sv1 - niceties = C2Sv2.
+
+\begin{indentedfigure}
+    \centering
+    \resizebox{0.7\textwidth}{!}{%
+    \begin{circuitikz}
+        \tikzstyle{every node}=[font=\fontsize{11.9pt}{15.5pt}\selectfont]
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (15,19.625) rectangle (17.5,13.375);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (16.25,16.5) {\fontsize{18.2pt}{23.7pt}\selectfont MCU};
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (10,14.375) rectangle (12.5,13.625);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,14) {\fontsize{11.9pt}{15.5pt}\selectfont CLOCKS};
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (10,15.625) rectangle (12.5,14.625);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,15.125) {\fontsize{11.9pt}{15.5pt}\selectfont OBC};
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (10,18.5) rectangle (12.5,17.875);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,18.1875) {\fontsize{11.9pt}{15.5pt}\selectfont EPS};
+        \draw  (10,19.625) rectangle (12.5,19);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,19.3125) {\fontsize{11.9pt}{15.5pt}\selectfont USB-C};
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (20,15.75) rectangle (22.5,14.75);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,15.25) {\fontsize{11.9pt}{15.5pt}\selectfont Camera};
+        \draw  (20,16.75) rectangle (22.5,16.125);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,16.4375) {\fontsize{11.9pt}{15.5pt}\selectfont LEDs};
+        \draw [ color={rgb,255:red,255; green,0; blue,0}, draw opacity=1 ] (20,18.25) rectangle (22.5,17.125);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,17.6875) {\fontsize{11.9pt}{15.5pt}\selectfont STLINK/V2};
+        \draw  (20,19.25) rectangle (22.5,18.625);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,18.9375) {\fontsize{11.9pt}{15.5pt}\selectfont microSD};
+        \draw [-{Stealth[scale=1.5]}, ] (12.5,15.375) -- (15,15.375)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SPI};
+        \draw [-{Stealth[scale=1.5]}, ] (15,14.875) -- (12.5,14.875)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SPI};
+        \draw [-{Stealth[scale=1.5]}, ] (12.5,14) -- (15,14)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{LSE, HSE};
+        \draw [-{Stealth[scale=1.5]}, ] (17.5,18.875) -- (20,18.875)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SPI};
+        \draw [-{Stealth[scale=1.5]}, ] (20,17.875) -- (17.5,17.875)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SWD};
+        \draw [-{Stealth[scale=1.5]}, ] (17.5,17.375) -- (20,17.375)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SWD};
+        \draw [-{Stealth[scale=1.5]}, ] (17.5,16.5) -- (20,16.5)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{GPIO};
+        \draw [-{Stealth[scale=1.5]}, ] (17.5,15.5) -- (20,15.5)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{I2C};
+        \draw [-{Stealth[scale=1.5]}, ] (20,15) -- (17.5,15)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{DCMI};
+        \draw  (10,17.5) rectangle (12.5,16.5);
+        \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,17) {\fontsize{11.9pt}{15.5pt}\selectfont CSA};
+        \draw [-{Stealth[scale=1.5]}, ] (13.75,17.25) -- (12.5,17.25);
+        \draw  (13.75,18.125) circle (0.125cm);
+        \draw [short] (12.5,19.375) -- (13.75,19.375);
+        \draw [short] (13.75,18) -- (13.75,17.25)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{PWR};
+        \draw [-{Stealth[scale=1.5]}, ] (13.75,19.375) -- (13.75,18.25);
+        \draw [-{Stealth[scale=1.5]}, ] (12.5,18.125) -- (13.625,18.125);
+        \draw [-{Stealth[scale=1.5]}, ] (12.5,16.875) -- (15,16.875)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{I2C};
+    \end{circuitikz}}%
+    \caption{C2Sv1 systems interface diagram}
+    \label{fig:v1-systems-diagram}
+\end{indentedfigure}
+
+The red-outline nodes in \autoref{fig:v1-systems-diagram} represent subsytems strictly required for v2, whereas the others are peripherals to debug and characterise the board.
+\nl
+Subsystems that have been excluded from v0.1 include: the rotary encoder, audio buzzer, LCD display, OR gate, and broken out GPIOs.
+While these user-side components are valuable for development, they are functionally redundant for remote mission environments like a HAB or vacuum chamber testing.
+Omitting them reduces the software footprint and preserves space and processing resources.
+The USB-C, CSA, microSD and LEDs were kept for v1 because they are vital for characterising and testing the the board e.g., the CSA will provide data on power consumption, whereas the LCD screen just displays that data.
+A detailed breakdown on why each component was kept/removed is found below:
+
+\paragraph{USB-C}
+Although C2S will be powered by EPS on HAB and CubeSat missions, I won't be able to take EPS home for weeks or months at a time whilst I program the board.
+The USB-C connector makes powering the board universally accessible.
+
+\paragraph{CSA}
+The current sense amplifier is a useful component that will help characterise the power consumption of the board during testing.
+We can also use its data to automatically power-down the board if it begins to consume too much power, something useful for HAB missions where there is only a finite amount of charge.
+
+\paragraph{microSD}
+To locally store the photos for easy access, and doubles as storage for HAB flights in-case the OBC storage fails.
+
+\paragraph{LEDs}
+Visual indicators of the board's state, enabling me to identify when faults occur.
+
+\paragraph{*Rotary Encoder}
+Useful for changing configuration settings quickly, but it takes up a lot of space, not used for remote applications, and results from v0.1 should already provide me with working configurations.
+
+\paragraph{*Audio Buzzer}
+An auditory indicator for when I'm not looking at the board, but can easily be replaced with LEDs. Plus, it will be useless in vacuum environments.
+
+\paragraph{*LCD Display}
+Can be used to display select information, but I'll only need to know those values when I'm testing/programming the board, and I can view far more variables at once in the STM32CubeIde variables tab.
+
+\paragraph{*OR Gate}
+This subsytem was meant to prevent me from prematurely powering down the board, but I can just use an LED to indicate when it's okay to power down.
+
+\paragraph{*GPIO Header}
+While breaking out spare pins was helpful for testing to get a few more user inputs, the v1 subsystem configurations are now finalised and the design no longer requires external hardware customisation.

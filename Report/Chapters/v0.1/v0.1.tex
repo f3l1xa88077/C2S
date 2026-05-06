@@ -1,0 +1,148 @@
+% -----------------------
+% Introduction
+% -----------------------
+\subsection{Introduction}
+
+    \subimport{./Intro/}{Introduction.tex}
+
+% -----------------------
+% System Requirements
+% -----------------------
+\subsection{System Requirements}
+
+    \subimport{./Requirements/}{Requirements.tex}
+
+% -----------------------
+% Hardware
+% -----------------------
+\subsection{Schematic Design \& Component Selection}
+
+    The schematic and PCB were reviewed and approved by Tristan Davies on 19/11/2025.
+
+    % -----------------------
+    % Schematic
+    % -----------------------
+    \subsubsection{Overview}
+        \subimport{./Hardware/Schematic/}{Overview.tex}
+
+    \subsubsection{MCU}\label{sec:v0.1-mcu}
+        \subimport{./Hardware/Schematic/}{MCU.tex}
+
+    \subsubsection{Clocks}\label{sec:v0.1-clocks}
+        \subimport{./Hardware/Schematic/}{Clocks.tex}
+
+    \subsubsection{microSD}
+        \subimport{./Hardware/Schematic/}{uSD.tex}
+
+    \subsubsection{LPS}
+        \subimport{./Hardware/Schematic/}{LPS.tex}
+
+    \subsubsection{TAG}
+        \subimport{./Hardware/Schematic/}{TAG.tex}
+
+    \subsubsection{USB-C}
+        \subimport{./Hardware/Schematic/}{USBC.tex}
+
+    \subsubsection{Memory}
+        \subimport{./Hardware/Schematic/}{Memory.tex}
+
+    \subsubsection{Image Sensor}\label{sec:v0.1-sensor}
+        \subimport{./Hardware/Schematic/}{Sensor.tex}
+
+    \subsubsection{Other}\label{sec:v0.1-sch-other}
+        \subimport{./Hardware/Schematic/}{Other.tex}
+
+% -----------------------
+% PCB
+% -----------------------
+\subsection{PCB Design}
+
+    \subsubsection{Layout}
+        \subimport{./Hardware/PCB/}{Layout.tex}
+
+    \subsubsection{Routing}
+        \subimport{./Hardware/PCB/}{Routing.tex}
+
+    \subsubsubsection{Coupling}
+        \subimport{./Hardware/PCB/}{Coupling.tex}\label{sec:v0.1-coupling}
+
+    \subsubsection{Power Distribution}
+        \subimport{./Hardware/PCB/}{Power.tex}
+
+    \subsubsection{Ground Fill}
+        \subimport{./Hardware/PCB/}{Ground Fill.tex}
+
+    \subsubsection{Vias}
+        \subimport{./Hardware/PCB/}{Vias.tex}
+
+    \subsubsection{Power Pad}\label{sec:v0.1-powerpad}
+        \subimport{./Hardware/PCB/}{Power Pad.tex}
+
+    \subsubsection{Silkscreen}\label{sec:v0.1-silkscreen-pcb}
+        \subimport{./Hardware/PCB/}{Silkscreen.tex}
+
+    \subsubsection{Mounting}
+        \subimport{./Hardware/PCB/}{Mounting.tex}
+
+    \subsubsection{Fiducial Markers}
+        \subimport{./Hardware/PCB/}{Fiducial.tex}
+
+% -----------------------
+% Manufacturing
+% -----------------------
+\subsection{Manufacturing}\label{sec:manufacturing-v0.1}
+
+    The components for C2Sv0.1 were received on the following:
+    \begin{itemize}
+        \item \textbf{Element14}: This contained only the STMU5Gxxx processor. This was received on Tuesday, December 2nd 2025.
+        \item \textbf{Digikey}: This included the AR0141CS CIS and Raspberry Pi lens, received Thursday, December 4th 2025.
+        \item \textbf{Mouser}: The rest of the project components were in the Mouser order. This was received on Monday, December 8th 2025.
+    \end{itemize}
+    Components were checked off and quantities were verified on Monday, December 8th 2025. Replacement parts were ordered in later December 2025 and early January 2026.
+
+    \subsubsection{3D Printing}
+    \subimport{./Manufacturing/}{3D.tex}
+
+    \subsubsection{Component Placement}
+    \subimport{./Manufacturing/}{Placement.tex}
+
+    \subsubsection{AT\&MWA Placement}
+    \subimport{./Manufacturing/}{ATMWA.tex}
+
+% -----------------------
+% Programming
+% -----------------------
+\subsection{Programming}\label{sec:v0.1-coding}
+
+    The software implementation implementation phase of the project was split into two sections: (i) coding and testing systems in isolated environments i.e., systems do no communicate with each other, and (ii) cross-system testing i,e., systems talk to one another e.g., taking a photo, storing data in QSPI memory and writing to uSD card.
+    \nl
+    A CubeIDE setup section has also been included so the project can be setup correctly.
+
+    \subsubsection{STM32CubeIDE Setup}
+    \subimport{./Programming/CubeIDE/}{CubeIDE.tex}
+
+    \subsubsection{Isolated Testing}
+    \subimport{./Programming/Isolated/}{Isolated.tex}
+
+    \subsubsection{Cross-System Testing}
+    \subimport{./Programming/Cross/}{Cross.tex}
+
+% -----------------------
+% Results
+% -----------------------
+\subsection{Results}
+
+    \subsubsection{Power Consumption}
+        \subimport{./Results/}{Power.tex}
+    
+    \subsubsection{QSPI Read/Write}
+        \subimport{./Results/}{QSPI.tex}
+
+    \subsubsection{Vibration Table}
+        \subimport{./Results/}{Vibration.tex}
+
+% -----------------------
+% Remarks
+% -----------------------
+\subsection{Remarks}
+    \subimport{./Remarks/}{Remarks.tex}

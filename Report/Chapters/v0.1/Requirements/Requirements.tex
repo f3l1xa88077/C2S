@@ -1,0 +1,28 @@
+This version's system requirements were much more flexible than those imposed in \autoref{sec:v0-requirements}.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|p{10cm}|}
+    \hline
+    \textbf{No.} & \textbf{Description} \\
+    \hline
+    1 & Requires standard interfaces to communicate with a flight computer for potential Flatsat integration. \\
+    \hline
+    2 & Avoid BGA package components whenever possible to reduce production costs. \\
+    \hline
+    3 & The processor and image sensor must be on independent boards. \\
+    \hline
+    4 & The image sensor board must use an M12 lens mount. \\
+    \hline
+    5 & Be able to save image data to a microSD card (unidirectional). \\
+    \hline
+    6 & Must interface with an CIS via DCMI. \\
+    \hline
+    \end{tabular}
+    \caption{C2Sv0.1 system requirements.}
+    \label{tab:v0.1-requirements}
+\end{table}
+
+Comparing \autoref{tab:v0.1-requirements} and \autoref{tab:v0-requirements}, we can see that Verion 0 focused on strict technical requirements like pixel count, whereas Version 0.1 uses a high-level systems approach to focus on the must-haves. These relaxed requirements helped focus on developing functional circuits rather than optimising them before I even knew if they worked.
+\nl
+In addition to changing system requirements, all of the mission requirements were removed from this version as the previous version required as aspects like specific pixel resolution are unnecessary for a prototype.

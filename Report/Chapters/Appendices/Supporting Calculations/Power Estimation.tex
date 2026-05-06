@@ -1,0 +1,37 @@
+If we have a series current-sense resistor of resistance R (\autoref{fig:power-draw-resistor}), the current flowing through the resistor is $I=V_d/R$, where $V_d$ is the voltage drop across the resistor. Multiplying $V_{IN}$ to both sides gives
+\begin{equation}
+    V_{IN}I = \frac{V_d V_{IN}}{R}
+    \label{eq:power-draw}
+\end{equation}
+Since $P=VI$, the power going into the circuit is $P_{IN} = \frac{V_d V_{IN}}{R}$.
+\begin{indentedfigure}
+    \includegraphics[width=0.5\linewidth]{Images/Appendices/Calculations/Power Estimate/PowerDrawResistor.png}
+    \caption{Resistor in series with a voltage source VIN with output voltage VOUT.}
+    \label{fig:power-draw-resistor}
+\end{indentedfigure}
+This estimation was tested on an LED circuit to gauge the accuracy of the process (\autoref{fig:power-draw-test}). Using \autoref{eq:power-draw}, I was able to successfully identify the power draw within 5\% of the approximate power (where the approximate power was the current and voltage drop measured from a multimeter).
+These promising results show that the resistor circuit, coupled with the STM Power Consumption Calculator, will provide a strong estimation of the camera's power consumption (although it should be noted that the camera's circuit is far more complex than a simple LED set-up, so it is not guaranteed the recorded value will be within 5\%).
+
+\begin{indentedfigure}
+    \centering
+    % First subfigure
+    \begin{subfigure}[b]{0.5\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/Appendices/Calculations/Power Estimate/Power Estimate Circuit.png}
+        \caption{Power estimation circuit.}
+        \label{fig:power-draw-circuit}
+    \end{subfigure}
+    
+    \vspace{0.5cm} % optional space between subfigures
+    
+    % Second subfigure
+    \begin{subfigure}[b]{1\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/Appendices/Calculations/Power Estimate/Estimate Data.png}
+        \caption{Results gathered from LED power estimation. Calculated power was within 5\% of approximate power.}
+        \label{fig:power-draw-data}
+    \end{subfigure}
+    
+    \caption{Overview of the LED power estimation: (a) the circuit used, (b) measured results.}
+    \label{fig:power-draw-test}
+\end{indentedfigure}

@@ -1,0 +1,16 @@
+The Local Power Supply (LPS) schematic was mostly copied from the MIRA220 reference schematic. The LDO components were updated to support active components, and the 1V8 power line was modified to be generated when then 3V3 line was present, since the MCU requires 1V8 to boot.
+Moreover, 
+Test points were added to the outputs of the LDOs as well as on the enable lines. Since each LDO uses the same package (SOT-25-5 / SMV), the schematic uses the 2V8 LDO as a placeholder.
+The selected LDOs were:
+\begin{itemize}
+    \item \href{https://au.mouser.com/ProductDetail/Toshiba/TCR2EF28LMCT?qs=cW4DzVrAanOy43sfBSrpyQ%3D%3D}{TCR2EF28,LM(CT}
+    \item \href{https://au.mouser.com/ProductDetail/Toshiba/TCR2EF135LMCT?qs=bZr6mbWTK5l0uINCghoB7g%3D%3D}{TCR2EF135,LM(CT}
+\end{itemize}
+I were able to meet the following requirements from the datasheet:
+\begin{itemize}
+    \item 3V3 input on $V_{IN}$ with a $0.1\mu\texttt{F}$ decoupling capacitor (pin 1)
+    \item $1\mu\texttt{F}$ ecoupling capacitor on the output (pin 5).
+\end{itemize}
+As mentioned in \autoref{sec:schematic-usbc}, the system will require 2500mW in the worst case scenario. This is mostly attributed to $\texttt{V}_{\texttt{DDCORE}}$, the most power-intensive domain (~2000mW). The internal SMPS is supplied by the 1V8 power domain, which corresponds to a current requirement of 1.11A for just the STM32's SMPS (rounded to 1.25A to account for other components).
+Fortunately, the other power domains operate below the chosen LDO's current limit of 200mA. However, I still need to accomodate for $\texttt{V}_{\texttt{DDCORE}}$.
+As a result, I selected the \href{https://au.mouser.com/ProductDetail/Texas-Instruments/TPS62061DSGR?qs=sGAEpiMZZMvAX9OfPh%252B2NTd%2Fl77i5i6T9vQ1%2FEkgUpA%3D}{TPS62061DSGR} as the buck converter to supply the 1V8 power domain. It can operate up to 1.6A output current at the required 1V8 domain.

@@ -1,0 +1,35 @@
+All pins should now be enabled and allocated. In the GPIO section, rename the pins to match the following labels:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Pin} & \textbf{Name} \\
+        \hline
+        PB3 & RESETBAR \\
+        PB4 & TRIGGER \\
+        PB6 & SHUTTER \\
+        PB14 & MCU\_LED\_1 \\
+        PB15 & MCU\_LED\_2 \\
+        PC0 & PWR\_STATE \\
+        PC1 & PWR\_ACTION \\
+        PC13 & SCROLL\_B \\
+        PD8 & READ\_LED\_1 \\
+        PD9 & READ\_LED\_2 \\
+        PD10 & WRITE\_LED\_1 \\
+        PD11 & WRITE\_LED\_2 \\
+        PD12 & DEBUG\_LED \\
+        PE2 & SCROLL\_A \\
+        PE13 & SENSOR\_LED\_2 \\
+        PE14 & SENSOR\_LED\_1 \\
+        PG15 & STANDBY \\
+        PH3-BOOT0 & BOOT0 \\
+        PH9 & PIN81 \\
+        PH10 & PIN84 \\
+        PH11 & PIN85 \\
+        PI3 & PIN97 \\
+        \hline
+    \end{tabular}
+    \caption{List of user pin labels for C2Sv0.1 STM32CubeIDE Project.}
+\end{table}
+
+Now we must ensure that the \verb|SCROLL_A| and \verb|SCROLL_B| pins (PC13 and PE2) are pulled up for the rotary encoder code to function.

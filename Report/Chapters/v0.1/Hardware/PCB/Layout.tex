@@ -1,0 +1,5 @@
+I based the processor board around the STM chip. After my mistakes from v0, I learnt that it's more important to place the most dense components (trace wise) in the centre over everything else. I placed the processor on a 45° angle so I could easily route all pins on the left and right side to the left and right sides of the PCB. Moreover, the decoupling capacitors and some resistors were also placed on angles, but this was purely to save space and let traces pass between them. The sensor board barely had any components, so I just placed the image sensor in the centre for simplicity and kept the PLL clock close to the IC.
+\nl
+I kept the USB-C, FPC and microSD connectors each on their own side of the board to avoid uneccesary trace overlap, and placed the QSPI chip close to the I/O pins to keep trace length short.
+\nl
+Lastly, I tried keeping all the decoupling capacitors as close to their ICs as possible. Some capacitors are a little further away than other since there just wasn't space directly next to the pin, but they're all within <5mm of where they need to be, so I doubt there will be any issues during testing.

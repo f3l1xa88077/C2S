@@ -1,0 +1,36 @@
+The selection was restricted to \href{https://www.renesas.com/en}{Renesas} SPI chips to maintain architectural consistency with previous PAST projects like FISHv1, C2Sv0.1, and OBC. The similar ecosystems make is significantly easier to develop the hardware and software. I used the \href{https://www.renesas.com/en/products/memory-logic/non-volatile-memory/spi-nor-flash/product-selector?field-memory-density=128%2C256&field-operating-voltage-range=2.7%2C3.6}{SPI NOR Flash product selector} to identify the chips that met the system requirements. It should be noted that although four results appear when accessing the product selector, the SF and QF components are identical.
+\nl
+There are several design criterion that will influence the memory selection, the least important being the cost and physical size of the chips as memory is typically not expensive nor large. Storage capacity and power consumption are the heavy hitters here. It's obviously a baseline requirement that the chip can hold a full frame, but the active and standby currents are actually the more important constraints. Since the memory is only awake during write cycles, the sleep-mode power draw is the real decider for the mission's power budget. Next, it is ideal that the memory can be recycled for the CubeSat version if it meets the operating temperature requirements of space. Lastly, minimising expected execute time for commands like reading and writing is paramount for reducing overall power consumption.
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+        \hline
+        \textbf{Criteria} & \textbf{Weight} & \textbf{AT25xF128} & \textbf{AT25xF256} \\
+        \hline
+        Cost & 1 & 4 & 4 \\
+        \hline
+        Size & 1 & 3 & 3 \\
+        \hline
+        Storage & 2 & 2 & 4 \\
+        \hline
+        Execute Time & 5 & 2 & 4 \\
+        \hline
+        Deep Power Down Current & 4 & 2 & 4 \\
+        \hline
+        Standby Current & 2 & 2 & 3 \\
+        \hline
+        Operating Current & 4 & 3 & 4 \\
+        \hline
+        Temperature Rating & 3 & 4 & 2 \\
+        \hline
+        \hline
+        \textbf{Total Score} &  & 57 & 79 \\
+        \hline
+    \end{tabular}
+    
+    \caption{C2Sv1 external memory trade study comparing the 128 and 256 Mbit versions of the AT25xF on a scale (1-5).}
+    \label{tab:v1-trade-memory}
+\end{indentedtable}
+
+In comparison to the alternative, the 256 Mbit chip is marginally better in almost every category. The main benefit is attributed to the lower current consumption and expected operating times, which means it should consume much less power. A concern with the selected memory option is that the operating temperature range does not reach the recommended 120°C threshold for space. Thermal testing will be required closer to the final flight model for validation.

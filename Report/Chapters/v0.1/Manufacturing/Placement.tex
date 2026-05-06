@@ -1,0 +1,55 @@
+It should be noted that 1x 0.1$\mu$F 0603 capacitor and 3x 10k$\Omega$ 0603 resistors were accidentally wasted whilst making the sensor board as I used the values from the PCB instead of the commented values on the schematic - generic components with commented values were used instead of the exact components.
+This was an oversight during the design stage and should be improved on in further versions to make the project more readable and host a lower risk of confusion or misinterpretation.
+\nl
+Additionally, I had misinterpreted the product page for the \href{https://au.mouser.com/ProductDetail/Vision-Components/MIPI-LHLD12?qs=Znm5pLBrcAJI2%252BzumslyRA%3D%3D&srsltid=AfmBOoqr8Mm1qwy0BK2N0wo_CrXxpCy7PLH3sw8MPNLAsFLDGxInytsz}{M12 lens mount}.
+I had thought that for \$22.51AUD, I would get the Factory Pack Quantity (20), but I had blanked that the factory pack quantity and order quantity are independent from each other. If more mounts are required in the future, they should be sourced from cheaper suppliers like AliExpress (since at the end of the day it's just plastic).
+
+
+\paragraph{Sensor Board}
+The sensor boards were partially manufactued on December 8th, 2025, directly after the Mouser components were received. All components except for the image sensor were successfully placed without any reflow issues.
+\nl
+Prior to placing the components, I called Peter Larkin from AT\&MWA to ensure that I was following the proper procedure to present them with usable PCBs. It was his recommendation to avoid putting solder paste on the BGA pads and continue normally with all other components.
+Fortunately, the sensor being the centre of the board made it easy to avoid the BGA pads. I applied solder paste to the edge of the spreader and completed motions from the the edge of the BGA pads to the edge of the PCB (opposed to one large side to side swipe). Repeating this four times for the four sides of the BGA allowed me to spread the paste evenly across all pads whilst avoiding the BGA.
+\nl
+The PCBs were placed on the hotplate (set at 240C) and were removed a couple seconds after the solder had reflowed. After completing a surface level examination of the boards, I noticed no immediate connection issues between components and pads.
+Unfortunately, I had realised I used the wrong LEDs on the sensor board (bicolour instead of single colour). However, since both have similar pad sizes this was not a large issue.
+\nl
+I then fit the M12 lens mount to one of the PCBs and screwed on the M12 Raspberry Pi Lens to ensure that it fit properly (see \autoref{fig:sensor-partially-made}). To fit the mount to the PCB, the screws must be fed from below the PCB instead of above and down through the mount.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Manufacturing/Sensor Partially Complete.png}
+        \caption{C2Sv0.1 sensor board after M12 mount and lens fitted.}
+        \label{fig:sensor-partially-made}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v0.1/Manufacturing/Sensor Partially Manufactured.png}
+        \caption{Second view or stage of the sensor board.}
+        \label{fig:sensor-second-image}
+    \end{subfigure}
+    \caption{Birds eye view of the C2Sv0.1 sensor board after intial manufacturing.}
+    \label{fig:sensor-side-by-side}
+\end{indentedfigure}
+
+
+\paragraph{Processor Board}\label{sec:place-proc}
+The first processor board was manufactued on December 9th, 2025, before the Tuesday project session. I placed all components except for the 3V3 LDO. I did try hand soldering the larger buttons onto the pads, however this did not work and I tore the pads off in the process of removing them.
+\nl
+I did encounter bridging issues with the U5G and FFC connector. I was no expert at removing bridges though, so it took a while, but they were eventually removed.
+I also had mistakenly used the wrong value capacitors, so a few 100nF 0603 capacitors were wasted.
+\nl
+Initial testing showed that there were no shorts before or after placement. Since I could not power the board by USBC, I connected the 3V3 output of my Arduino Uno to the 3V3 pin on the PCB as a temporary power source (an intentional design feature).
+Probing each voltage showed that the LDOs were operating and outputting expected voltages.
+\nl
+Since this board was incomplete, I decided that this will be the board used for vibration table testing.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{Images/v0.1/Manufacturing/Processor Manufactured.png}
+    \caption{First C2Sv0.1 processor board after manufacturing with the large buttons still included.}
+    \label{fig:processor-partially-made}
+\end{indentedfigure}

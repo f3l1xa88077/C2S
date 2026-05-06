@@ -1,0 +1,10 @@
+# Include Reseach Document (no images)
+/Research/*
+!/Research/C2S_Research.tex
+
+# Include Report Document (no images)
+/Report/*
+!/Report/Chapters/
+!/Report/Ref/
+!/Report/main.tex
+!/Report/style.sty

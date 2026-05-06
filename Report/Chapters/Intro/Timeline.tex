@@ -1,0 +1,32 @@
+The timeline provides a clear schedule to track milestone completion, outlining which project phase should be active each month and the expected duration of each phase to ensure steady progress.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|p{1.5cm}|p{3cm}|p{7.5cm}|p{2cm}|}
+\hline
+\textbf{Expected Date} & \textbf{Phase} & \textbf{Key Tasks} & \textbf{Relevant Objective ID} \\
+\hline
+Aug '25 & Project Planning \& Kick-off & Define system requirements; Select image sensor; Preliminary architecture planning; Initial parts research & 1 \\
+\hline
+Sep--Nov '25 & Schematic Design \& Component Selection & Design camera circuit schematic (breakout board); Select power regulation, oscillators, EEPROM, etc.; Create block diagrams & 1 \\
+\hline
+Dec '25 -- Jan '26 & PCB Layout \& Review & Begin PCB layout; Design for manufacturability (DFM); Include test points, headers, debugging pads. Begin investigating camera lens & 1 \\
+\hline
+Feb '26 & PCB Fabrication \& Assembly & Send board to fabricate and order components; Begin manufacturing & 1 \\
+\hline
+Mar '26 & Firmware: Sensor Bring-Up & I\textsuperscript{2}C/SPI communication tests; Basic sensor initialisation; Test register writes/reads & 2 \\
+\hline
+Apr--May '26 & Image Processing Pipeline & Capture raw Bayer data; Implement demosaicing, gain, white balance; Export images via USB/SD/Wi-Fi & 2, 3 \\
+\hline
+Jun--Jul '26 & Mechanical and PCB Prototype & Design simple 3D-printed housing; Consider heatsinking or fan-based thermal dissipation; Design lens mount if needed. Alongside this, developing the PCB layout for the prototype board (not a breakout). & 4 \\
+\hline
+Aug--Oct '26 & Functional Testing & Send board to fabricate and source any further components; Manufacture board once arrived. Test camera stability, power usage, image quality under varied lighting; Conduct thermal monitoring; Log long-duration operation & 5 \\
+\hline
+Nov '26 & Optimisation & Tune firmware; Improve image quality; Reduce power and memory usage; Prepare documentation & 2, 3 \\
+\hline
+Dec '26 & Final Integration \& Reporting & Compile results; Document all hardware/software; Prepare final presentation/demo/report &  \\
+\hline
+\end{tabular}
+\caption{Project schedule and key tasks}
+\label{tab:project_schedule}
+\end{table}

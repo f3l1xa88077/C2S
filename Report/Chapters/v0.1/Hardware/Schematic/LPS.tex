@@ -1,0 +1,37 @@
+According to the datasheets of the U5 and AR0141, the only power domains required are: 3V3, 2V8 and 1V8. The U5 only requires 3V3 and 1V8 to operate, so 2V8 was only required for the image sensor. According to Table 27 of the AR0141 datasheet (page 54), the maximum operating current consumption in parallel output is 160mA. Because of this, I was able to re-use the same LDO package from v0 for all the voltage supplies since their maximum current output is 200mA - TCR2EFxx,LM(CT).
+As per the datasheet, I included decoupling capacitors on VCC and VOUT.
+\nl
+\begin{indentedfigure}
+    \centering
+    \begin{tikzpicture}[
+            node distance=1.8cm and 2cm,
+            every node/.style={font=\small, align=center},
+            box/.style={draw, rounded corners, minimum width=2.5cm, minimum height=1cm, fill=gray!10},
+            arrow/.style={-latex, thick}
+        ]
+
+        % Nodes
+        \node[box] (vin) {3V3 Input};
+        \node[box, left=of vin] (2v8) {LDO \\ 2V8};
+        \node[box, right=of vin] (1v8) {LDO \\ 1V8};
+
+        % Arrows
+        \draw[arrow] (vin) -- (2v8);
+        \draw[arrow] (vin) -- (1v8);
+
+        % Labels
+        \node[below=0.3cm of vin] {MCU Core};
+        \node[below=0.3cm of 1v8] {Sensor Core};
+        \node[below=0.3cm of 2v8] {Sensor Analog \& I/O};
+
+    \end{tikzpicture}
+
+    \caption{Simple power tree diagram of C2Sv0.1}
+
+\end{indentedfigure}
+
+\paragraph{Remark}
+The \href{https://au.mouser.com/ProductDetail/Toshiba/TCR2EF33LMCT?qs=EPmvyOv1YlPmhsvS3PaWfg%3D%3D}{original 3V3 LDO} was only capable of supplying an output current of $200$mA. Early stages of testing showed that this current ceiling would not accomodate all subsystems operating at the same time. Unfortunately, I had designed the board using this 3V3 LDO which meant a replacement was required - the \href{https://au.mouser.com/ProductDetail/Torex-Semiconductor/XC6220B331MR-G?qs=AsjdqWjXhJ8lRh0WBUyqoQ%3D%3D}{XC6220D331MR-G}. This replacement was selected because it was the cheapest option that came in the same package with a potential output current output of 1 A.
+\nl
+To perform a transplant, the legs of the original LDO were cut off and lifted off with some heat. The new component was placed on using flux and wire-solder to fix the corner legs. Once secured, the other legs were soldered.
+The board was powered to test the connection and the STM booted with no issues.

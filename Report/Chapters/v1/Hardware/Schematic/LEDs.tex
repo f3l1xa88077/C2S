@@ -1,0 +1,18 @@
+To aid the debugging process, standard 0603 LEDs (HSMG-C190) were integrated to provide immediate visual status for critical system lines. These were selected to allow for rapid hardware-level troubleshooting of power, communication, and fault states without needing an external debugger.
+
+\begin{itemize}
+    \item \textbf{CS} \
+    Connected to the OBC connector CS pin. Provides a visual cue that the MCU is being correctly addressed by the OBC during SPI transactions.
+    \item \textbf{CD} \
+    Linked to the microSD slot to confirm the physical presence of a card, narrowing down data-logging issues.
+    \item \textbf{ERR} \
+    Indicates a system-level fault where the MCU has exited normal operations.
+    \item \textbf{MCU} \
+    Confirms that the MCU is active and executing code.
+    \item \textbf{+3V3} \
+    Provides hardware-level verification that the 3.3V logic rail is stable and powered.
+\end{itemize}
+
+By the Ohm's law and the current divider law (or simulating in \href{https://www.falstad.com/circuit/}{Falstad}), the current through the LEDs are approximately 2.6 mA, 2.6 mA, 0.85 mA, 0.85 mA, and 0.85 mA, respectively. 470 $\Omega$ resistors were selected since it's a common value for LEDs. I breadboarded the circuit using leaded-LEDs and found that LEDs with 0.8 mA of current are still visible (although this rough test was not directly comparable as the LEDs because of different packaging and sizes, the luminance levels should be roughly equivalent since they're both standard LEDs).
+\nl
+A jumper was placed in series with ground, so the LEDs can be disabled by removing the jumper for any testing that requires extensive power saving.

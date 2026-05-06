@@ -1,0 +1,38 @@
+System requirements are the necessary hardware and software specifications a device must meet to successfully complete a designed purpose. Requirements are a critical stage of the iterative engineering process, as it converts vague needs into clear and actionable blueprints that verify if the system is fulfilling its intended purpose. Refer to the \href{https://www.nasa.gov/reference/system-engineering-handbook-appendix/#hds-sidebar-nav-3}{NASA Systems Engineering Handbook, Appendix  C} for more information. The following requirements have been compiled:
+
+\begin{indentedtable}
+    \centering
+    \begin{tabular}{|l|p{12cm}|}
+        \hline
+        \textbf{No.} & \textbf{Description} \\
+        \hline
+        1 & The system shall transfer telemetry data to the flight computer via an SPI interface. \\
+        \hline
+        2 & The system shall record image data to non-volatile microSD storage. \\
+        \hline
+        3 & The system shall interface with a CIS module via DCMI. \\
+        \hline
+        4 & The board shall be able to accept and operate on 5V from an EPS connector. \\
+        \hline
+        5 & The standard operating voltage shall be 3V3. \\
+        \hline
+        6 & The system shall be able to characterise its power consumption with current sense amplifier through I2C. \\
+        \hline
+        7 & The system shall be programmable on SWD via an STLINK. \\
+        \hline
+        8 & The MCU shall completely store raw CIS data on an external memory chip via QSPI. \\
+        \hline
+        8 & The system shall be capable of operating within the temperature ranges of space. \\
+        \hline
+    \end{tabular}
+    \caption{C2Sv1 system requirements.}
+    \label{tab:v1-requirements}
+\end{indentedtable}
+
+In addition to the system requirements in \autoref{tab:v1-requirements}, goals for Version 1 are as follows:
+
+\begin{itemize}
+    \item The MCU should display the current status of systems through data logging and LEDs.
+    \item The system should operate on power supply from a USB-C connector.
+    \item The MCU, CIS, and external memory should be capable of entering and exiting deep sleep modes via commands from an external controller.
+\end{itemize}

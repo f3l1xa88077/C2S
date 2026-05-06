@@ -1,0 +1,20 @@
+The primary objective of this project is to design, develop, and demonstrate a standalone CubeSat-compatible camera system prototype. The prototype aims to meet key performance and integration requirements for future low Earth orbit missions, with a focus on modularity, efficiency, and feasibility within typical CubeSat constraints. The system must operate independently to capture, process, and store image data using commercially available components.
+
+The specific scope includes:
+\begin{itemize}
+    \item Acquisition of RAW image data from a CMOS image sensor with pixel binning capabilities to enhance low-light performance and reduce onboard processing demands.
+    \item Onboard conversion of RAW data to compressed format like JPEG or ICER to reduce image file size while preserving perceptual image quality, which is critical for bandwidth and storage-constrained space environments.
+    \item Integration of an microSD card breakout board to store processed images, enabling straightforward data access during ground testing and allowing for future adaptation to in-flight non-volatile memory solutions.
+    \item Implementation of a fixed focal length lens system to simplify the optical design, reduce mechanical complexity, and optimise image consistency. Lens and sensor pairing will be chosen based on trade-offs between resolution, field of view, and compatibility with CubeSat mechanical form factors.
+    \item System design intended for eventual microcontroller or FPGA control, with all power, data, and interface components selected to support future embedded control integration.
+\end{itemize}
+
+The following features are intentionally excluded from the current development phase to maintain focus and ensure feasibility within available time, budget, and resource constraints:
+\begin{itemize}
+    \item Wireless or wired image transmission beyond the camera and processing modules, such as radio downlink or USB tethering.
+    \item Integration with full CubeSat systems, including EPS, onboard computers, or attitude control systems.
+    \item Design or implementation of redundancy, fault tolerance, or radiation hardening beyond basic best practices for PCB layout and component selection.
+    \item In-orbit deployment or qualification testing (e.g., thermal vacuum, vibration).
+\end{itemize}
+
+This scope defines a foundational platform from which future iterations may extend toward full CubeSat integration and space qualification.

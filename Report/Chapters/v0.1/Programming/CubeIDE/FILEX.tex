@@ -1,0 +1,4 @@
+Under the Middleware and Software Packs tab, the FileX Core should be enabled, with the SD interface additionally enabled. Ensure that under 'SD Driver' that 'FX Driver Initializes the SD IP' is set to \verb|true|.
+Next, under 'NVIC Settings', enable the 'SDMMC1 Global Interrupt'.
+Then, navigate to the 'Project Manager' tab (at the top next to 'Clock Configuration'). Click on 'Advanced Settings' and uncheck the visibility of the \verb|MX_SDMMC1_SD_Init| function to make it not-static.
+This will allow the FileX driver to access the initialise function found in \verb|main.c|. If kept checked, the \verb|init| function will be kept static, and the compiler will not build the code as it will be unable to find the function.

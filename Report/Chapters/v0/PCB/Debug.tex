@@ -1,0 +1,5 @@
+The TX and RX pins are \textbf{not representative of UART}. Since there was not enough space to add "READ" and "WRITE", I opted for the shorthand notation used in UART. In this case, RX means the MCU is receiving / reading from the image sensor, and TX means the MCU is transmitting / writing to the uSD card.
+\nl
+The power LEDs (3V3, 2V8, 1V8, 1V2, 0V8) show whether each line is active or not.
+\nl
+The "AR0" and "STM" LEDs show whether each component is active or not. They are each connected to a GPIO pin on the STM32. They will turn on when the STM32 is operating and can utilise its GPIO pins, and whether it can talk to the image sensor.

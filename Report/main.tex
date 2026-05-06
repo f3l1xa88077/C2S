@@ -1,0 +1,211 @@
+\documentclass[10pt]{article}
+
+% -----------------------
+% Style Document
+% -----------------------
+\usepackage{style}
+
+% -----------------------
+% References
+% -----------------------
+
+\bibliography{Ref/ref}
+\bibliography{Ref/stm}
+\bibliography{Ref/misc}
+\bibliography{Ref/datasheets}
+
+% -----------------------
+% Page Layout
+% -----------------------
+\pagecolor{white}
+\color{black}
+\geometry{a4paper, margin=1in}
+
+% -----------------------
+% Hyperref Setup
+% -----------------------
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=cyan,
+    pdftitle={CubeSat Camera System - Project Report},
+    pdfpagemode=FullScreen,
+}
+
+% -----------------------
+% Header/Footer Setup
+% -----------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{Perth Aerospace}
+% \fancyhead[C]{\bfseries \textcolor{red}{CONFIDENTIAL DO NOT RELEASE}}
+\fancyhead[L]{\leftmark}
+\fancyfoot[C]{C2S - Project Report}
+\fancyfoot[L]{Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% -----------------------
+% Begin Document
+% -----------------------
+\begin{document}
+
+% -----------------------
+% COVER PAGE
+% -----------------------
+\pagecolor[HTML]{0025A9}
+\begin{titlepage}
+    \centering
+    \color{white}
+    \vspace*{2cm}
+    
+    \includegraphics[width=0.6\textwidth]{Images/Cover/Logo_White.png} % Replace with your team logo
+    
+    \vspace{2cm}
+    {\LARGE\bfseries Project Report\par}
+    \vspace{0.5cm}
+    {\Huge\bfseries CubeSat Camera System (C2S)\par}
+    % \vspace{1cm}
+    % {\Huge\bfseries \textcolor{red}{CONFIDENTIAL}\par}
+    % {\Huge\bfseries \textcolor{red}{DO NOT RELEASE}\par}
+    
+    \vspace{2cm}
+    {\large Abbott F. \quad | \quad Perth Aerospace Student Team\par}
+    \vspace{0.25cm}
+    {\large ADCS Department \quad | \quad CubeSat 1 Mission\par}
+
+    \vspace{3cm}
+    This document presents all the considerations and processes towards developing the CubeSat Camera System, an undergraduate student-based project as part of the Perth Aerospace Student Team.
+    The project served as a strong platform to develop sophisticated understandings of various camera subsystems and succeed in refining skills of the Curtin Graduate Capabilities Matrix.
+    
+    \vfill
+    {\large \today \par}
+\end{titlepage}
+
+% -----------------------
+% Preliminary and Reset Style
+% -----------------------
+\pagecolor{white}
+\color{black}
+\pagestyle{fancy}
+\pagenumbering{roman}
+
+% -----------------------
+% Version History
+% -----------------------
+\newpage
+\section*{Document Version History}
+\begin{table}[H]        
+    \centering
+    \begin{tabular}{|l|l|p{8cm}|}
+        \hline
+    \textbf{Doc. Version} & \textbf{Date} & \textbf{Change} \\
+    \hline
+    v0.0 & Aug. 25 & Added introduction \& project details \\
+    \hline
+    v0.1 & Aug. 25 & Added version 0 system planning \\
+    \hline
+    v0.2 & Sep. 25 & Version 0 content written \\
+    \hline
+    v1.0 & Dec. 25 & Report appearance reformatted and restructured content \\
+    \hline
+    v1.1 & Mar. 26 & Content for Version 0.1 written \\
+    \hline
+    v2.0 & Apr. 26 & Report restructured, with detail added to lacking sections \\
+    \hline
+    v2.1 & May. 26 & Version 1.0 schematic content written and heading 4 added \\
+    \hline
+    \end{tabular}
+\end{table}
+
+% -----------------------
+% TOC
+% -----------------------
+\newpage
+
+% 1. Ensure tocdepth is 4 (includes subsubsubsections)
+\setcounter{tocdepth}{4}
+
+% 2. Redefine how the standard paragraph entry is handled in the TOC
+\makeatletter
+% If the entry is a standard 'paragraph', do nothing (swallow it)
+% If it's your 'subsubsubsection', it will use the \l@subsubsubsection we defined
+\renewcommand{\l@paragraph}[2]{} 
+\makeatother
+
+\makeatletter
+% 1. Link the titlesec class to tocloft
+\newcommand{\l@subsubsubsection}{\@dottedtocline{4}{6em}{5em}}
+
+% 2. Create the missing lengths that tocloft doesn't make automatically
+\newlength{\cftsubsubsubsecindent}
+\newlength{\cftsubsubsubsecnumwidth}
+\makeatother
+
+% 3. Spacing between entries
+\setlength{\cftbeforesecskip}{2em}
+\setlength{\cftbeforesubsecskip}{0.5em}
+\setlength{\cftbeforesubsubsecskip}{0.25em}
+
+% 4. Set Indentations (Staircase effect)
+\setlength{\cftsecindent}{0em}          % Level 1
+\setlength{\cftsubsecindent}{2em}       % Level 2
+\setlength{\cftsubsubsecindent}{4em}    % Level 3
+\setlength{\cftsubsubsubsecindent}{6em} % Level 4 (Your new level)
+
+% 5. Set Number Widths
+\setlength{\cftsecnumwidth}{2em}
+\setlength{\cftsubsecnumwidth}{3em}
+\setlength{\cftsubsubsecnumwidth}{4em}
+\setlength{\cftsubsubsubsecnumwidth}{5em}
+
+\tableofcontents
+
+% -----------------------
+% Table of Abbreviations
+% -----------------------
+\newpage
+\section*{Table of Abbreviations}
+    \import{Chapters/Pre/}{Abbreviations.tex}
+
+% -----------------------
+% Summary
+% -----------------------
+\newpage
+\section*{Summary}
+    \import{Chapters/Pre/}{Summary.tex}
+
+% -----------------------
+% MAIN CONTENT
+% -----------------------
+\newpage
+\justifying
+\clearpage
+\pagenumbering{arabic}
+
+\section{Introduction}\label{sec:intro}
+    \import{Chapters/Intro/}{Intro.tex}
+
+\newpage \section{C2Sv0}\label{sec:c2sv0}
+    \import{Chapters/v0/}{v0.tex}
+
+\newpage \section{C2Sv0.1}\label{sec:c2sv0.1}
+    \import{Chapters/v0.1/}{v0.1.tex}
+
+\newpage \section{C2Sv1}\label{sec:c2sv1}
+    \import{Chapters/v1/}{v1.tex}
+
+
+% \clearpage
+% \addcontentsline{toc}{section}{References}
+% \printbibliography
+
+
+% \clearpage
+% \appendix
+% \section*{Appendices}\label{sec:appendices}
+% \addcontentsline{toc}{section}{Appendices}
+% \setcounter{section}{0}
+%     \import{Chapters/Appendices/}{Appendices.tex}
+
+\end{document}

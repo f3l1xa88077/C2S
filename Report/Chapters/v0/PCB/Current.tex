@@ -1,0 +1,27 @@
+Using the \href{https://saturnpcb.com/saturn-pcb-toolkit/}{Saturn PCB Toolkit}, I can estimate the current carrying capacity of the BGA traces with the following parameters:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+    \hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Unit} \\
+\hline
+Conductor Width & 4 & mil \\
+\hline
+Conductor Length & 50 & mm \\
+\hline
+PCB Thickness & 62 & mil \\
+\hline
+Plane Present & Yes & - \\
+\hline
+Distance to Plane & 10 & mil \\
+\hline
+\hline
+\textbf{Conductor Current} & 1.13 & A \\
+\hline
+\end{tabular}
+\caption{Current carrying capacity estimation of BGA traces in C2S Breakout Board.}
+\label{tab:current-carrying-capacity}
+\end{table}
+
+As per \autoref{tab:current-carrying-capacity}, the maximum current on a 4mil trace is ~1.1A, which is less than the typical current requirement. The current carrying capacity is not a concern for the STM32N6 since its power traces are 0.2mm, which can carry ~1.8A, equal to the maximum 1.8A drawn by the MCU.

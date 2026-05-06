@@ -1,0 +1,6 @@
+The microSD schematic was copied from v0. Unfortunately, the filter used in the original schematic sold out across most stores three days before v0.1 started, so, the component was removed from this schematic. Since the filter acted as EMI and ESD protection (as suggested in the N6 getting started guide to reduce noise and protect signal integrity) there may be slightly higher risks which can be mitigated be proper ground referencing. As a precaution, make sure not to prematurely remove the microSD whilst the board is powered just to mitigate any potential risks.
+\nl
+I followed \cite{usd-design-guidelines} and \cite{st-sdmmc-schematics-thread} for developing the schematic. 47k$\Omega$ pull up resistors were placed on the data and command lines, with another 10k$\Omega$ on CD. The absolute maximum ratings is dependent on the card itself, so I needed to make sure the selected microSD meets the condition requirements.
+
+\paragraph{Remark}
+As mentioned in this \href{https://youtu.be/aEwwQMdKd-c?t=246}{Phil's Lab video}, the external pull up resistors on the data and command lines could be replaced by the internal pull ups on the STM, but as Phil mentions, this design practice should not be employed on critical/important boards.

@@ -1,0 +1,11 @@
+\textit{This section contains information relevant to the literature review.}
+\nl
+There's a clear trade-off between performance and zoom. Consider a single pixel of size $d$ with a focal point located at a distance $f$ from the pixel. The angle formed between the pixel's centre and its top edge changes depending on the pixel's height. Now, imagine extending lines from the pixel's edges through the focal point out for several hundred kilometres. As the pixel size grows, the area it covers on the Earth's surface also expands. Therefore, to maintain a constant spatial resolution when increasing the pixel size, the focal length must be increased accordingly.
+\nl
+The obvious limitations to the our image are the file size and CubeSat size. I cannot be transmitting 2.2MP images down to Earth, so I must bin down or crop the image. If I bin down by $n$ times, then the pixel size and focal length increases by $n^2$. If I place a hard limit of 1MP on the pixel count, then I only need a focal length of $<$10mm.
+If the sensor is binned once (2.224MP$\rightarrow$0.5MP, 2.79$\mu$m$\rightarrow$11.16$\mu$m) to improve performance and reduce file size, the required focal length for the camera is: $f=hd/s$ where $d$ is the pixel size, $h$ is the orbital height and $s$ is the spatial resolution. I find that the expected focal length for a M12 lens would be 8.9mm for a spatial resolution of 500m at an altitude of 400km. This would capture an image 400km x 350km across. This fits within our (assumed) limits, however, I may adjust the scope towards the 750m spectral resolution range to comfortably sit within size contraints (depending on the results of testing).
+\begin{indentedfigure}
+    \includegraphics[width=0.5\linewidth]{Images/v0/Planning/camera-expected-resolution.png}
+    \caption{Expected image coverage and resolution for the MIRA220 sensor, binned once with a focal length of 8.9mm.}
+    \label{fig:expected-resolution}
+\end{indentedfigure}

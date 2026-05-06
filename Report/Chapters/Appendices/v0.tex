@@ -1,0 +1,98 @@
+%\subsection{Schematic Sheets}
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-toplevel.png}
+%     \caption{Top-Level schematic sheet from C2Sv0 Breakout Board Project. Only critical paths were included on the Top-Level schematic. Routes like general power and ground were not included.}
+%     \label{fig:schematic-toplevel}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-mcu.png}
+%     \caption{MCU schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-mcu}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-sensor.png}
+%     \caption{Sensor schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-sensor}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-clks.png}
+%     \caption{Clock/oscillator schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:hse-clk}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-sdcard.png}
+%     \caption{SD Card schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-sdcard}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-LDO.png}
+%     \caption{LDO schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-ldo}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-swd.png}
+%     \caption{SWD TAG schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-swd}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-usbc.png}
+%     \caption{USB-C Connector schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-usbc}
+% \end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=1\linewidth]{Images/v0/Schematic/Schematic-sequencer.png}
+%     \caption{Power Sequencer schematic sheet from C2Sv0 Breakout Board Project.}
+%     \label{fig:schematic-sequencer}
+% \end{indentedfigure}
+
+\subsection{PCB Layout}
+
+\begin{indentedfigure}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/PCB/fanout.png}
+        \caption{Fanout of AR0147 image sensor.}
+        \label{fig:fanout}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/PCB/dogbone.png}
+        \caption{Fanout of the STM32N6 MCU.}
+        \label{fig:dogbone}
+    \end{subfigure}
+    \caption{BGA fanout methods used in the C2S Breakout Board PCB.}
+    \label{fig:fanout-methods}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/PCB/mipi-trace.png}
+        \caption{Differential traces on the PCB.}
+        \label{fig:mipi-trace}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{Images/v0/PCB/mipi-length-match.png}
+        \caption{Signal lengths of each differential signal.}
+        \label{fig:length-match}
+    \end{subfigure}
+    \caption{MIPI CSI-2 differential pairs on the C2S Breakout Board.}
+    \label{fig:mipi-pcb}
+\end{indentedfigure}
+
+% \begin{indentedfigure}
+%     \includegraphics[width=0.6\linewidth]{Images/v0/PCB/debug-leds.png}
+%     \caption{Debug LEDs on C2S Breakout Board.}
+%     \label{fig:pcb-debug-leds}
+% \end{indentedfigure}

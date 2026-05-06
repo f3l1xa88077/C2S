@@ -1,0 +1,10 @@
+The \href{https://www.st.com/en/development-tools/st-link-v2.html#overview}{STLINK/V2} is an in-circuit debugger for ST processors. This module allows me to flash firmware and perform real-time debugging on the MCU. This specific STLINK was been selected because it was the same one I had at the time of development. While PAST currently uses the \href{https://www.st.com/en/development-tools/stlink-v3minie.html}{STLINK-V3}, an adaptor kit \href{https://rarecomponents.com/store/adapter-kit-for-stlink-v3-minie}{like this} can be used to make board compatible. Unlike Version 0 and 0.1, this board exclusively uses a header connector rather than the TAG connector. As mentioned in \autoref{sec:v0.1-tag-remark}, the TAG connector was never used because it was much easier using the STLINK/V2 directly with the header. Moreover, SWD is used over JTAG because it requiries fewer pins and is \href{https://www.reddit.com/r/ECE/comments/yygs1/jtag_vs_swd/#:~:text=I%20know%20that%20there's%20less,OP%20%E2%80%A2%2014y%20ago}{recommended by the community}.
+\nl
+The \href{https://www.st.com/resource/en/user_manual/um1075-stlinkv2-incircuit-debuggerprogrammer-for-stm8-and-stm32-stmicroelectronics.pdf}{STLINK/V2 manual} was used to develop the pinout for a SWD connection. Unlike the SWD connection in \autoref{sec:v0.1-other-remark}, the entire pinout has been followed, utilising SWDIO, SWCLK, TRACESWO, and NRST. Since the connector required a standard 10x2 2.54 mm header that would be added in by hand using the single row headers that PAST already had, a random component that met these components was selected from the PAST library for its symbol and footprint, the TSW-110-08-G-D.
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.4\textwidth]{Images/v1/Schematic/STLINK Pinout.png}
+    \caption{STLINK/V2 pinout.}
+    \label{fig:stlink-pinout}
+\end{indentedfigure}

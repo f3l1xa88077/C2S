@@ -1,0 +1,31 @@
+The image sensor was a very difficult category to save money on. Most sensors would cost upwards of \$50AUD for decent/quality sensors, dipping below that line whilst seeking for the same quality has its drawbacks. The most notable drawback was product availability - most that fit the requirements were either obsolete, or in its last-stock but required bulk purchases (e.g., the AR0134). The second drawback was the package. Image sensors are designed for compact systems, so finding sensors that had a BGA package within manufacturing capabilities was a challenge of its own. Sensors like the MIRA016 and AR0144 were both within our price range, but their BGA ball diameter and pitch made them unreasonable options. This left me with the \href{https://www.digikey.com.au/en/products/detail/onsemi/AR0141CS2M00SUEA0-DPBR/7221099}{AR0141CS2M00SUEA0-DPBR}. The AR0141 was only option I had found within the price range and package requirements with an available datasheet \textbf{at the time}. Although there were cheaper, colour image sensors like the \href{https://www.digikey.com.au/en/products/detail/onsemi/MT9M114EBLSTCZ-CR/5321744}{MT9M114EBLSTCZ-CR}, they were subject to the previously mentioned limitations. Despite the monochrome filter, I concluded that this would not be an issue since the only difference between a monochrome and colour CIS was the number of channels. Both colour and monochrome images undergo the exact same processing, so it served as a viable option for a prototype.
+\nl
+Since v0 and v0.1 used sensors from the same manufacturer, it was easy to develop the schematic, the only major difference between them was the DCMI (parallel) interface. I selected a CSI-2 compatible FPC connector (same connector used on FISHv1) because its impedance profile should have also be compatible with DCMI. Furthermore, to minimise the complexity of the board, I only kept the bare essentials on the schematic to minimise the size of the board and lowers production costs (as price scales quickly with an ENIG finish).
+\nl
+I had included three debug LEDs to verify that the image sensor was receiving the following signals: (1) reset, (2) take photo, and (3) stand-by.
+\nl
+To make the module vacuum-compatible, I replaced the electrolytic decoupling capacitors that were recommended with ceramic capacitors so I wouldn't encounter any issues during vacuum testing. After consulting with the community (see \href{https://www.reddit.com/r/PCB/comments/1orpjwe/comment/nnrqqf0/?context=1}{here}), I decided not to split the copper ground into AGND and DGND. I used pg. 59 of sensor datasheet for instructions of the startup sequence and included RC timers near the relevant startup pins. I chose to leave the flash pin as a NC since the camera didn't need to operate with a flash. Moreover, the HiSPi pins were left as NC since that interface was not used.
+\nl
+Unlike traditional DCMI naming conventions, the AR0141 used its own pin names:
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{AR0141 Pin} & \textbf{DCMI Name} \\
+        \hline
+        PIXCLK & DCMI\_PIXLCK \\
+        \hline
+        LINE\_VALID & DCMI\_HSYNC \\
+        \hline
+        FRAME\_VALID & DCMI\_VSYNC \\
+        \hline
+    \end{tabular}
+    \caption{AR0141 DCMI pin naming convention}
+\end{table}
+
+The camera interface had a configurable parallel data interface from 8 to 14 data lines, together with a pixel-clock line DCMI\_PIXCLK … DCMI\_PIXCLK and AHB clocks must respect the minimum ratio AHB/PIXCLK of 2.5. In other words: the AHB bus clock must be at least 2.5 times faster than the PIXCLK input to the DCMI \cite{ST_STM32F7_Peripheral_DCMI}.
+\nl
+The I2C lines had pull up resistors matched to the logic level of the sensor, and lastly, the decoupling capacitors for the power rails use the 0402 package instead of 0603 so they can fit inside the M12 mount.
+
+\paragraph{Remark}
+Unfortunately, the VDDIO pins were tied to 1V8 instead of 2V8, meaning the sensor's data output voltage was too low to register logic 1s on the STM. Future versions of this sensor should have all VDD pins tied to 1V8, and all VDDA and VDDIO tied to 2V8, with the I2C lines also pulled up to 2V8 instead of 1V8 (to match the I/O logic level). I had discovered this issue after I failed to communicate with the image sensor over I2C and retrieve temperature sensor values. I had tried hacking a spare-board to separate the pins from the 1V8 pour and connect them to the 2V8 pour, but it required too much precision, effort, and money to justify fixing. This meant the image sensor was inoperable. I am unsure if the schematic includes any further issues because debugging was not possible.

@@ -1,0 +1,8 @@
+Vias were a difficult aspect of the PCB. As discovered in \autoref{sec:c2sv0}, vias were one of the main culprits to the spike in production cost - the dimension requirements inside the BGA packages meant it was not possible to produce the board within the manufacturer's standard precision price range. As found in an early release of C2Sv0.1, the larger package sizes allowed for larger via dimensions, hence a significant reduction in production cost (approximately from \$150AUD to \$40AUD on the processor).
+The increased via since introduced some clearance issues that were discovered throughout the PCB development cycle, but this was not a major hurdle.
+\nl
+Transfer vias were included to maintain continuous return current paths and improve signal integrity \cite{EEVblogImportanceTransferVias}. One transfer via was shared between 1 or 2 through hole vias (with one or two cases sharing three). These were placed as close as reasonably possible to reduce the loop inductance without introducing voiding \cite{Peterson2022StitchingViasAltium}.
+\nl
+I did not add stitching or transfer vias on test points since those typically expose the copper on the same layer as the signal. Where test points have been used as through hole vias, transfer or stitching vias had been included.
+\nl
+On the sensor board, you may find that transfer vias have a trace connecting them to another standard via on the ground layer. This has no purpose since the ground pour will blanket the entire layer, it was included just to avoid net antennae violations from the DRC.

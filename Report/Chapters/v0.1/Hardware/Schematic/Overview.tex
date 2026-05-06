@@ -1,0 +1,24 @@
+This phase involved designing the camera circuit schematic using Altium Designer, laying the groundwork for subsequent PCB development and component selection. The schematic is discussed in nine sections:
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{MCU} \\
+    Containing all the processor and dependent circuits.
+    \item \textbf{Clocks} \\
+    The external TCXO clocks for the STM32u5Gxxx and the AR0141CS image sensor.
+    \item \textbf{microSD Card} \\
+    This hosted the microSD connector and its dependencies.
+    \item \textbf{LPS} \\
+    The Local Power Supplies (LPS) sub-sheet held all the LDO regulators.
+    \item \textbf{TAG Connector} \\
+    This was for the TAG connector. Keeping it on its own subsheet was easier since it cleaned up the processor subsheet.
+    \item \textbf{USB-C Connector} \\
+    The USB-C sub-sheet contained everything related to the main power supply (+3V3). It hosted the USB-C connector itself, as well as filtering circuits, a power switch, and the 3V3 LDO regulator.
+    \item \textbf{Memory} \\
+    Included the external QSPI memory chip and dependencies.
+    \item \textbf{Image Sensor} \\
+    The image sensor and its dependencies.
+    \item \textbf{Other} \\
+    This encompasses all other aspects of the hardware that are non-critical: LEDs, rotary encoder, audio buzzer, buttons, LCD, and Shield PCB.
+\end{enumerate}
+
+To meet budget limitations, the PCB needed to achieve low-precision standards (minimum trace/clearance of 4mil and 0.3mm/0.4mm via hole/diameter). I selected non-BGA components where available. Additionally, this version was completed before all components were stored on the PAST workspace library, so most components (those not found within the PAST component server or Manufacturer Search) were included in a local schematic and footprint library within the Altium project files.

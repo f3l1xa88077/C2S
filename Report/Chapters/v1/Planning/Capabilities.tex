@@ -1,0 +1,53 @@
+\subsubsubsection{Mechanical}
+According to the Mechanical Department, the current payload bay (as of March 2026) can house a full-width board (~87x87 mm) that is approximately 35 mm tall.
+Moreover, the camera can be mounted on an angle to minimise its height if the lens is too large.
+
+\subsubsubsection{Communications}
+As of March 2026, the Comms department estimates 7 to 18 minutes of contact with the CubeSat for a single ground station, averaged to 10 minutes, with two passes per day.
+They estimated a reliable download rate of 3 kb/s, with optimal speeds of 6 kb/s, and a potential maximum of 40 kb/s.
+Through a verbal agreement with Mission, we concluded that a three day window would be the longest time for transmitting a single image, with a single day window being an ideal time to transmit an image.
+Moreover, during this window, approximately 60\% of the data would be dedicated to the photo, where the other 40\% is for telemetry data.
+A breakdown of the estimated download sizes for a single ground station can be seen in \autoref{tab:v1-comms-reqs}.
+
+\begin{indentedfigure}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Rate} & \textbf{1 Day} & \textbf{3 Days} \\
+        \hline
+        3 kb/s & 270 kB & 810 KB \\
+        \hline
+        6 kb/s & 540 kB & 1.62 MB \\
+        \hline
+        40 kb/s & 3.6 MB & 10.8 MB \\
+        \hline
+    \end{tabular}
+    \caption{Estimated download sizes for a single ground station at 60\% usage}
+    \label{tab:v1-comms-reqs}
+\end{indentedfigure}
+
+While the final compression algorithm is pending, initial estimates using \cite{balalam_image_compression} and \cite{squoosh_editor} suggest a 10:1 JPEG compression ratio is achievable before significant artifacting occurs.
+Given the operational similarities between JPEG and ICER, this figure serves as a reliable baseline for the current design phase.
+Assuming the raw data is received in the YCbCr format at 12-bit resolution (see \autoref{sec:appendices} for more on YCbCr), the download sizes in \autoref{tab:v1-comms-reqs} can be converted into approximate CIS pixel counts.
+
+\begin{indentedfigure}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Rate} & \textbf{1 Day} & \textbf{3 Days} \\
+        \hline
+        3 kb/s & 1.8 MP & 5.4 MP \\
+        \hline
+        6 kb/s & 3.6 MP & 10.8 MP \\
+        \hline
+        40 kb/s & 24 MP & 72 MP \\
+        \hline
+    \end{tabular}
+    \caption{Approximate megapixel count for assumed Comms requirements}
+    \label{tab:v1-pixel-count}
+\end{indentedfigure}
+
+Based on these benchmarks, a CIS under 5 MP optimises the trade-off between visual fidelity and transmission overhead.
+This resolution supports QuadHD (2K) images with flexibility for 2x binning to HD.
+While higher data rates or multiple ground stations would allow for lower compression ratios, the pixel count remains viable under degraded conditions, capable of downlinking a 5 MP frame over 72 hours at a 3 kb/s baseline.
+This approach helps prioritise mission reliability over ideal-case performance.
