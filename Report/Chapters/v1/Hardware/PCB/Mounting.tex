@@ -1,8 +1,20 @@
-As outlined in \autoref{sec:v1-layout}, there was not enough space around the edge of the board to include all four mounting holes and external connectors so one of the mounting holes was excluded. According to Connor Major, the Mechanical 2IC at the time, three mounting holes were the minimum number to properly secure the board to a frame, so the design consideration was justified. Future version of the board, like the flight-model, will exclude the microSD module headers and use a fourth mounting hole. \href{https://my.altium.com/altium-designer/getting-started/creating-assembly-drawing-draftsman}{This Draftsman guide} was followed to populate \autoref{fig:v1-mounting}.
+As outlined in \autoref{sec:v1-layout}, there was not enough space around the edge of the board to include all four mounting holes and external connectors so one of the mounting holes was excluded. According to Connor Major, the Mechanical 2IC at the time, three mounting holes were the minimum number to properly secure the board to a frame, so the design consideration was justified. Future version of the board, like the flight-model, will exclude the microSD module headers and use a fourth mounting hole. \href{https://my.altium.com/altium-designer/getting-started/creating-assembly-drawing-draftsman}{This Draftsman guide} was followed to populate \autoref{fig:v1-mounting} and \autoref{fig:ov7670-mounting}.
+\nl
+The mounting pattern for the OV7670 Adaptor was difficult to develop as I could not find any documentation specifying the exact dimensions of the board.
+Instead, I estimated the board size and mounting pattern using vernier calipers.
+Although the measurements are not exact, they should be accurate to within a millimetre.
+
 
 \begin{indentedfigure}
     \centering
     \includegraphics[width=0.8\textwidth]{Images/v1/PCB/Mechanical_Drawing.pdf}
     \caption{C2Sv1.0 mechanical drawing.}
     \label{fig:v1-mounting}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Images/v1/PCB/Adaptor.pdf}
+    \caption{C2Sv1.0 OV7670 Adaptor mechanical drawing.}
+    \label{fig:ov7670-mounting}
 \end{indentedfigure}

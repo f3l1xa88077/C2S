@@ -1,1 +1,32 @@
-tbdddd
+Like version 0.1, it was important to promote good silk screen labelling.
+Components that belonged to the same circuit were all ground into boxes labelled e.g., "QSPI", "CAMERA", "LEDS", etc.
+Moreover, important components were individually labelled e.g., "+3V3" being the 3V3 LDO, "HSE", "LSE", etc.
+Just like the previous version, I included some fun comments like "EYES IN THE SKY" and "MASTER CONNECTION", but these would be covered up when the components were placed.
+\nl
+One aspect of the manufacturing process which I found difficult was knowing how to place the resistors and capacitors when they were closely spaced.
+On the previous version, I had removed the silk screen dividers on resistors and capacitors since I thought how the components would be placed was intuitive, unfortunately, on a few occasions I was caught out on this and accidentally oriented components the wrong way.
+I made sure to keep the resistor and capacitor dividers where applicable so myself, or anyone else, could not get confused by component orientation.
+\nl
+Connection orientation was also an important aspect to note on the silkscreen.
+Modules that had to be plugged in, like the camera module and microSD module, need to be inserted correctly to avoid any damage to the pins.
+For example, if the microSD module is placed in reverse, then it will short VDD and GND.
+In \autoref{fig:v1-silkscreen}, you can see that the correct insertion orientation is clearly noted, where an arrow points in the direction that the microSD module must point, and that the OV7670 adaptor must be inserted directly below the module.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/PCB/microSD Orientation.png}
+        \caption{C2Sv1.0 silk screen labelling.}
+        \label{fig:v1-silkscreen-orientation}
+    \end{subfigure}
+    \hspace{1cm}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/PCB/OV7670 Orientation.png}
+        \caption{C2Sv1.0 OV7670 Adaptor silk screen labelling.}
+        \label{fig:ov7670-silkscreen}
+    \end{subfigure}
+    \caption{Silk screen orientation notes.}
+    \label{fig:v1-silkscreen}
+\end{indentedfigure}
