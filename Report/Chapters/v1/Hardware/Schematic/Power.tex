@@ -10,7 +10,14 @@ Sinks a stable 5V from the EPS board, named +VEPS.
 A three pin header allows the power source to be selected by shorting the middle pin with either the USB or EPS voltage. The output is +VSEL (Voltage Selected).
 
 \paragraph{3. Power Measurement}
-+VSHUNT is passed through a shunt resistor, where the voltage difference is recorded by an INA219 CSA (as selected in \autoref{sec:v1-trade-csa}). The CSA outputs current, voltage, and power data via I2C. The terminating side of the shunt resistor has +VCSA.
++VSHUNT is passed through a shunt resistor, where the voltage difference is recorded by an INA219 CSA (as selected in \autoref{sec:v1-trade-csa}). 
+With both address pins of the INA219 tied to ground, its address becomes 0x40, which does not clash with the read and write addresses of the OV7670 (0x42 and 0x43).
+The CSA outputs current, voltage, and power data via I2C. The terminating side of the shunt resistor has +VCSA.
+The selected LDO has a maximum output current of 300 mA on 3V3 logic which sinks 200 mA at 5V.
+I selected the shunt resistor value according to the maximum voltage range (gain /8) of the INA219, this meant if less current was being drawn, the gain could be changed for increased accuracy i.e., worst case scenario the gain is /8 and I can characterise at max current draw, or during power-efficient modes where the current draw is low, I could change the range to $\pm$80 mV or $\pm$ 40 mV for better accuracy.
+To achieve a 320 mV swing at 200 mA, a 1.6 $\Omega$ shunt resistor, the \href{https://au.mouser.com/ProductDetail/Panasonic/ERJ-6DQF1R6V?qs=WO7YBshssFHHp%2FMEk%2F2ARA%3D%3D}{ERJ-6DQF1R6V} was selected.
+The 0805 package was selected to make the shunt more identifiable, although the 0603 package was perfectly fine to use.
+The shunt resistor will dissipate some power, 64 mW at its peak, but we know its resistance and the current going through, so we can subtract its dissipated power from the total power to identify how much power only the board is consuming.
 
 \paragraph{4. Filtering}
 +VCSA is then passed through a pi-filter (CLC network) to reject any high-frequency noise, with output +VFILT (Voltage Filtered). I chose capacitor values of $C_1=$100 nF and $C_2=$10 $\mu$F (\autoref{sec:clc-values}) to create a cut-off frequency $\approx$1 MHz.
