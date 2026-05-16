@@ -2,15 +2,21 @@ The reduced pin count of the STM32U575 and fewer subsystems meant that there wer
 As discussed in \autoref{sec:v1-coupling}, important traces where signal integrity was a priority like DCMI and QSPI were all routed first.
 When exiting closely spaced pins, like those on the FPC/FFC connector and STM32, the traces were spaced out to increase seperation distance and reduce coupling voltage when routing on the back layer.
 According to \href{https://www.reddit.com/r/embedded/comments/1ozbddc/for_dcmi_pcb_routing_using_ov2640_camera_on_stm32/}{this Reddit post}, the signal integrity of PCLK should be prioritised, so PCLK was routed first with no layer transitions.
-
+\nl
+According to \href{https://resources.pcb.cadence.com/blog/2024-impedance-matching-for-usb-interfaces-in-pcbs}{this article}, the differential characteristic impedance of the USB 2.0 and USB 3.x interface is 90$\Omega \pm$15\%.
+Using the Altium Designer impedance profile, a target impedance of 90$\Omega \pm$10\% was generated, and the \href{https://www.youtube.com/watch?v=C-BBZG2tuKA}{profile was attached to the differential pair}.
 usb data lines, talk about altium stackup impedance calculator, differential routing tool.
-
-Talk about DCMI and keeping them close together.
-
-transfer vias.
-
-why delay matching was not used on this board, why it wasn't used on the bridge. at what length mismatch would the delay be catastrophic, could this catastrophe be acheived with these boards not being delay matched?
-
-
-
-Although 90° are not always bad for signal integrity, as explained in \href{https://resources.altium.com/p/pcb-routing-angle-myths-45-degree-angle-versus-90-degree-angle}{tjis Altium article}, I took the precaution of two 45° angle corners.
+As this was the only differential pair, the rule was applied to all pairs. In future boards where several various pairs may be included, like CSI-2 and USB, the profiles should be attached according to the differential classes.
+Like mentioned, the COM port was additional scope so the apparent long and winding trace is a result of working around the board.
+\nl
+To keep the board organised, I tried collating the DCMI lines together and keeping them a consistent distance from each other, as mentioned in \autoref{sec:v1-coupling}.
+Where layer transitioning occured, I used transfer vias to reduce the reference plane distance.
+\nl
+Delay matching was not used on this board, as the maximum operating frequency is not high enough to cause skewing issues.
+Using \href{https://blindburiedcircuits.com/why-signal-propagation-delay-matters-in-pcb-design/}{150 ps/in} as a baseline and a maximum PCLK frequency of 64 MHz as mentioned in the STM32U575 datasheet Table 120, the length mismatch between the nets would need to be approximately 265 cm, which in just about every practical application PAST will be using, will never be reached, hence delay matching was not required on either PCB.
+Additionally, the length mismatch for QSPI, which operates at 133 MHz, would need to be approximately 125 cm, which like DCMI, should never be reached.
+If delay matching were ever a problem, then the operating frequency could be decreased, where halving the speed doubles the maximum possible length mismatch.
+\nl
+Although 90° are not always bad for signal integrity, as explained in \href{https://resources.altium.com/p/pcb-routing-angle-myths-45-degree-angle-versus-90-degree-angle}{this Altium article}, I took the precaution of two 45° angle corners.
+\nl
+Moreover, the solder mask expandion was reduced to 0.04 mm such that the solder mask bridge on STM32 and FFC/FPC connector pads could be at least 0.1mm to meet \href{https://jlcpcb.com/capabilities/pcb-capabilities}{JLC requirements}.

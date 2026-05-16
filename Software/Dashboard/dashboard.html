@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>C2Sv1.0 Camera Dashboard</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; display: flex; gap: 20px; background: #f4f6f9; }
+        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .control-panel { width: 400px; }
+        .display-panel { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .param-group { margin-bottom: 12px; display: flex; justify-content: space-between; }
+        input, select { width: 55%; padding: 4px; }
+        button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        #canvasView { border: 2px dashed #ccc; background: #000; max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+
+<!-- Left: Control Inputs -->
+<div class="panel control-panel">
+    <h2>Configurations</h2>
+    <button onclick="connectSerial()" style="background:#007bff; color:white;">Connect Port</button>
+    <hr>
+
+    <div class="param-group">
+        <label for="colour">Colour Mode:</label>
+        <select id="colour">
+            <option value="RGB">RGB</option>
+            <option value="Grayscale">Grayscale</option>
+        </select>
+    </div>
+
+    <div class="param-group">
+        <label for="sizeX">Image Size X (px):</label>
+        <input type="text" id="sizeX" value="640">
+    </div>
+    <div class="param-group">
+        <label for="sizeY">Image Size Y (px):</label>
+        <input type="text" id="sizeY" value="480">
+    </div>
+
+    <!-- SLIDER 1: JPEG Quality -->
+    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="jpegInput">JPEG Quality:</label>
+            <input type="number" id="jpegInput" min="1" max="100" value="100" 
+                oninput="document.getElementById('jpegSlider').value = this.value">
+        </div>
+        <input type="range" id="jpegSlider" min="1" max="100" value="100" 
+            oninput="document.getElementById('jpegInput').value = this.value" style="width: 100%;">
+    </div>
+
+    <!-- SLIDER 2: Sensor Gain -->
+    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="gainInput">Sensor Gain:</label>
+            <input type="number" id="gainInput" min="1" max="64" value="10" 
+                oninput="document.getElementById('gainSlider').value = this.value">
+        </div>
+        <input type="range" id="gainSlider" min="1" max="64" value="10" 
+            oninput="document.getElementById('gainInput').value = this.value" style="width: 100%;">
+    </div>
+
+    <!-- SLIDER 3: Exposure Time -->
+    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="exposureInput">Exposure (ms):</label>
+            <input type="number" id="exposureInput" min="10" max="250" value="50" 
+                oninput="document.getElementById('exposureSlider').value = this.value">
+        </div>
+        <input type="range" id="exposureSlider" min="10" max="250" value="50" 
+            oninput="document.getElementById('exposureInput').value = this.value" style="width: 100%;">
+    </div>
+
+    <hr>
+    <button onclick="sendParameters()" style="background:#28a745; color:white;">Send & Capture</button>
+</div>
+
+<!-- Right: Visual Feedback Frame -->
+<div class="panel display-panel">
+    <h2>C2Sv1.0 Camera Dashboard</h2>
+    <canvas id="canvasView" width="640" height="480"></canvas>
+    <p id="status">Status: Disconnected</p>
+</div>
+
+<script>
+    let port;
+    let reader;
+
+    async function connectSerial() {
+        try {
+            port = await navigator.serial.requestPort();
+            await port.open({ baudRate: 921600 }); 
+            document.getElementById('status').innerText = "Status: Connected. Listening for data...";
+            readLoop(); 
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    }
+
+    async function sendParameters() {
+        // Grab current configurations safely using unique IDs
+        const col = document.getElementById('colour').value;
+        const xSize = document.getElementById('sizeX').value;
+        const ySize = document.getElementById('sizeY').value;
+        const quality = document.getElementById('jpegSlider').value;
+        const gain = document.getElementById('gainSlider').value;
+        const exposure = document.getElementById('exposureSlider').value;
+
+        // Clean compilation string showing all your variables
+        const message = `{colour: "${col}"} {width: ${xSize}} {height: ${ySize}} {quality: ${quality}} {gain: ${gain}} {exposure: ${exposure}}\n`; 
+
+        console.log("Generated Message:", message);
+        
+        if (port && port.writable) {
+            const encoder = new TextEncoder();
+            const writer = port.writable.getWriter();
+            await writer.write(encoder.encode(message));
+            writer.releaseLock();
+        }
+    }
+
+    async function readLoop() {
+        let incomingBytes = [];
+        const canvas = document.getElementById('canvasView');
+        const ctx = canvas.getContext('2d');
+
+        while (port.readable) {
+            reader = port.readable.getReader();
+            try {
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    for (let i = 0; i < value.length; i++) {
+                        incomingBytes.push(value[i]);
+                    }
+
+                    if (incomingBytes.length >= 38400) { 
+                        let imgData = ctx.createImageData(160, 120);
+                        ctx.putImageData(imgData, 0, 0);
+                        incomingBytes = []; 
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                reader.releaseLock();
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
