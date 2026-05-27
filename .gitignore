@@ -11,7 +11,6 @@
 
 # Whitelist specific v0.1 STM32CubeIDE
 /Software/C2Sv0.1/*
-/Software/C2Sv0.1/.settings/
 !/Software/C2Sv0.1/.cproject
 !/Software/C2Sv0.1/.mxproject
 !/Software/C2Sv0.1/.project
