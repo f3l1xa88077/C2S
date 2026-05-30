@@ -8,6 +8,8 @@
 !/Report/Ref/
 !/Report/main.tex
 !/Report/style.sty
+!/Report/Images/
+/Report/Images/*
 
 # Whitelist specific v0.1 STM32CubeIDE
 /Software/C2Sv0.1/*
