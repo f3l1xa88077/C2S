@@ -59,6 +59,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define SHUTTER_Pin GPIO_PIN_13
 #define SHUTTER_GPIO_Port GPIOC
+#define SHUTTER_EXTI_IRQn EXTI13_IRQn
 #define LED_MCU_Pin GPIO_PIN_15
 #define LED_MCU_GPIO_Port GPIOC
 #define LED_ERR_Pin GPIO_PIN_1

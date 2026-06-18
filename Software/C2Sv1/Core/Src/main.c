@@ -118,10 +118,7 @@ int main(void)
   while (1)
   {
 
-	  // Toggle LEDs
-	  HAL_GPIO_TogglePin(LED_ERR_GPIO_Port, LED_ERR_Pin);
-	  HAL_GPIO_TogglePin(LED_MCU_GPIO_Port, LED_MCU_Pin);
-	  HAL_Delay(500);
+	  //
 
     /* USER CODE END WHILE */
 
@@ -548,6 +545,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI13_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI13_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
