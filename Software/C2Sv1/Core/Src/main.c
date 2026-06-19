@@ -59,6 +59,9 @@ QSPI_HandleTypeDef QSPI_Memory;
 QSPI_DataChunk_HandleTypeDef DataChunk;
 OSPI_RegularCmdTypeDef sCommand;
 
+// CSA
+INA219_HandleTypeDef INA219_Chip;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -117,8 +120,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // QSPI
-  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
-  QSPI_Read_JedecId(&QSPI_Memory);
+//  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
+//  QSPI_Read_JedecId(&QSPI_Memory);
+
+  // CSA
+  INA219_Setup(&INA219_Chip, &hi2c2);
 
   /* USER CODE END 2 */
 
@@ -127,7 +133,8 @@ int main(void)
   while (1)
   {
 
-	  //
+	  // CSA
+	  INA219_ReadAll(&INA219_Chip);
 
     /* USER CODE END WHILE */
 

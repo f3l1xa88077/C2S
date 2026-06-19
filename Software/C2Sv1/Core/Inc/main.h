@@ -33,6 +33,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include "AT25SF2561C.h"
+#include "ina219.h"
 
 /* USER CODE END Includes */
 
