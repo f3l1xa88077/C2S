@@ -32,6 +32,8 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+#include "AT25SF2561C.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

@@ -54,6 +54,11 @@ HCD_HandleTypeDef hhcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
+// QSPI
+QSPI_HandleTypeDef QSPI_Memory;
+QSPI_DataChunk_HandleTypeDef DataChunk;
+OSPI_RegularCmdTypeDef sCommand;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -110,6 +115,10 @@ int main(void)
   MX_SPI2_Init();
   MX_USB_OTG_FS_HCD_Init();
   /* USER CODE BEGIN 2 */
+
+  // QSPI
+  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
+  QSPI_Read_JedecId(&QSPI_Memory);
 
   /* USER CODE END 2 */
 
@@ -286,13 +295,13 @@ static void MX_OCTOSPI1_Init(void)
   hospi1.Init.FifoThreshold = 1;
   hospi1.Init.DualQuad = HAL_OSPI_DUALQUAD_DISABLE;
   hospi1.Init.MemoryType = HAL_OSPI_MEMTYPE_MICRON;
-  hospi1.Init.DeviceSize = 32;
-  hospi1.Init.ChipSelectHighTime = 1;
+  hospi1.Init.DeviceSize = 24;
+  hospi1.Init.ChipSelectHighTime = 3;
   hospi1.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
   hospi1.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
   hospi1.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
-  hospi1.Init.ClockPrescaler = 1;
-  hospi1.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_NONE;
+  hospi1.Init.ClockPrescaler = 5;
+  hospi1.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_HALFCYCLE;
   hospi1.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_DISABLE;
   hospi1.Init.ChipSelectBoundary = 0;
   hospi1.Init.DelayBlockBypass = HAL_OSPI_DELAY_BLOCK_BYPASSED;
