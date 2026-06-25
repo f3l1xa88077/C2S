@@ -33,7 +33,9 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include "AT25SF2561C.h"
-#include "ina219.h"
+#include <tinyusb/tusb.h>
+#include "interrupt.h"
+#include "microSD.h"
 
 /* USER CODE END Includes */
 
@@ -81,10 +83,13 @@ void Error_Handler(void);
 #define DCMI_MCLK_GPIO_Port GPIOA
 #define WAKEUP_Pin GPIO_PIN_9
 #define WAKEUP_GPIO_Port GPIOA
+#define WAKEUP_EXTI_IRQn EXTI9_IRQn
 #define SPI1_CS_Pin GPIO_PIN_10
 #define SPI1_CS_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
+
+void SystemClock_Config(void);
 
 /* USER CODE END Private defines */
 

@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include "app_threadx.h"
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -50,7 +51,7 @@ OSPI_HandleTypeDef hospi1;
 SPI_HandleTypeDef hspi1;
 SPI_HandleTypeDef hspi2;
 
-HCD_HandleTypeDef hhcd_USB_OTG_FS;
+PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
 
@@ -60,7 +61,14 @@ QSPI_DataChunk_HandleTypeDef DataChunk;
 OSPI_RegularCmdTypeDef sCommand;
 
 // CSA
-INA219_HandleTypeDef INA219_Chip;
+
+
+// TinyUSB
+uint32_t rxCnt = 0;
+uint8_t rxBuf[256];
+
+// Interrupt
+volatile bool c2s_should_sleep = 0;
 
 /* USER CODE END PV */
 
@@ -72,7 +80,7 @@ static void MX_I2C2_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_SPI2_Init(void);
-static void MX_USB_OTG_FS_HCD_Init(void);
+static void MX_USB_OTG_FS_PCD_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -100,6 +108,8 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  HAL_PWREx_EnableVddUSB(); // Isolate VDDUSB
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -116,25 +126,70 @@ int main(void)
   MX_OCTOSPI1_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
-  MX_USB_OTG_FS_HCD_Init();
+  MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
 
   // QSPI
 //  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
 //  QSPI_Read_JedecId(&QSPI_Memory);
 
+  // microSD
+//  uSD_Test();
+
   // CSA
-  INA219_Setup(&INA219_Chip, &hi2c2);
+
+
+  HAL_GPIO_WritePin(LED_MCU_GPIO_Port, LED_MCU_Pin, 1);
 
   /* USER CODE END 2 */
+
+  MX_ThreadX_Init();
+
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
 
-	  // CSA
-	  INA219_ReadAll(&INA219_Chip);
+	  // LED
+	  HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, 1);
+
+	  // TinyUSB
+	  if (OPERATIONAL_MODE == USB_MODE)
+	  {
+		  if (tud_cdc_n_available(0)) {
+			  rxCnt = tud_cdc_n_read(0, rxBuf, sizeof(rxBuf));
+
+			  for (int rxIdx = 0; rxIdx < rxCnt; rxIdx++) {
+				  tud_cdc_n_write_char(0, rxBuf[rxIdx]);
+			  }
+			  tud_cdc_n_write_flush(0);
+		  }
+
+		  tud_task(); // Periodically call
+	  }
+	  // SLEEP Mode
+	  else if (OPERATIONAL_MODE == SLAVE_MODE)
+	  {
+		  if (c2s_should_sleep)
+		  {
+			  // Clear flag
+			  c2s_should_sleep = 0;
+
+			  // Place into sleep
+			HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, 0);
+			HAL_SuspendTick();  // Disable SysTick to avoid unwanted wake-ups
+			HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+
+			// Wait for wake-up interrupt...
+
+			// Wake-up
+			HAL_ResumeTick();
+			HAL_GPIO_WritePin(LED_ERR_GPIO_Port, LED_ERR_Pin, 1);
+
+		  }
+	  }
 
     /* USER CODE END WHILE */
 
@@ -161,10 +216,21 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.MSIState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_0;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV2;
+  RCC_OscInitStruct.PLL.PLLM = 2;
+  RCC_OscInitStruct.PLL.PLLN = 12;
+  RCC_OscInitStruct.PLL.PLLP = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 3;
+  RCC_OscInitStruct.PLL.PLLR = 2;
+  RCC_OscInitStruct.PLL.PLLRGE = RCC_PLLVCIRANGE_1;
+  RCC_OscInitStruct.PLL.PLLFRACN = 0;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -450,7 +516,7 @@ static void MX_SPI2_Init(void)
   * @param None
   * @retval None
   */
-static void MX_USB_OTG_FS_HCD_Init(void)
+static void MX_USB_OTG_FS_PCD_Init(void)
 {
 
   /* USER CODE BEGIN USB_OTG_FS_Init 0 */
@@ -460,14 +526,18 @@ static void MX_USB_OTG_FS_HCD_Init(void)
   /* USER CODE BEGIN USB_OTG_FS_Init 1 */
 
   /* USER CODE END USB_OTG_FS_Init 1 */
-  hhcd_USB_OTG_FS.Instance = USB_OTG_FS;
-  hhcd_USB_OTG_FS.Init.Host_channels = 12;
-  hhcd_USB_OTG_FS.Init.speed = HCD_SPEED_FULL;
-  hhcd_USB_OTG_FS.Init.dma_enable = DISABLE;
-  hhcd_USB_OTG_FS.Init.phy_itface = HCD_PHY_EMBEDDED;
-  hhcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
-  hhcd_USB_OTG_FS.Init.vbus_sensing_enable = DISABLE;
-  if (HAL_HCD_Init(&hhcd_USB_OTG_FS) != HAL_OK)
+  hpcd_USB_OTG_FS.Instance = USB_OTG_FS;
+  hpcd_USB_OTG_FS.Init.dev_endpoints = 6;
+  hpcd_USB_OTG_FS.Init.speed = PCD_SPEED_FULL;
+  hpcd_USB_OTG_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
+  hpcd_USB_OTG_FS.Init.Sof_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.low_power_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.lpm_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.battery_charging_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.use_dedicated_ep1 = DISABLE;
+  hpcd_USB_OTG_FS.Init.vbus_sensing_enable = DISABLE;
+  hpcd_USB_OTG_FS.Init.dma_enable = DISABLE;
+  if (HAL_PCD_Init(&hpcd_USB_OTG_FS) != HAL_OK)
   {
     Error_Handler();
   }
@@ -552,7 +622,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : WAKEUP_Pin */
   GPIO_InitStruct.Pin = WAKEUP_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(WAKEUP_GPIO_Port, &GPIO_InitStruct);
 
@@ -563,6 +633,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(SPI1_CS_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI9_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI9_IRQn);
+
   HAL_NVIC_SetPriority(EXTI13_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI13_IRQn);
 
@@ -574,6 +647,28 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+/**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1)
+  {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

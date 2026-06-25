@@ -10,9 +10,15 @@
 
 #include "main.h"
 
+#define NO_MODE 0
+#define USB_MODE 1
+#define SLAVE_MODE 2
+
 // ------------ USER INPUT STARTS HERE ------------
 
 #define VERIFY_CFG 0
+
+#define OPERATIONAL_MODE USB_MODE
 
 // ------------ USER INPUT ENDS HERE ------------
 

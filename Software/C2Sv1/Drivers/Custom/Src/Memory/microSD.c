@@ -1,11 +1,14 @@
 /*
- * uSD.c
+ * microSD.c
  *
- *  Created on: Mar 8, 2026
+ *  Created on: Jun 25, 2026
  *      Author: felix
+ *
+ *     	Copied over from the v0.1 source code and adapted to work with SPI instead of SDMMC.
+ *
  */
 
-#include"uSD.h"
+#include"microSD.h"
 
 
 
