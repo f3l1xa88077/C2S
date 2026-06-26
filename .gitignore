@@ -1,70 +1,32 @@
-# Include Reseach Document (no images)
+# --- Research ---
 /Research/*
 !/Research/C2S_Research.tex
 
-# Include Report Document (no images)
+# --- Report ---
 /Report/*
-!/Report/Chapters/
-!/Report/Ref/
 !/Report/main.tex
 !/Report/style.sty
-!/Report/Images/
-/Report/Images/*
+!/Report/Chapters/
+!/Report/Ref/
 
-# Whitelist specific v0.1 STM32CubeIDE
-/Software/C2Sv0.1/*
-!/Software/C2Sv0.1/.cproject
-!/Software/C2Sv0.1/.mxproject
-!/Software/C2Sv0.1/.project
-!/Software/C2Sv0.1/C2Sv0.1.ioc
-!/Software/C2Sv0.1/STM32U5G9ZJTXQ_FLASH.ld
-!/Software/C2Sv0.1/STM32U5G9ZJTXQ_RAM.ld
+# --- Software (C2Sv0.1 and C2Sv1) ---
+/Software/C2Sv[01]*/
+!/Software/C2Sv[01]*/.cproject
+!/Software/C2Sv[01]*/.mxproject
+!/Software/C2Sv[01]*/.project
+!/Software/C2Sv[01]*/C2Sv[01]*.ioc
+!/Software/C2Sv[01]*/STM32U5G9ZJTXQ_*.ld
 
-!/Software/C2Sv0.1/Drivers/
-/Software/C2Sv0.1/Drivers/*
-!/Software/C2Sv0.1/Drivers/Custom/
-!/Software/C2Sv0.1/Drivers/Custom/*
+# Drivers
+!/Software/C2Sv[01]*/Drivers/
+/Software/C2Sv[01]*/Drivers/*
+!/Software/C2Sv[01]*/Drivers/Custom/
 
-!/Software/C2Sv0.1/Core/
-/Software/C2Sv0.1/Core/*
-!/Software/C2Sv0.1/Core/Inc/
-/Software/C2Sv0.1/Core/Inc/*
-!/Software/C2Sv0.1/Core/Inc/main.h
-!/Software/C2Sv0.1/Core/Src/
-/Software/C2Sv0.1/Core/Src/*
-!/Software/C2Sv0.1/Core/Src/main.c
-!/Software/C2Sv0.1/Core/Src/syscalls.c
-!/Software/C2Sv0.1/Core/Src/sysmem.c
-
-!/Software/C2Sv0.1/Core/Startup/
-/Software/C2Sv0.1/Core/Startup/*
-!/Software/C2Sv0.1/Core/Startup/startup_stm32u5g9zjtxq.[sS]
-
-# Whitelist specific v1 STM32CubeIDE
-/Software/C2Sv1/*
-!/Software/C2Sv1/.cproject
-!/Software/C2Sv1/.mxproject
-!/Software/C2Sv1/.project
-!/Software/C2Sv1/C2Sv1.ioc
-!/Software/C2Sv1/STM32U5G9ZJTXQ_FLASH.ld
-!/Software/C2Sv1/STM32U5G9ZJTXQ_RAM.ld
-
-!/Software/C2Sv1/Drivers/
-/Software/C2Sv1/Drivers/*
-!/Software/C2Sv1/Drivers/Custom/
-!/Software/C2Sv1/Drivers/Custom/*
-
-!/Software/C2Sv1/Core/
-/Software/C2Sv1/Core/*
-!/Software/C2Sv1/Core/Inc/
-/Software/C2Sv1/Core/Inc/*
-!/Software/C2Sv1/Core/Inc/main.h
-!/Software/C2Sv1/Core/Src/
-/Software/C2Sv1/Core/Src/*
-!/Software/C2Sv1/Core/Src/main.c
-!/Software/C2Sv1/Core/Src/syscalls.c
-!/Software/C2Sv1/Core/Src/sysmem.c
-
-!/Software/C2Sv1/Core/Startup/
-/Software/C2Sv1/Core/Startup/*
-!/Software/C2Sv1/Core/Startup/startup_stm32u5g9zjtxq.[sS]
+# Core / Source
+!/Software/C2Sv[01]*/Core/
+/Software/C2Sv[01]*/Core/*
+!/Software/C2Sv[01]*/Core/Inc/main.h
+!/Software/C2Sv[01]*/Core/Src/main.c
+!/Software/C2Sv[01]*/Core/Src/syscalls.c
+!/Software/C2Sv[01]*/Core/Src/sysmem.c
+!/Software/C2Sv[01]*/Core/Startup/startup_stm32u5g9zjtxq.[sS]
