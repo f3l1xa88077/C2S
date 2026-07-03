@@ -35,7 +35,6 @@ extern "C" {
 #include "AT25SF2561C.h"
 #include <tinyusb/tusb.h>
 #include "interrupt.h"
-#include "microSD.h"
 
 /* USER CODE END Includes */
 
@@ -77,8 +76,6 @@ void Error_Handler(void);
 #define DCMI_GPIO2_GPIO_Port GPIOC
 #define DCMI_GPIO3_Pin GPIO_PIN_0
 #define DCMI_GPIO3_GPIO_Port GPIOB
-#define SPI2_CS_Pin GPIO_PIN_12
-#define SPI2_CS_GPIO_Port GPIOB
 #define DCMI_MCLK_Pin GPIO_PIN_8
 #define DCMI_MCLK_GPIO_Port GPIOA
 #define WAKEUP_Pin GPIO_PIN_9

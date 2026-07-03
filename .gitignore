@@ -40,6 +40,7 @@
 !/Software/C2Sv*/Core/Src/main.c
 !/Software/C2Sv*/Core/Src/syscalls.c
 !/Software/C2Sv*/Core/Src/sysmem.c
+!/Software/C2Sv*/Core/Src/app_threadx.c
 
 !/Software/C2Sv*/Core/Startup/
 /Software/C2Sv*/Core/Startup/*
