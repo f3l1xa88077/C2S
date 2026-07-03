@@ -10,7 +10,11 @@
 !/Report/Ref/
 
 # --- Software (C2Sv0.1 and C2Sv1) ---
-/Software/C2Sv[01]*/
+
+!/Software/C2Sv[01]*/
+/Software/C2Sv[01]*/*
+
+# Configuration Files
 !/Software/C2Sv[01]*/.cproject
 !/Software/C2Sv[01]*/.mxproject
 !/Software/C2Sv[01]*/.project
@@ -21,12 +25,25 @@
 !/Software/C2Sv[01]*/Drivers/
 /Software/C2Sv[01]*/Drivers/*
 !/Software/C2Sv[01]*/Drivers/Custom/
+/Software/C2Sv[01]*/Drivers/Custom/*
 
 # Core / Source
-!/Software/C2Sv[01]*/Core/
-/Software/C2Sv[01]*/Core/*
-!/Software/C2Sv[01]*/Core/Inc/main.h
-!/Software/C2Sv[01]*/Core/Src/main.c
-!/Software/C2Sv[01]*/Core/Src/syscalls.c
-!/Software/C2Sv[01]*/Core/Src/sysmem.c
-!/Software/C2Sv[01]*/Core/Startup/startup_stm32u5g9zjtxq.[sS]
+!/Software/C2Sv*/Core/
+/Software/C2Sv*/Core/*
+
+!/Software/C2Sv*/Core/Inc/
+/Software/C2Sv*/Core/Inc/*
+!/Software/C2Sv*/Core/Inc/main.h
+
+!/Software/C2Sv*/Core/Src/
+/Software/C2Sv*/Core/Src/*
+!/Software/C2Sv*/Core/Src/main.c
+!/Software/C2Sv*/Core/Src/syscalls.c
+!/Software/C2Sv*/Core/Src/sysmem.c
+
+!/Software/C2Sv*/Core/Startup/
+/Software/C2Sv*/Core/Startup/*
+!/Software/C2Sv*/Core/Startup/startup_stm32u5g9zjtxq.[sS]
+
+# FileX Custom SPI Driver (Exclusive to C2Sv1)
+!/Software/C2Sv1*/FileX/
