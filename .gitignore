@@ -10,7 +10,7 @@
 !/Report/Ref/
 
 # --- Software (C2Sv0.1 and C2Sv1) ---
-/Software/C2Sv[01]*/
+/Software/C2Sv[01]*/*
 !/Software/C2Sv[01]*/.cproject
 !/Software/C2Sv[01]*/.mxproject
 !/Software/C2Sv[01]*/.project
