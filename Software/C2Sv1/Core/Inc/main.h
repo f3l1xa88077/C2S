@@ -35,7 +35,7 @@ extern "C" {
 #include "AT25SF2561C.h"
 #include <tinyusb/tusb.h>
 #include "interrupt.h"
-#include "linked_list.h"
+//#include "linked_list.h"
 
 /* USER CODE END Includes */
 

@@ -47,7 +47,8 @@
 DCACHE_HandleTypeDef hdcache1;
 
 DCMI_HandleTypeDef hdcmi;
-
+DMA_NodeTypeDef Node_GPDMA1_Channel0;
+DMA_QListTypeDef List_GPDMA1_Channel0;
 DMA_HandleTypeDef handle_GPDMA1_Channel0;
 
 I2C_HandleTypeDef hi2c2;
@@ -80,7 +81,7 @@ volatile bool c2s_should_sleep = 0;
 // Force the buffer into SRAM4 where caching won't hide the DMA writes
 ALIGN_32BYTES(uint32_t pBuffer[MAX_PICTURE_BUFF]) __attribute__((section(".sram3")));
 uint32_t atat[3];
-extern DMA_QListTypeDef DCMIQueue;
+//extern DMA_QListTypeDef DCMIQueue;
 
 /* USER CODE END PV */
 
@@ -143,9 +144,9 @@ int main(void)
   MX_DCACHE1_Init();
   /* USER CODE BEGIN 2 */
 
-  MX_DCMIQueue_Config();
-  HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
-  __HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
+//  MX_DCMIQueue_Config();
+//  HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
+//  __HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
 
   // QSPI
 //  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
@@ -347,20 +348,6 @@ static void MX_GPDMA1_Init(void)
   /* USER CODE BEGIN GPDMA1_Init 1 */
 
   /* USER CODE END GPDMA1_Init 1 */
-  handle_GPDMA1_Channel0.Instance = GPDMA1_Channel0;
-  handle_GPDMA1_Channel0.InitLinkedList.Priority = DMA_HIGH_PRIORITY;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkStepMode = DMA_LSM_FULL_EXECUTION;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT1;
-  handle_GPDMA1_Channel0.InitLinkedList.TransferEventMode = DMA_TCEM_LAST_LL_ITEM_TRANSFER;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkedListMode = DMA_LINKEDLIST_CIRCULAR;
-  if (HAL_DMAEx_List_Init(&handle_GPDMA1_Channel0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel0, DMA_CHANNEL_NPRIV) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN GPDMA1_Init 2 */
 
   /* USER CODE END GPDMA1_Init 2 */
