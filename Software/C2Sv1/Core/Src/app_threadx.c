@@ -136,6 +136,8 @@ void MX_ThreadX_Init(void)
 
 /* USER CODE BEGIN 1 */
 
+extern uint32_t *atat;
+
 void INA219_ThreadEntry()
 {
 	// Setup
@@ -158,9 +160,13 @@ void INA219_ThreadEntry()
 			snprintf(tmp, sizeof(tmp), "%d\n", INA219_Chip.shunt_voltage);
 
 			// Send each character to buffer
-			for (int i=0; i<strlen(tmp); i++)
+//			for (int i=0; i<strlen(tmp); i++)
+//			{
+//				tud_cdc_n_write_char(0, tmp[i]);
+//			}
+			for (int i=0; i<2; i++)
 			{
-				tud_cdc_n_write_char(0, tmp[i]);
+				tud_cdc_n_write_char(0, atat[i]);
 			}
 			// Send buffer
 			tud_cdc_n_write_flush(0);

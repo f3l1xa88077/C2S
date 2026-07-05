@@ -16,7 +16,7 @@
 
 // ------------ USER INPUT STARTS HERE ------------
 
-#define VERIFY_CFG 				0
+#define VERIFY_CFG 				0					// (0) Don't; (1) Do
 
 #define OPERATIONAL_MODE 		USB_MODE
 
@@ -30,10 +30,11 @@
 #define INA219_GAIN 			8 					// The dividing factor for the gain. Either 1, 2, 4, or 8.
 #define INA219_ADDRESS 			0b1000000 			// A0 = GND, A1 = GND
 
-// SPI2 PM for Custom SD Library
-//extern SPI_HandleTypeDef hspi2;
-//#define SD_CS_Pin 				SD_CS_Pin
-#define SD_CS_PORT 				SD_CS_GPIO_Port
-//#define SD_SPI_HANDLE 			hspi2
+// DCMI
+#define DCMI_PWRDWN_Pin			DCMI_GPIO0_Pin
+#define DCMI_PWRDWN_GPIO_Port	DCMI_GPIO0_GPIO_Port
+
+#define DCMI_RESET_Pin			DCMI_GPIO2_Pin
+#define DCMI_RESET_GPIO_Port	DCMI_GPIO2_GPIO_Port
 
 #endif /* CUSTOM_INC_CONFIG_H_ */
