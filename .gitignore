@@ -25,7 +25,7 @@
 !/Software/C2Sv[01]*/Drivers/
 /Software/C2Sv[01]*/Drivers/*
 !/Software/C2Sv[01]*/Drivers/Custom/
-/Software/C2Sv[01]*/Drivers/Custom/*
+!/Software/C2Sv[01]*/Drivers/Custom/*/
 
 # Core / Source
 !/Software/C2Sv*/Core/
