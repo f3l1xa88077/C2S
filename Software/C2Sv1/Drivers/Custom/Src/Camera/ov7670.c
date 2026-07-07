@@ -138,12 +138,14 @@ static RET ov7670_read(uint8_t regAddr, uint8_t *data)
 void ov7670_testpattern(DCMI_HandleTypeDef *hdcmi)
 {
 	// Setup
-	ov7670_write(0x40, 0xD0);
-	ov7670_write(0x12, 0x12);
-	ov7670_write(0x15, 0x00);
+//	ov7670_write(0x40, 0xD0);
+//	ov7670_write(0x12, 0x12);
+//	ov7670_write(0x15, 0x00);
+//
+//	// Change SCALING Registers
+//	ov7670_write(0x70, 0xF5); // scaling_xsc
+//	ov7670_write(0x71, 0xEF); // scaling_ysc
 
-	// Change SCALING Registers
-	ov7670_write(0x70, 0xF5); // scaling_xsc
-	ov7670_write(0x71, 0xEF); // scaling_ysc
+	ov7670_write(0x42, 0x08);
 
 }
