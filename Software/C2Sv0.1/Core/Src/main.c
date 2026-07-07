@@ -21,6 +21,7 @@
 #include "jpeg_utils_conf.h"
 #include "app_filex.h"
 #include "jpeg_codec.h"
+#include "test_image.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -95,7 +96,6 @@ OSPI_RegularCmdTypeDef sCommand;
 // Image Sensor
 uint16_t sensor_temp = 0;
 
-static uint8_t gray[128*128];;
 static uint8_t jpeg_out[20000];
 uint32_t jpeg_size = 20000;
 
@@ -179,13 +179,8 @@ int main(void)
 
   // Initialise subsystems
 
-	  // Image Sensor
-	  for (int y=0; y<128;y++) {
-		  for (int x=0;x<128;x++){
-			  gray[y*128+x] = (x % 32 < 16) ? 50: 200;
-		  }
-	  }
-	  JPEG_Encode_Gray(&hjpeg, gray, 128, 128, 70, jpeg_out, sizeof(jpeg_out), &jpeg_size);
+// Image Sensor
+	  JPEG_Encode_Gray(&hjpeg, test_image, 128, 128, 70, jpeg_out, sizeof(jpeg_out), &jpeg_size);
 	  uSD_Init();
 	  SD_Stream_Data("test.jpg", jpeg_out, jpeg_size, 1);
 //	  AR_Init_Temperature(&hi2c1);
