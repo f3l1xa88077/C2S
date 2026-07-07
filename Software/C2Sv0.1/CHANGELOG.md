@@ -1,0 +1,24 @@
+## Finalise v0.1 JPEG Encoding
+
+### Added
+- `jpeg_codec.c/.h` — grayscale JPEG encoder wrapping the STM32U5G9 hardware
+  codec: configures the codec (size/quality/grayscale), tiles the raster image
+  into 8x8 MCU blocks, runs a blocking encode, reports the compressed length,
+  and guards both HAL calls.
+- Copied in `jpeg_utils.c/.h` + `jpeg_utils_conf.h` (for the future RGB path).
+- Pre-captured 128x128 grayscale test image into a `const` header to be used as encoder input.
+
+### Changed
+- `main.c` now calls `JPEG_Encode_Gray(...)` in place of the inline `HAL_JPEG_*`
+  test; the SD write uses the returned `jpeg_size`.
+- Replaced the synthetic stripe pattern with the pre-captured test image.
+
+### Fixed
+- `.gitignore` bug: the version directory's contents are now excluded
+  (`/*`) with Core `Inc`/`Src`/`Startup` re-includes, so `Drivers/Custom` and Core
+  sources are actually tracked instead of ignored.
+
+### Notes
+- Not yet hardware-verified. 
+- No camera to encoding pipeline set up yet, only uses a pre-generated test image.
+
