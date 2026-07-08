@@ -16,6 +16,7 @@
 !/Software/C2Sv[01]*/.project
 !/Software/C2Sv[01]*/C2Sv[01]*.ioc
 !/Software/C2Sv[01]*/STM32U5G9ZJTXQ_*.ld
+!/Software/C2Sv[01]*/*.md
 
 # Drivers
 !/Software/C2Sv[01]*/Drivers/
