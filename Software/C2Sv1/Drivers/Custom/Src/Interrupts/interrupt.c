@@ -12,6 +12,12 @@
 extern volatile bool c2s_should_sleep;
 static volatile uint32_t last_button_time = 0;
 
+// External Camera Variables
+extern uint8_t FrameProcessed;
+extern uint32_t pBuffer[];
+extern DCMI_HandleTypeDef hdcmi;
+
+
 /**
  * @brief GPIO EXTI rising edge callback.
  *
@@ -27,12 +33,14 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
     {
         uint32_t now = HAL_GetTick();
 
-        // Software debounce check
+        // Software de-bounce check
         if ((now - last_button_time) >= 200)
         {
-        	last_button_time = now;
-        	// Interrupt Code...
-        	c2s_should_sleep = 1;
+        	if (!FrameProcessed)
+        	{
+        		// Open DMA and listen for image
+        		//HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); // Cast pBuffer to obtain address
+        	}
 
         }
     }

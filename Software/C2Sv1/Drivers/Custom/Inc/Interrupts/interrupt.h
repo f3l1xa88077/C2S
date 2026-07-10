@@ -10,5 +10,6 @@
 
 #include "main.h"
 #include <stdint.h>
+#include "ov7670.h"
 
 #endif /* CUSTOM_INC_INTERRUPT_H_ */

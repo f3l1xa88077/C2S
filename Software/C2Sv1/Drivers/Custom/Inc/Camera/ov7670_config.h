@@ -5,20 +5,23 @@
  *      Author: take-iwiw
  */
 
-#ifndef OV7670_OV7670REG_H_
-#define OV7670_OV7670REG_H_
+#ifndef OV7670_CONFIG_H_
+#define OV7670_CONFIG_H_
+
+#include <stdint.h>
+#include "ov7670.h"
 
 #define REG_BATT 0xFF
 
 
 const uint8_t OV7670_reg[][2] = {
   /* Color mode related */
-  {0x12, 0x14},   // QVGA, RGB
-  {0x8C, 0x00},   // RGB444 Disable
-  {0x40, 0x10 + 0xc0},   // RGB565, 00 - FF
-  {0x3A, 0x04 + 8},   // UYVY (why?)
-  {0x3D, 0x80 + 0x00},   // gamma enable, UV auto adjust, UYVY
-  {0xB0, 0x84}, // important
+  {OV7670_COM7_ADDRESS, OV7670_COM7_RESET_VALUE},   	// QVGA, RGB
+  {OV7670_RGB444_ADDRESS, 0X00},   						// RGB444 Disable
+  {OV7670_COM15_ADDRESS, 0xD0},   						// RGB565, 00 - FF
+  {OV7670_TSLB_ADDRESS, 0x04},   						// UYVY (bits 1&2 reserved 01)
+  {OV7670_COM13_ADDRESS, 0x0C},   						// gamma enable, UV auto adjust, UYVY
+  {OV7670_RSVD_B0_ADDRESS, OV7670_RSVD_B0_RESET_VALUE}, // DO NOT CLEAR (library mentions it is important, no reason)
 
   /* clock related */
   {0x0C, 0x04},  // DCW enable
@@ -31,10 +34,11 @@ const uint8_t OV7670_reg[][2] = {
   /* windowing (empirically decided...) */
   {0x17, 0x13},   // HSTART
   {0x18, 0x01},   // HSTOP
-  {0x32, 0x92},   // HREF
+  {0x32, 0xB6},   // HREF
   {0x19, 0x03},   // VSTART =  14 ( = 3 * 4 + 2)
   {0x1a, 0x7b},   // VSTOP  = 494 ( = 123 * 4 + 2)
   {0x03, 0x0a},   // VREF (VSTART_LOW = 2, VSTOP_LOW = 2)
+  {0x0D, 0x00}, // Full window
 
   /* color matrix coefficient */
 #if 0
@@ -115,4 +119,4 @@ const uint8_t OV7670_reg[][2] = {
 };
 
 
-#endif /* OV7670_OV7670REG_H_ */
+#endif /* OV7670_CONFIG_H_ */

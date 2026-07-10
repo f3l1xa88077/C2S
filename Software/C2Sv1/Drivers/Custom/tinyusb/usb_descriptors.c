@@ -180,7 +180,7 @@ static char const *string_desc_arr[] = {
   "PAST",                     // 1: Manufacturer
   "C2Sv1.0",              // 2: Product
   NULL,                          // 3: Serials will use unique ID if possible
-  "TinyUSB CDC",                 // 4: CDC Interface
+  "C2Sv1.0",                 // 4: CDC Interface
 };
 
 static uint16_t _desc_str[32 + 1];

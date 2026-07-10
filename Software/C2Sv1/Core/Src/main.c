@@ -23,9 +23,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "ov7670.h"
-#include "linked_list.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,22 +63,12 @@ QSPI_HandleTypeDef QSPI_Memory;
 QSPI_DataChunk_HandleTypeDef DataChunk;
 OSPI_RegularCmdTypeDef sCommand;
 
-// CSA
-
-
-// TinyUSB
-uint32_t rxCnt = 0;
-uint8_t rxBuf[256];
-
 // Interrupt
 volatile bool c2s_should_sleep = 0;
 
-#define MAX_PICTURE_BUFF     (320 * 240 * 2 / 4) // 320 * 240 pixels. 2 pixels per word. 4 Bytes per word.
-// Force the buffer into SRAM4 where caching won't hide the DMA writes
-ALIGN_32BYTES(uint32_t pBuffer[MAX_PICTURE_BUFF])__attribute__((section(".sram3")));
-//uint32_t pBuffer[MAX_PICTURE_BUFF];
-uint32_t atat[3];
-extern DMA_QListTypeDef DCMIQueue;
+// Camera
+ALIGN_32BYTES(uint32_t pBuffer[MAX_PICTURE_BUFF]);//__attribute__((section(".sram3"))); 	// Force the buffer into SRAM3
+volatile uint8_t FrameProcessed = 0;													// Image captured to RAM (1); not (0)
 
 /* USER CODE END PV */
 
@@ -122,8 +109,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-  HAL_PWREx_EnableVddUSB(); // Isolate VDDUSB
-
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -143,44 +128,6 @@ int main(void)
   MX_SPI1_Init();
   MX_DCACHE1_Init();
   /* USER CODE BEGIN 2 */
-
-  MX_DCMIQueue_Config();
-  HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
-  __HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
-
-  // QSPI
-//  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
-//  QSPI_Read_JedecId(&QSPI_Memory);
-
-  memset(pBuffer, 0xAA, sizeof(pBuffer)); // Fill with 0xAA pattern
-
-	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET); //Camera PWDN to GND
-	ov7670_init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);
-	ov7670_config(OV7670_MODE_QVGA_RGB565);
-	HAL_Delay(50); // Allow clock generator stability
-
-	//ov7670_stopCap();
-
-	//ov7670_startCap(OV7670_CAP_SINGLE_FRAME, (uint32_t)pBuffer);
-	ov7670_testpattern(&hdcmi);
-	HAL_StatusTypeDef a = HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); // Cast pBuffer to obtain address
-
-	//ov7670_startCap(OV7670_CAP_SINGLE_FRAME, (uint32_t)pBuffer);
-
-	HAL_Delay(3000);
-
-	// Should have image captured by this point
-
-	HAL_DCACHE_InvalidateByAddr(&hdcache1, pBuffer, sizeof(pBuffer));
-	atat[0] = pBuffer[0];
-//	atat[1] = pBuffer[4];
-//	atat[2] = pBuffer[8];
-
-	uint32_t * aaa = (uint32_t *)(0x4202c028);
-	uint32_t bbb = *aaa;
-
-
-  HAL_GPIO_WritePin(LED_MCU_GPIO_Port, LED_MCU_Pin, 1);
 
   /* USER CODE END 2 */
 
@@ -218,18 +165,16 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE
-                              |RCC_OSCILLATORTYPE_MSI;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_MSI;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
-  RCC_OscInitStruct.LSEState = RCC_LSE_BYPASS;
   RCC_OscInitStruct.MSIState = RCC_MSI_ON;
   RCC_OscInitStruct.MSICalibrationValue = RCC_MSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.MSIClockRange = RCC_MSIRANGE_0;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_MSI;
-  RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV4;
-  RCC_OscInitStruct.PLL.PLLM = 3;
-  RCC_OscInitStruct.PLL.PLLN = 9;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMBOOST = RCC_PLLMBOOST_DIV2;
+  RCC_OscInitStruct.PLL.PLLM = 2;
+  RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 3;
   RCC_OscInitStruct.PLL.PLLR = 1;
@@ -256,14 +201,13 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  /** Enable MSI Auto calibration
-  */
-  HAL_RCCEx_EnableMSIPLLModeSelection(RCC_MSISPLL_MODE_SEL);
-  HAL_RCCEx_EnableMSIPLLMode();
-
   /** MCO configuration
   */
   HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1);
+
+  /** Enables the Clock Security System
+  */
+  HAL_RCC_EnableCSS();
 }
 
 /**

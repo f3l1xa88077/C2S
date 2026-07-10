@@ -8,14 +8,15 @@
 #include <stdio.h>
 #include "main.h"
 #include "stm32u5xx_hal.h"
-#include "common.h"
 #include "ov7670.h"
-#include "ov7670Config.h"
-#include "ov7670Reg.h"
+#include "ov7670_config.h"
 
 /*** Internal Const Values, Macros ***/
 #define OV7670_QVGA_WIDTH  320
 #define OV7670_QVGA_HEIGHT 240
+
+/*** External Variables ***/
+extern uint8_t FrameProcessed;
 
 /*** Internal Static Variables ***/
 static DCMI_HandleTypeDef *sp_hdcmi;
@@ -60,7 +61,7 @@ RET ov7670_init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C
 
 RET ov7670_config(uint32_t mode)
 {
-  ov7670_stopCap();
+  //ov7670_stopCap();
   ov7670_write(0x12, 0x80);  // RESET
   HAL_Delay(200);
   for(int i = 0; OV7670_reg[i][0] != REG_BATT; i++) {
@@ -106,6 +107,9 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 
   s_currentV++;
   s_currentH = 0;
+
+  // Update snapshot variable
+  FrameProcessed = 1;
 }
 
 void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
@@ -138,14 +142,24 @@ static RET ov7670_read(uint8_t regAddr, uint8_t *data)
 void ov7670_testpattern(DCMI_HandleTypeDef *hdcmi)
 {
 	// Setup
-//	ov7670_write(0x40, 0xD0);
-//	ov7670_write(0x12, 0x12);
-//	ov7670_write(0x15, 0x00);
+//	ov7670_write(0x12, 0x15);
 //
 //	// Change SCALING Registers
-//	ov7670_write(0x70, 0xF5); // scaling_xsc
-//	ov7670_write(0x71, 0xEF); // scaling_ysc
+//	//ov7670_write(0x70, 0xF5); // scaling_xsc
+//	ov7670_write(0x71, 0xB5); // scaling_ysc
 
-	ov7670_write(0x42, 0x08);
+	//ov7670_write(0x42, 0x08);
+
+	//ov7670_write(0x12, 0x80); //Software reset, YUV
+
+	ov7670_write(0x1E, 0x31);  //Flip image vertically
+	ov7670_write(0x13, 0x81); //Auto gain enable, White balance enable, Auto exposure enable
+	ov7670_write(0x3f, 0x01 ); //Edge enhancement factor
+
+	ov7670_write(0x70, 0x3A); // Enable pattern
+	ov7670_write(0x71, 0x35 | 0x80); // Enable pattern
+
+	ov7670_write(0x3A, 0x1D); // Fixed MANU, MANV
+	ov7670_write(0x3D, 0x88 | 0x40); // UV saturation
 
 }
