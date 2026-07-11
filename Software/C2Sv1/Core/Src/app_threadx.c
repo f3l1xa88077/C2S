@@ -205,25 +205,26 @@ void Cam_ThreadEntry()
 	extern uint32_t pBuffer[MAX_PICTURE_BUFF]; 			// Image Data
 	extern uint8_t FrameProcessed;						// Image Captured?
 	extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
-	extern DCACHE_HandleTypeDef hdcache1;
+	//extern DCACHE_HandleTypeDef hdcache1;
 	extern DCMI_HandleTypeDef hdcmi;
 	extern I2C_HandleTypeDef hi2c2;
-	extern DMA_QListTypeDef DCMIQueue;
+	//extern DMA_QListTypeDef DCMIQueue;
 
 	// Set unused picture area to white
-	memset(pBuffer, 0xFF, sizeof(pBuffer));
+	//memset(pBuffer, 0xFF, sizeof(pBuffer));
 
 	// GPDMA Linked List Setup
-	MX_DCMIQueue_Config();
-	HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
-	__HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
+	//MX_DCMIQueue_Config();
+	//HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
+	//__HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
 
 	// OV7670 Configuration
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET); 	// Camera PWDN to GND (Enable Camera)
 	ov7670_init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);						// Basic interface test
 	ov7670_config(OV7670_MODE_QVGA_RGB565);										// Register configuration
-	tx_thread_sleep((100 * TX_TIMER_TICKS_PER_SECOND) / 1000);					// Allow clock generator stability
+	tx_thread_sleep((300 * TX_TIMER_TICKS_PER_SECOND) / 1000);					// 300 ms setting time specified by datasheet (Table 4)
 	//ov7670_testpattern(&hdcmi);
+	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);	// Disable Camera
 
 	while(1)
 	{
@@ -242,15 +243,19 @@ void Cam_ThreadEntry()
 					if ((char)buf[0] == 'S')
 					{
 						// Open DMA and listen for image
-						HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); // Cast pBuffer to obtain address
+						HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);				// Enable Camera
+						tx_thread_sleep((300 * TX_TIMER_TICKS_PER_SECOND) / 1000);								// 300 ms setting time specified by datasheet (Table 4)
 
-						while (hdcmi.State != HAL_DCMI_STATE_READY)
-						{
-						    tx_thread_sleep(50);
-						}
+						HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); 	// Cast pBuffer to obtain address
 
-						HAL_GPIO_TogglePin(LED_ERR_GPIO_Port, LED_ERR_Pin);
-						FrameProcessed = 1;
+//						while (hdcmi.State != HAL_DCMI_STATE_READY)
+//						{
+//						    tx_thread_sleep(5);
+//						}
+
+
+						//HAL_GPIO_TogglePin(LED_ERR_GPIO_Port, LED_ERR_Pin);
+						//FrameProcessed = 1;
 					}
 
 				}
@@ -258,10 +263,13 @@ void Cam_ThreadEntry()
 		}
 		if (FrameProcessed)
 		{
+			HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);				// Disable Camera
 		    // 1. Double check that HTerm is actually connected and pulling lines!
 		    if (tud_cdc_n_connected(0))
 		    {
-		        HAL_DCACHE_InvalidateByAddr(&hdcache1, pBuffer, sizeof(pBuffer));
+
+
+		        //HAL_DCACHE_InvalidateByAddr(&hdcache1, pBuffer, sizeof(pBuffer));
 
 		        uint8_t *byteStream = (uint8_t *)pBuffer;
 		        uint32_t totalBytes = MAX_PICTURE_BUFF * 4;

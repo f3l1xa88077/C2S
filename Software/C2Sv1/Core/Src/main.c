@@ -42,10 +42,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-DCACHE_HandleTypeDef hdcache1;
-
 DCMI_HandleTypeDef hdcmi;
-
+DMA_NodeTypeDef Node_GPDMA1_Channel0;
+DMA_QListTypeDef List_GPDMA1_Channel0;
 DMA_HandleTypeDef handle_GPDMA1_Channel0;
 
 I2C_HandleTypeDef hi2c2;
@@ -81,7 +80,6 @@ static void MX_I2C2_Init(void);
 static void MX_OCTOSPI1_Init(void);
 static void MX_USB_OTG_FS_PCD_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_DCACHE1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -126,7 +124,6 @@ int main(void)
   MX_OCTOSPI1_Init();
   MX_USB_OTG_FS_PCD_Init();
   MX_SPI1_Init();
-  MX_DCACHE1_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -211,33 +208,6 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief DCACHE1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_DCACHE1_Init(void)
-{
-
-  /* USER CODE BEGIN DCACHE1_Init 0 */
-
-  /* USER CODE END DCACHE1_Init 0 */
-
-  /* USER CODE BEGIN DCACHE1_Init 1 */
-
-  /* USER CODE END DCACHE1_Init 1 */
-  hdcache1.Instance = DCACHE1;
-  hdcache1.Init.ReadBurstType = DCACHE_READ_BURST_WRAP;
-  if (HAL_DCACHE_Init(&hdcache1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN DCACHE1_Init 2 */
-
-  /* USER CODE END DCACHE1_Init 2 */
-
-}
-
-/**
   * @brief DCMI Initialization Function
   * @param None
   * @retval None
@@ -296,20 +266,6 @@ static void MX_GPDMA1_Init(void)
   /* USER CODE BEGIN GPDMA1_Init 1 */
 
   /* USER CODE END GPDMA1_Init 1 */
-  handle_GPDMA1_Channel0.Instance = GPDMA1_Channel0;
-  handle_GPDMA1_Channel0.InitLinkedList.Priority = DMA_HIGH_PRIORITY;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkStepMode = DMA_LSM_FULL_EXECUTION;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkAllocatedPort = DMA_LINK_ALLOCATED_PORT1;
-  handle_GPDMA1_Channel0.InitLinkedList.TransferEventMode = DMA_TCEM_LAST_LL_ITEM_TRANSFER;
-  handle_GPDMA1_Channel0.InitLinkedList.LinkedListMode = DMA_LINKEDLIST_NORMAL;
-  if (HAL_DMAEx_List_Init(&handle_GPDMA1_Channel0) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_DMA_ConfigChannelAttributes(&handle_GPDMA1_Channel0, DMA_CHANNEL_PRIV) != HAL_OK)
-  {
-    Error_Handler();
-  }
   /* USER CODE BEGIN GPDMA1_Init 2 */
 
   /* USER CODE END GPDMA1_Init 2 */

@@ -64,8 +64,8 @@ RET ov7670_config(uint32_t mode)
   //ov7670_stopCap();
   ov7670_write(0x12, 0x80);  // RESET
   HAL_Delay(200);
-  for(int i = 0; OV7670_reg[i][0] != REG_BATT; i++) {
-    ov7670_write(OV7670_reg[i][0], OV7670_reg[i][1]);
+  for(int i = 0; OV7670_Config[i][0] != REG_BATT; i++) {
+    ov7670_write(OV7670_Config[i][0], OV7670_Config[i][1]);
     HAL_Delay(1);
   }
   return RET_OK;
@@ -95,7 +95,7 @@ RET ov7670_stopCap()
   return RET_OK;
 }
 
-void ov7670_registerCallback(void (*cbHsync)(uint32_t h), void (*cbVsync)(uint32_t v))
+void OV7670_ConfigisterCallback(void (*cbHsync)(uint32_t h), void (*cbVsync)(uint32_t v))
 {
   s_cbHsync = cbHsync;
   s_cbVsync = cbVsync;

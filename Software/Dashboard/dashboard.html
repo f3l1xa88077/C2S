@@ -121,6 +121,7 @@
     async function sendParameters() {
         const message = 'S';
         console.log("Generated Message:", message);
+        document.getElementById('status').innerText = "Status: Command Sent.";
         
         if (port && port.writable) {
             const encoder = new TextEncoder();
@@ -151,6 +152,8 @@
                 while (keepReading) {
                     const { value, done } = await reader.read();
                     if (done) break;
+
+                    document.getElementById('status').innerText = "Status: Receiving...";
                     
                     for (let i = 0; i < value.length; i++) {
                         // Handle split 16-bit pixel bytes across packet boundaries
@@ -182,6 +185,7 @@
                         // If a frame completes, reset pointer for next snapshot
                         if (currentByteIndex >= expectedBytes) {
                             currentByteIndex = 0;
+                            document.getElementById('status').innerText = "Status: Received.";
                         }
                     }
 
