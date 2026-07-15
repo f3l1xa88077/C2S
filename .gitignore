@@ -34,6 +34,8 @@
 !/Software/C2Sv*/Core/Inc/
 /Software/C2Sv*/Core/Inc/*
 !/Software/C2Sv*/Core/Inc/main.h
+!/Software/C2Sv*/Core/Inc/app_threadx.h
+!/Software/C2Sv*/Core/Inc/stm32u5xx_it.h
 
 !/Software/C2Sv*/Core/Src/
 /Software/C2Sv*/Core/Src/*
@@ -41,6 +43,7 @@
 !/Software/C2Sv*/Core/Src/syscalls.c
 !/Software/C2Sv*/Core/Src/sysmem.c
 !/Software/C2Sv*/Core/Src/app_threadx.c
+!/Software/C2Sv*/Core/Src/stm32u5xx_it.c
 
 !/Software/C2Sv*/Core/Startup/
 /Software/C2Sv*/Core/Startup/*

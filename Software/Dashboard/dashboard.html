@@ -83,9 +83,14 @@
 </div>
 
 <script>
+
     let port;
     let reader;
     let keepReading = true;
+
+    // Track stream position globally so sendParameters() can reset them
+    let currentByteIndex = 0;
+    let oddByte = null;
 
     async function connectSerial() {
         try {
@@ -109,7 +114,7 @@
             keepReading = false;
             
             if (reader) {
-                await reader.cancel(); // Forces readLoop internal stream loop to unblock instantly
+                await reader.cancel(); 
             }
             
             document.getElementById('status').innerText = "Status: Disconnected.";
@@ -122,6 +127,10 @@
         const message = 'S';
         console.log("Generated Message:", message);
         document.getElementById('status').innerText = "Status: Command Sent.";
+        
+        // Reset pixel indices immediately when a new capture is ordered
+        currentByteIndex = 0;
+        oddByte = null;
         
         if (port && port.writable) {
             const encoder = new TextEncoder();
@@ -139,11 +148,9 @@
         const height = 240;
         const expectedBytes = width * height * 2; 
 
-        // Create a single persistent image data template and byte cache
+        // Create a single persistent image data template
         let imgData = ctx.createImageData(width, height);
         let data = imgData.data;
-        let currentByteIndex = 0;
-        let oddByte = null;
 
         while (port && port.readable && keepReading) {
             reader = port.readable.getReader();
@@ -207,6 +214,7 @@
             reader = null;
         }
     }
+
 </script>
 
 </body>
