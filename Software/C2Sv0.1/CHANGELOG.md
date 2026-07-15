@@ -1,3 +1,18 @@
+# Changelog
+
+## Fix JPEG encoded-length reporting
+
+### Fixed
+- `JPEG_Encode_Gray` reported `*out_len` from `hjpeg->OutDataLength` — the output
+  buffer *capacity* (~20000), not the real compressed size, so SD files were
+  written padded to the full buffer. The true length is now accumulated from
+  `HAL_JPEG_DataReadyCallback` into a file-scope counter (reset before each
+  encode) and returned via `*out_len`.
+- `main.c`: `JEPG_OUT_CAP` → `JPEG_OUT_CAP` macro typo.
+
+### Notes
+- Verified on hardware
+
 ## Finalise v0.1 JPEG Encoding
 
 ### Added

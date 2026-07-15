@@ -96,8 +96,10 @@ OSPI_RegularCmdTypeDef sCommand;
 // Image Sensor
 uint16_t sensor_temp = 0;
 
-static uint8_t jpeg_out[20000];
-uint32_t jpeg_size = 20000;
+#define JPEG_OUT_CAP 20000
+uint32_t jpeg_size = 0;
+static uint8_t jpeg_out[JPEG_OUT_CAP];;
+
 
 /* USER CODE END PV */
 
@@ -180,7 +182,7 @@ int main(void)
   // Initialise subsystems
 
 // Image Sensor
-	  JPEG_Encode_Gray(&hjpeg, test_image, 128, 128, 70, jpeg_out, sizeof(jpeg_out), &jpeg_size);
+	  JPEG_Encode_Gray(&hjpeg, test_image, 128, 128, 20, jpeg_out, sizeof(jpeg_out), &jpeg_size);
 	  uSD_Init();
 	  SD_Stream_Data("test.jpg", jpeg_out, jpeg_size, 1);
 //	  AR_Init_Temperature(&hi2c1);

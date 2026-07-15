@@ -7,13 +7,24 @@
  */
 #include "jpeg_codec.h"
 
-HAL_StatusTypeDef JPEG_Encode_Gray(JPEG_HandleTypeDef *hjpeg, 
-    const uint8_t *img, 
-    uint16_t w, 
-    uint16_t h, 
-    uint8_t quality, 
-    uint8_t *out, 
-    uint32_t out_cap, 
+// running total of encoded JPEG bytes (shared with the callback below)
+static uint32_t s_jpeg_out_len;
+
+// codec calls this each time output is ready
+void HAL_JPEG_DataReadyCallback(JPEG_HandleTypeDef *hjpeg, uint8_t *pDataOut, uint32_t OutDataLength)
+{
+    (void)hjpeg; //unused
+    (void)pDataOut; //unused
+    s_jpeg_out_len += OutDataLength; 
+}
+
+HAL_StatusTypeDef JPEG_Encode_Gray(JPEG_HandleTypeDef *hjpeg,
+    const uint8_t *img,
+    uint16_t w,
+    uint16_t h,
+    uint8_t quality,
+    uint8_t *out,
+    uint32_t out_cap,
     uint32_t *out_len
 )
 {
@@ -31,8 +42,10 @@ HAL_StatusTypeDef JPEG_Encode_Gray(JPEG_HandleTypeDef *hjpeg,
         return status;
     }
 
+    s_jpeg_out_len = 0; // reset output length counter for callback
+
     // Holds grayscale image in MCU order (8x8 blocks)
-    static uint8_t mcu_buf[128*128]; 
+    static uint8_t mcu_buf[128*128];
     uint32_t idx = 0;
     for (uint16_t by = 0; by < h/8; by++) {
         for (uint16_t bx = 0; bx < w/8; bx++) {
@@ -53,6 +66,6 @@ HAL_StatusTypeDef JPEG_Encode_Gray(JPEG_HandleTypeDef *hjpeg,
         return status;
     }
 
-    *out_len = hjpeg->JpegOutCount;
+    *out_len = s_jpeg_out_len; 
     return status;
 }
