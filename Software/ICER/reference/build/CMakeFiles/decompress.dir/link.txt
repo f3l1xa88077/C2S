@@ -1,0 +1,1 @@
+/usr/bin/cc -Wall -Wextra -O2 CMakeFiles/decompress.dir/example/src/example_decode.c.o CMakeFiles/decompress.dir/example/src/stb_lib.c.o -o decompress  -lm lib_icer/libicer.a 

@@ -10,8 +10,8 @@
 #define USE_DECODE_FUNCTIONS
 #define USE_UINT16_FUNCTIONS
 
-#include "icer.h"
-#include "color_util.h"
+#include "../../lib_icer/inc/icer.h"
+#include "../inc/color_util.h"
 
 const char compressed_filename[] = "./compressed.bin";
 const char filename[] = "./decompress.bmp";

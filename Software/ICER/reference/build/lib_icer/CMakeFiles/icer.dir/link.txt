@@ -1,0 +1,2 @@
+/usr/bin/ar qc libicer.a CMakeFiles/icer.dir/src/icer_wavelet.c.o CMakeFiles/icer.dir/src/crc32.c.o CMakeFiles/icer.dir/src/icer_encoding.c.o CMakeFiles/icer.dir/src/icer_decoding.c.o CMakeFiles/icer.dir/src/icer_partition.c.o CMakeFiles/icer.dir/src/icer_util.c.o CMakeFiles/icer.dir/src/icer_context_modeller.c.o CMakeFiles/icer.dir/src/icer_init.c.o CMakeFiles/icer.dir/src/icer_config.c.o CMakeFiles/icer.dir/src/icer_compress.c.o CMakeFiles/icer.dir/src/icer_color.c.o
+/usr/bin/ranlib libicer.a

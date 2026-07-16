@@ -10,7 +10,8 @@
 #define USE_ENCODE_FUNCTIONS
 #define USE_UINT16_FUNCTIONS
 
-#include "icer.h"
+
+#include "../../lib_icer/inc/icer.h"
 
 const char compressed_filename[] = "./compressed.bin";
 const char filename[] = "./boat.512.bmp";

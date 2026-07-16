@@ -206,9 +206,9 @@ int icer_compress_image_yuv_uint8(uint8_t *y_channel, uint8_t *u_channel, uint8_
 int icer_decompress_image_yuv_uint8(uint8_t *y_channel, uint8_t *u_channel, uint8_t *v_channel, size_t *const image_w,
                                     size_t *const image_h, const size_t image_bufsize, const uint8_t *datastream,
                                     const size_t data_length) {
-    uint8_t stages;
-    enum icer_filter_types filt;
-    uint8_t segments;
+    uint8_t stages = 0;
+    enum icer_filter_types filt = ICER_FILTER_A;
+    uint8_t segments = 0;
 
     for (int i = 0;i <= ICER_MAX_DECOMP_STAGES;i++) {
         for (int j = 0;j <= ICER_SUBBAND_MAX;j++) {
@@ -537,9 +537,9 @@ int icer_compress_image_yuv_uint16(uint16_t *y_channel, uint16_t *u_channel, uin
 int icer_decompress_image_yuv_uint16(uint16_t * const y_channel, uint16_t * const u_channel, uint16_t * const v_channel, size_t *const image_w,
                                     size_t *const image_h, const size_t image_bufsize, const uint8_t *datastream,
                                     const size_t data_length) {
-    uint8_t stages;
-    enum icer_filter_types filt;
-    uint8_t segments;
+    uint8_t stages = 0;
+    enum icer_filter_types filt = ICER_FILTER_A;
+    uint8_t segments = 0;
 
     for (int i = 0;i <= ICER_MAX_DECOMP_STAGES;i++) {
         for (int j = 0;j <= ICER_SUBBAND_MAX;j++) {

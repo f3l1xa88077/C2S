@@ -151,7 +151,7 @@ int icer_compress_image_uint8(uint8_t * const image, size_t image_w, size_t imag
                 for (int lsb = ICER_BITPLANES_TO_COMPRESS_8 - 1;lsb >= 0;lsb--) {
                     if (icer_rearrange_segments_8[chan][i][j][lsb][k] != NULL) {
                         len = icer_ceil_div_uint32(icer_rearrange_segments_8[chan][i][j][lsb][k]->data_length, 8) + sizeof(icer_image_segment_typedef)
-                                + (ICER_GET_METADATA_FLAG_MACRO(icer_rearrange_segments_8[chan][i][j][lsb][k]->metadata_subband_type) ? sizeof(icer_image_segment_metadata_typedef) : 0);;
+                                + (ICER_GET_METADATA_FLAG_MACRO(icer_rearrange_segments_8[chan][i][j][lsb][k]->metadata_subband_type) ? sizeof(icer_image_segment_metadata_typedef) : 0);
                         memcpy(output_data->rearrange_start + rearrange_offset, icer_rearrange_segments_8[chan][i][j][lsb][k], len);
                         rearrange_offset += len;
                     }
@@ -165,9 +165,9 @@ int icer_compress_image_uint8(uint8_t * const image, size_t image_w, size_t imag
 
 int icer_decompress_image_uint8(uint8_t * const image, size_t * const image_w, size_t * const image_h, const size_t image_bufsize, const uint8_t *datastream,
                                 const size_t data_length) {
-    uint8_t stages;
-    enum icer_filter_types filt;
-    uint8_t segments;
+    uint8_t stages = 0;
+    enum icer_filter_types filt = ICER_FILTER_A;
+    uint8_t segments = 0;
 
     int chan = 0;
     for (int i = 0;i <= ICER_MAX_DECOMP_STAGES;i++) {
@@ -435,9 +435,9 @@ int icer_compress_image_uint16(uint16_t * const image, size_t image_w, size_t im
 #ifdef USE_DECODE_FUNCTIONS
 int icer_decompress_image_uint16(uint16_t * const image, size_t * const image_w, size_t * const image_h, size_t image_bufsize, const uint8_t *datastream,
                                  size_t data_length) {
-    enum icer_filter_types filt;
-    uint8_t segments;
-    uint8_t stages;
+    enum icer_filter_types filt = ICER_FILTER_A;
+    uint8_t segments = 0;
+    uint8_t stages = 0;
 
     int chan = 0;
     for (int i = 0;i <= ICER_MAX_DECOMP_STAGES;i++) {
