@@ -56,6 +56,7 @@ TX_THREAD cam_thread;
 void INA219_ThreadEntry();
 void USB_ThreadEntry();
 void Cam_ThreadEntry();
+ULONG tx_time_ms(ULONG ms);
 
 /* USER CODE END PFP */
 
@@ -162,7 +163,6 @@ void INA219_ThreadEntry()
 {
 	// Setup
 	extern I2C_HandleTypeDef hi2c2;
-	uint32_t delay_ticks = (500 * TX_TIMER_TICKS_PER_SECOND) / 1000 ;
 	INA219_HandleTypeDef INA219_Chip;
 	INA219_Setup(&INA219_Chip, &hi2c2);
 
@@ -171,9 +171,7 @@ void INA219_ThreadEntry()
 	{
 		// Read CSA Data
 		INA219_ReadAll(&INA219_Chip);
-
-		// Wait
-		tx_thread_sleep(delay_ticks);
+		tx_thread_sleep(tx_time_ms(500));
 	}
 }
 
@@ -193,91 +191,80 @@ void USB_ThreadEntry()
 	{
 		// Poll PC
 		tud_task();
-
 		tx_thread_relinquish();
-		//tx_thread_sleep(15);
 	}
 }
 
 void Cam_ThreadEntry()
 {
 	// External variables
-	extern uint32_t pBuffer[MAX_PICTURE_BUFF]; 			// Image Data
-	extern uint8_t FrameProcessed;						// Image Captured?
+	extern uint32_t pBuffer[MAX_PICTURE_BUFF];
+	extern uint8_t FrameProcessed;
 	extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
-	//extern DCACHE_HandleTypeDef hdcache1;
 	extern DCMI_HandleTypeDef hdcmi;
 	extern I2C_HandleTypeDef hi2c2;
 	extern DMA_QListTypeDef DCMIQueue;
 
 	// Set unused picture area to white
-	memset(pBuffer, 0x1F, sizeof(pBuffer));
-
-	// GPDMA Linked List Setup
-	MX_DCMIQueue_Config();
-	HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
-	__HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
+	memset(pBuffer, 0x8B, sizeof(pBuffer));
 
 	// OV7670 Configuration
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET); 	// Camera PWDN to GND (Enable Camera)
 	ov7670_init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);						// Basic interface test
 	ov7670_config(OV7670_MODE_QVGA_RGB565);										// Register configuration
-	tx_thread_sleep((300 * TX_TIMER_TICKS_PER_SECOND) / 1000);					// 300 ms setting time specified by datasheet (Table 4)
-	//ov7670_testpattern(&hdcmi);
+	//ov7670_testpattern(&hdcmi);												// RGB Test Pattern
+	tx_thread_sleep(tx_time_ms(300));												// 300 ms setting time specified by datasheet (Table 4)
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);	// Disable Camera
+
+	// DCMI Setup
+	MX_DCMIQueue_Config();
+	HAL_DMAEx_List_LinkQ(&handle_GPDMA1_Channel0, &DCMIQueue);
+	__HAL_LINKDMA(&hdcmi, DMA_Handle, handle_GPDMA1_Channel0);
+
+	// Pause DCMI until requested
+	HAL_DCMI_Suspend(&hdcmi);
 
 	while(1)
 	{
-		// Check incoming data
-		if (!FrameProcessed) // If not already capturing image
+		if (tud_cdc_n_connected(0) && tud_cdc_available())
 		{
-			if (tud_cdc_n_connected(0))
+			// Read incoming data to check for start condition
+			uint8_t buf[1] = {0};
+			tud_cdc_read(buf, sizeof(buf));
+			tud_cdc_read_flush();
+
+			if ((char)buf[0] == 'S')
 			{
-				if (tud_cdc_available())
+				// Enable camera and wait for stabilisation
+				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
+				tx_thread_sleep(tx_time_ms(300));
+
+				// Clear memory (for debugging)
+				memset(pBuffer, 0x1F, sizeof(pBuffer));
+
+				// Capture Image
+				FrameProcessed = 0;
+				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, MAX_PICTURE_BUFF);
+
+				// Block until hardware completes the capture
+				while (!FrameProcessed)
 				{
-					uint8_t buf[1] = {0};
-
-					tud_cdc_read(buf, sizeof(buf));
-					tud_cdc_read_flush();
-
-					if ((char)buf[0] == 'S')
-					{
-						// Open DMA and listen for image
-						HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);				// Enable Camera
-						tx_thread_sleep((300 * TX_TIMER_TICKS_PER_SECOND) / 1000);								// 300 ms setting time specified by datasheet (Table 4)
-
-						HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); 	// Cast pBuffer to obtain address
-
-						while (hdcmi.State != HAL_DCMI_STATE_READY)
-						{
-						    tx_thread_sleep(5);
-						}
-
-
-						//HAL_GPIO_TogglePin(LED_ERR_GPIO_Port, LED_ERR_Pin);
-						FrameProcessed = 1;
-					}
-
+					tx_thread_sleep(5);
 				}
-			}
-		}
-		if (FrameProcessed)
-		{
-			HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);				// Disable Camera
-		    // 1. Double check that HTerm is actually connected and pulling lines!
-		    if (tud_cdc_n_connected(0))
-		    {
+
+				// IMAGE CAPTURED AT THIS POINT
+
+				// Stop DCMI and shut down camera power until next request
+				HAL_DCMI_Stop(&hdcmi);
+				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
 
 
-		        //HAL_DCACHE_InvalidateByAddr(&hdcache1, pBuffer, sizeof(pBuffer));
+				uint8_t *byteStream = (uint8_t *)pBuffer;
+				uint32_t totalBytes = MAX_PICTURE_BUFF * 4;
+				uint32_t bytesSent = 0;
 
-		        uint8_t *byteStream = (uint8_t *)pBuffer;
-		        uint32_t totalBytes = MAX_PICTURE_BUFF * 4;
-		        uint32_t bytesSent = 0;
-
-		        while (bytesSent < totalBytes)
+				while (bytesSent < totalBytes)
 				{
-					// FIX 2: Check total available FIFO depth dynamically rather than forcing a 64-byte limit
 					uint32_t avail = tud_cdc_n_write_available(0);
 
 					if (avail > 0)
@@ -293,22 +280,29 @@ void Cam_ThreadEntry()
 					}
 					else
 					{
-						// FIFO is full; explicitly flush and let the higher-priority USB thread clear it
 						tud_cdc_n_write_flush(0);
 						tx_thread_sleep(1);
 					}
 				}
 
 				tud_cdc_n_write_flush(0);
-				FrameProcessed = 0; // Ready for next snapshot request
-		    }
-
+			}
 		}
 
-		//tx_thread_relinquish();
-		tx_thread_sleep(100);
-	}
+	// Free up thread
+	tx_thread_sleep(tx_time_ms(100));
 
+	}
+}
+
+/**
+  * @brief  Returns threadx sleep ticks for an input milliseconds.
+  * @param ms: time to sleep in milliseconds
+  * @retval ticks
+  */
+ULONG tx_time_ms(ULONG ms)
+{
+	return ((ms * TX_TIMER_TICKS_PER_SECOND) / 1000);
 }
 
 /* USER CODE END 1 */

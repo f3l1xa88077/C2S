@@ -108,7 +108,7 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
   s_currentV++;
   s_currentH = 0;
 
-  // Update snapshot variable
+  // Update snapshot flag
   FrameProcessed = 1;
 }
 
