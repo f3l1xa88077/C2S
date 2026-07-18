@@ -148,70 +148,63 @@
         const height = 240;
         const expectedBytes = width * height * 2; 
 
-        // Create a single persistent image data template
-        let imgData = ctx.createImageData(width, height);
-        let data = imgData.data;
+        // Create a local buffer memory allocation to stack raw incoming chunks
+        const rawFrameBuffer = new Uint8Array(expectedBytes);
+        let frameBytesReceived = 0;
+
+        // Off-screen canvas canvas pipeline to handle rapid pixel blitting
+        const imageBufferCanvas = new OffscreenCanvas(width, height);
+        const ibCtx = imageBufferCanvas.getContext('2d');
+        const imgData = ibCtx.createImageData(width, height);
+        
+        // Uint32 view allows writing a full RGBA pixel (4 bytes) in a single instruction
+        const data32 = new Uint32Array(imgData.data.buffer);
+        const statusEl = document.getElementById('status');
 
         while (port && port.readable && keepReading) {
             reader = port.readable.getReader();
             try {
-                
                 while (keepReading) {
                     const { value, done } = await reader.read();
                     if (done) break;
 
-                    document.getElementById('status').innerText = "Status: Receiving...";
-                    
-                    for (let i = 0; i < value.length; i++) {
-                        // Handle split 16-bit pixel bytes across packet boundaries
-                        if (oddByte === null) {
-                            oddByte = value[i];
-                            continue;
-                        }
+                    // 1. Fast binary memory copy into our local frame builder
+                    rawFrameBuffer.set(value, frameBytesReceived);
+                    frameBytesReceived += value.length;
 
-                        let b1 = oddByte;
-                        let b2 = value[i];
-                        oddByte = null; // Clear cache for next pixel
-
-                        // Combine to RGB565
-                        let rgb565 = (b1 << 8) | b2;
-
-                        let r = ((rgb565 >> 11) & 0x1F) * 255 / 31;
-                        let g = ((rgb565 >> 5) & 0x3F) * 255 / 63;
-                        let b = (rgb565 & 0x1F) * 255 / 31;
-
-                        // Write directly into the ImageData pixel array position
-                        let pixelIndex = (currentByteIndex / 2) * 4;
-                        data[pixelIndex]     = r;     
-                        data[pixelIndex + 1] = g;     
-                        data[pixelIndex + 2] = b;     
-                        data[pixelIndex + 3] = 255;   
+                    // 2. Process only when a clean complete frame barrier is hit
+                    if (frameBytesReceived >= expectedBytes) {
                         
-                        currentByteIndex += 2;
+                        // 3. Fast Bitwise Unrolling: Process 2 bytes at a time directly
+                        for (let i = 0, p = 0; i < expectedBytes; i += 2, p++) {
+                            const b1 = rawFrameBuffer[i];
+                            const b2 = rawFrameBuffer[i + 1];
+                            const rgb565 = (b1 << 8) | b2;
 
-                        // If a frame completes, reset pointer for next snapshot
-                        if (currentByteIndex >= expectedBytes) {
-                            currentByteIndex = 0;
-                            document.getElementById('status').innerText = "Status: Received.";
+                            // Unpack components cleanly
+                            const r = ((rgb565 >> 11) & 0x1F) * 255 / 31;
+                            const g = ((rgb565 >> 5) & 0x3F) * 255 / 63;
+                            const b = (rgb565 & 0x1F) * 255 / 31;
+
+                            // Write an entire 32-bit pixel (RGBA) at once via Little Endian mask
+                            // Layout: Alpha (255) | Blue | Green | Red
+                            data32[p] = (255 << 24) | (b << 16) | (g << 8) | r;
                         }
+
+                        // 4. Draw to the UI viewport using standard hardware acceleration
+                        ibCtx.putImageData(imgData, 0, 0);
+                        ctx.drawImage(imageBufferCanvas, 0, 0);
+
+                        // Reset slice tracking index
+                        frameBytesReceived = 0;
+                        statusEl.innerText = "Status: Frame Rendered.";
                     }
-
-                    // Render whatever chunk of pixels just arrived immediately to screen
-                    ctx.putImageData(imgData, 0, 0);
                 }
-                document.getElementById('status').innerText = "Status: Received.";
-
             } catch (err) {
-                console.error("Read thread cancelled:", err);
+                console.error("Processing channel disrupted:", err);
             } finally {
                 reader.releaseLock();
             }
-
-        }
-        if (port) {
-            await port.close();
-            port = null;
-            reader = null;
         }
     }
 

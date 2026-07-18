@@ -57,6 +57,7 @@ void INA219_ThreadEntry();
 void USB_ThreadEntry();
 void Cam_ThreadEntry();
 ULONG tx_time_ms(ULONG ms);
+void transmit_image(uint8_t* image_data, uint32_t total_bytes);
 
 /* USER CODE END PFP */
 
@@ -191,6 +192,7 @@ void USB_ThreadEntry()
 	{
 		// Poll PC
 		tud_task();
+		//tx_thread_sleep(tx_time_ms(20));
 		tx_thread_relinquish();
 	}
 }
@@ -204,9 +206,6 @@ void Cam_ThreadEntry()
 	extern DCMI_HandleTypeDef hdcmi;
 	extern I2C_HandleTypeDef hi2c2;
 	extern DMA_QListTypeDef DCMIQueue;
-
-	// Set unused picture area to white
-	memset(pBuffer, 0x8B, sizeof(pBuffer));
 
 	// OV7670 Configuration
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET); 	// Camera PWDN to GND (Enable Camera)
@@ -239,9 +238,6 @@ void Cam_ThreadEntry()
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
 				tx_thread_sleep(tx_time_ms(300));
 
-				// Clear memory (for debugging)
-				memset(pBuffer, 0x1F, sizeof(pBuffer));
-
 				// Capture Image
 				FrameProcessed = 0;
 				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, MAX_PICTURE_BUFF);
@@ -258,41 +254,42 @@ void Cam_ThreadEntry()
 				HAL_DCMI_Stop(&hdcmi);
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
 
-
-				uint8_t *byteStream = (uint8_t *)pBuffer;
-				uint32_t totalBytes = MAX_PICTURE_BUFF * 4;
-				uint32_t bytesSent = 0;
-
-				while (bytesSent < totalBytes)
-				{
-					uint32_t avail = tud_cdc_n_write_available(0);
-
-					if (avail > 0)
-					{
-						uint32_t chunkSize = totalBytes - bytesSent;
-						if (chunkSize > avail) chunkSize = avail; // Saturate the USB FIFO completely
-
-						uint32_t written = tud_cdc_n_write(0, &byteStream[bytesSent], chunkSize);
-						if (written > 0)
-						{
-							bytesSent += written;
-						}
-					}
-					else
-					{
-						tud_cdc_n_write_flush(0);
-						tx_thread_sleep(1);
-					}
-				}
-
-				tud_cdc_n_write_flush(0);
+				// Transmit
+				transmit_image((uint8_t *)pBuffer, MAX_PICTURE_BUFF*4);
 			}
+
 		}
 
 	// Free up thread
-	tx_thread_sleep(tx_time_ms(100));
+	tx_thread_sleep(tx_time_ms(500));
 
 	}
+}
+
+/**
+  * @brief  Transmits a given image over TinyUSB to the dashboard
+  * @param image_data: 8-bit array of image data to be sent
+  * @param total_bytes: Total Bytes of image
+  */
+void transmit_image(uint8_t* image_data, uint32_t total_bytes)
+{
+    uint32_t bytes_sent = 0;
+
+    while (bytes_sent < total_bytes)
+    {
+        uint32_t available_space = tud_cdc_write_available();
+
+        if (available_space > 0)
+        {
+            uint32_t remaining_bytes = total_bytes - bytes_sent;
+            uint32_t chunk_size = (remaining_bytes < available_space) ? remaining_bytes : available_space;
+            uint32_t written = tud_cdc_write(&image_data[bytes_sent], chunk_size);
+            bytes_sent += written;
+        }
+
+        tud_cdc_write_flush();
+
+    }
 }
 
 /**
