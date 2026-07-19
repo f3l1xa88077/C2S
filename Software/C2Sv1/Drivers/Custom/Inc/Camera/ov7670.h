@@ -1,5 +1,5 @@
 /**
- * @file ov7670.h
+ * @file OV7670.h
  * @brief Main header file for the OV7670 camera module.
  *
  * @details pinkeee @ j.t0dd@protonmail.com
@@ -12,6 +12,31 @@
 #define OV7670_H
 
 #include <stdint.h>
+#include "stm32u5xx_hal.h"
+
+// Code below is adapted from take-iwiw
+
+typedef uint32_t RET;
+
+// 320 * 240 pixels. 2 pixels per word. 4 Bytes per word.
+#define MAX_PICTURE_BUFF     	(320 * 240 * 2 / 4)
+
+#define SLAVE_ADDR 0x42
+
+#define RET_OK           0x00000000
+#define RET_NO_DATA      0x00000001
+#define RET_DO_NOTHING   0x00000002
+#define RET_ERR          0x80000001
+#define RET_ERR_OF       0x80000002
+#define RET_ERR_TIMEOUT  0x80000004
+#define RET_ERR_STATUS   0x80000008
+#define RET_ERR_PARAM    0x80000010
+#define RET_ERR_FILE     0x80000020
+#define RET_ERR_MEMORY   0x80000040
+
+RET OV7670_Init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C_HandleTypeDef *p_hi2c);
+RET OV7670_Config(uint8_t colour_mode, uint8_t resolution_mode, uint8_t test_pattern_mode);
+void OV7670_RegisterCallback(void (*cbHsync)(uint32_t h), void (*cbVsync)(uint32_t v));
 
 // Code below is from pinkeee
 
@@ -2657,38 +2682,5 @@
  * @return 0x26
  */
 #define OV7670_RSVD_79_RESET_VALUE_FINAL 0x26
-
-// Code below is adapted from take-iwiw
-
-typedef uint32_t RET;
-
-// 320 * 240 pixels. 2 pixels per word. 4 Bytes per word.
-#define MAX_PICTURE_BUFF     	(320 * 240 * 2 / 4)
-
-#define OV7670_MODE_QVGA_RGB565 0
-#define OV7670_MODE_QVGA_YUV    1
-
-#define OV7670_CAP_CONTINUOUS   0
-#define OV7670_CAP_SINGLE_FRAME 1
-
-#define SLAVE_ADDR 0x42
-
-#define RET_OK           0x00000000
-#define RET_NO_DATA      0x00000001
-#define RET_DO_NOTHING   0x00000002
-#define RET_ERR          0x80000001
-#define RET_ERR_OF       0x80000002
-#define RET_ERR_TIMEOUT  0x80000004
-#define RET_ERR_STATUS   0x80000008
-#define RET_ERR_PARAM    0x80000010
-#define RET_ERR_FILE     0x80000020
-#define RET_ERR_MEMORY   0x80000040
-
-RET ov7670_init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C_HandleTypeDef *p_hi2c);
-RET ov7670_config(uint32_t mode);
-RET ov7670_startCap(uint32_t capMode, uint32_t destAddress);
-RET ov7670_stopCap();
-void ov7670_registerCallback(void (*cbHsync)(uint32_t h), void (*cbVsync)(uint32_t v));
-void ov7670_testpattern(DCMI_HandleTypeDef *hdcmi);
 
 #endif /* OV7670_H */

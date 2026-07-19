@@ -4,210 +4,700 @@
     <meta charset="UTF-8">
     <title>C2Sv1.0 Camera Dashboard</title>
     <style>
-        body { font-family: sans-serif; margin: 20px; display: flex; gap: 20px; background: #f4f6f9; }
-        .panel { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .control-panel { width: 400px; }
-        .display-panel { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .param-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
-        input, select { width: 55%; padding: 4px; }
-        button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; font-weight: bold; }
-        #canvasView { border: 2px dashed #ccc; background: #000; width: 640px; height: 480px; image-rendering: pixelated; }
+        @font-face {
+            font-family: 'JetBrainsMono';
+            src: url('./fonts/JetBrainsMono-VariableFont_wght.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'JetBrainsMono', monospace !important;
+        }
+        
+        body { 
+            margin: 0; 
+            padding: 2vw; 
+            display: flex; 
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 24px; 
+            background: #0b0f19; 
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+        .panel { 
+            background: #131a26; 
+            padding: 24px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3); 
+        }
+        
+        .control-panel { 
+            width: 380px; 
+            flex-shrink: 0;
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            padding-top: 30px; 
+        }
+        .display-panel { 
+            flex: 1 1 500px;
+            max-width: 660px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        hr { border: none; height: 1px; background: #222f47; margin: 4px 0; }
+        .param-group { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+        .param-group.column { flex-direction: column; align-items: stretch; gap: 6px; }
+        .btn-group { display: flex; gap: 12px; }
+        
+        label { font-size: 0.85rem; color: #94a3b8; font-weight: 500; }
+        .disabled-label { color: #475569 !important; }
+        
+        select, input[type="number"] { 
+            width: 50%; 
+            padding: 6px 12px; 
+            background: #1e293b; 
+            color: #ffffff; 
+            border: none; 
+            border-radius: 8px; 
+            font-size: 0.85rem;
+            outline: none;
+        }
+        input[type="number"]:disabled, select:disabled {
+            background: #0f172a;
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; position: relative; }
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #1d4ed8;
+            cursor: pointer;
+        }
+
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            cursor: help;
+            font-size: 0.85rem;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .info-tip:hover { color: #38bdf8; }
+        .info-tip::after {
+            content: attr(data-help);
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #f1f5f9;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            white-space: normal;
+            width: 200px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            font-weight: 400;
+            line-height: 1.3;
+        }
+        .info-tip:hover::after { opacity: 1; }
+
+        .rgb-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 4px;
+        }
+        .rgb-input-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .rgb-grid input[type="number"] {
+            width: 100%;
+            text-align: center;
+        }
+        
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            border: none;
+            border-radius: 10px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+        button:disabled {
+            opacity: 0.25;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .btn-connect { background: #1d4ed8; color: white; }
+        .btn-connect:hover { background: #2563eb; }
+        
+        .btn-state-indicator { 
+            background: #991b1b; 
+            color: white; 
+            cursor: default; 
+            pointer-events: none;
+        }
+        .btn-state-indicator.connected { background: #065f46; }
+        .btn-state-indicator.active-action { cursor: pointer; pointer-events: auto; }
+        .btn-state-indicator.active-action:hover { opacity: 0.9; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .shake-alert {
+            animation: shake 0.3s ease-in-out;
+            background: #dc2626 !important;
+            box-shadow: 0 0 15px #dc2626;
+        }
+
+        .btn-capture { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-capture:hover { background: #3b82f6; transform: translateY(-1px); }
+        
+        .btn-stream { background: #0f172a; color: #60a5fa; border: 1px solid #222f47; margin-top: -6px; }
+        .btn-stream:hover { background: #1e293b; }
+        .btn-stream.streaming { background: #1d4ed8; color: #ffffff; border-color: transparent; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+        .btn-stream.streaming:hover { background: #2563eb; }
+
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #222f47; border-radius: 4px; outline: none; margin-top: 4px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
+
+        .status-pipeline {
+            display: flex;
+            position: relative;
+            width: 100%;
+            background: #1e293b;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .pipeline-indicator {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc(25% - 8px);
+            background: #1d4ed8;
+            border-radius: 7px;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+        }
+        .stage {
+            flex: 1;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            padding: 10px 0;
+            z-index: 2;
+            transition: color 0.2s ease;
+        }
+        .stage.active-txt { color: #ffffff; }
+
+        .canvas-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            aspect-ratio: 4 / 3;
+            margin-bottom: 12px;
+        }
+        #canvasView { 
+            background: #000000; 
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            image-rendering: pixelated; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        
+        .storage-bar {
+            width: 100%;
+            background: #1e293b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+        .storage-actions { display: flex; align-items: center; gap: 8px; }
+        .btn-storage {
+            background: #334155;
+            color: #f8fafc;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            width: auto;
+        }
+        .btn-storage:hover { background: #475569; }
     </style>
 </head>
 <body>
 
 <div class="panel control-panel">
-    <h2>Configurations</h2>
     <div class="btn-group">
-        <button onclick="connectSerial()" style="background:#007bff; color:white; margin-top:0;">Connect Port</button>
-        <button onclick="disconnectSerial()" style="background:#dc3545; color:white; margin-top:0;">Disconnect</button>
+        <button class="btn-connect" onclick="connectSerial()">Connect Port</button>
+        <button id="stateBtn" class="btn-state-indicator" onclick="disconnectSerial()">Disconnected</button>
     </div>
     <hr>
 
     <div class="param-group">
-        <label for="colour">Colour Mode:</label>
+        <label id="lbl-colour" for="colour">Colour Mode</label>
         <select id="colour">
             <option value="RGB565">RGB565</option>
             <option value="Grayscale">Grayscale</option>
+            <option value="YCbCr">YCbCr</option>
         </select>
     </div>
 
+    <div class="param-group" style="margin-top: 4px;">
+        <div class="checkbox-row">
+            <input type="checkbox" id="testPatternCheck">
+            <label for="testPatternCheck">Enable Test Pattern</label>
+            <span class="info-tip" data-help="Forces the camera sensor to output a static or shifting internal test bar pattern for link debugging.">ⓘ</span>
+        </div>
+    </div>
+    
+    <hr>
+
     <div class="param-group">
-        <label for="sizeX">Image Size X (px):</label>
-        <input type="text" id="sizeX" value="320">
-    </div>
-    <div class="param-group">
-        <label for="sizeY">Image Size Y (px):</label>
-        <input type="text" id="sizeY" value="240">
-    </div>
-
-    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="jpegInput">JPEG Quality:</label>
-            <input type="number" id="jpegInput" min="1" max="100" value="100" 
-                oninput="document.getElementById('jpegSlider').value = this.value">
-        </div>
-        <input type="range" id="jpegSlider" min="1" max="100" value="100" 
-            oninput="document.getElementById('jpegInput').value = this.value" style="width: 100%;">
-    </div>
-
-    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="gainInput">Sensor Gain:</label>
-            <input type="number" id="gainInput" min="1" max="64" value="10" 
-                oninput="document.getElementById('gainSlider').value = this.value">
-        </div>
-        <input type="range" id="gainSlider" min="1" max="64" value="10" 
-            oninput="document.getElementById('gainInput').value = this.value" style="width: 100%;">
-    </div>
-
-    <div class="param-group" style="display: flex; flex-direction: column; gap: 5px; width: 100%; margin-top: 15px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="exposureInput">Exposure (ms):</label>
-            <input type="number" id="exposureInput" min="10" max="250" value="50" 
-                oninput="document.getElementById('exposureSlider').value = this.value">
-        </div>
-        <input type="range" id="exposureSlider" min="10" max="250" value="50" 
-            oninput="document.getElementById('exposureInput').value = this.value" style="width: 100%;">
+        <label for="resolution">Resolution</label>
+        <select id="resolution" onchange="updateResolutionDimensions()">
+            <option value="QVGA" selected>QVGA (320 × 240)</option>
+            <option value="VGA">VGA (640 × 480)</option>
+        </select>
     </div>
 
     <hr>
-    <button onclick="sendParameters()" style="background:#28a745; color:white;">Send & Capture</button>
+
+    <div class="param-group column">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <label for="jpegInput">JPEG Quality</label>
+                <span class="info-tip" data-help="Sets compression level. 0 is the lowest quality (maximum compression), 100 is the highest quality (uncompressed).">ⓘ</span>
+            </div>
+            <input type="number" id="jpegInput" min="0" max="100" value="100" 
+                oninput="document.getElementById('jpegSlider').value = this.value" style="width: 80px; text-align: center;">
+        </div>
+        <input type="range" id="jpegSlider" min="0" max="100" value="100" 
+            oninput="document.getElementById('jpegInput').value = this.value">
+    </div>
+
+    <hr>
+    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+        <button id="captureBtn" class="btn-capture" onclick="handleCaptureClick()">Send & Capture</button>
+        <span class="info-tip" data-help="Transmits configuration payload down to camera subsystem, triggers single burst window frame capture.">ⓘ</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
+        <button id="streamBtn" class="btn-stream" onclick="handleStreamClick()">Start Streaming</button>
+        <span class="info-tip" data-help="Launches continuous frame request loops, refreshing the pipeline canvas at maximum hardware frame rate.">ⓘ</span>
+    </div>
 </div>
 
-<div class="panel display-panel" style="max-width: 720px;">
-    <h2>C2Sv1.0 Camera Dashboard</h2>
-    <canvas id="canvasView" width="320" height="240"></canvas>
-    <p id="status">Status: Disconnected</p>
+<div class="panel display-panel">
+    <div class="status-pipeline">
+        <div id="pipelineIndicator" class="pipeline-indicator"></div>
+        <div id="txt-disc" class="stage active-txt">Disconnected</div>
+        <div id="txt-conn" class="stage">Connected</div>
+        <div id="txt-sent" class="stage">Processing</div>
+        <div id="txt-recv" class="stage">Rendered</div>
+    </div>
+    
+    <div class="canvas-container">
+        <canvas id="canvasView" width="320" height="240"></canvas>
+    </div>
+
+    <div class="storage-bar">
+        <div class="checkbox-row">
+            <input type="checkbox" id="autoSaveCheck">
+            <label for="autoSaveCheck">Auto-Save Streams</label>
+        </div>
+        <div class="storage-actions">
+            <button id="folderBtn" class="btn-storage" onclick="selectTargetFolder()">Set Folder</button>
+            <span class="info-tip" data-help="Launches native file system system prompt to select a local directory context for saved captures." style="margin-right: 4px;">ⓘ</span>
+            <button class="btn-storage" onclick="copyToClipboard()">Copy Frame</button>
+            <button class="btn-storage" onclick="saveCanvasImage()">Save As</button>
+        </div>
+    </div>
 </div>
 
 <script>
-
     let port;
     let reader;
     let keepReading = true;
+    let isStreaming = false;
+    let currentStageIndex = 0; 
+    let saveIndex = 0;
+    let directoryHandle = null;
+    
+    let currentWidth = 320;
+    let currentHeight = 240;
 
-    // Track stream position globally so sendParameters() can reset them
-    let currentByteIndex = 0;
-    let oddByte = null;
+    let byteBuffer = [];
+    let imageReassemblyBuffer = null;
+    let imageBytesCopied = 0;
+    
+    let currentHardwareState = "IDLE"; 
+
+    function triggerDisconnectAlert() {
+        const stateBtn = document.getElementById('stateBtn');
+        stateBtn.classList.remove('shake-alert');
+        void stateBtn.offsetWidth; 
+        stateBtn.classList.add('shake-alert');
+        setTimeout(() => { stateBtn.classList.remove('shake-alert'); }, 300);
+    }
+
+    function handleCaptureClick() {
+        if (!port) { triggerDisconnectAlert(); return; }
+        currentHardwareState = "IMAGE_CAPTURE";
+        sendParameters();
+    }
+
+    function handleStreamClick() {
+        if (!port) { triggerDisconnectAlert(); return; }
+        toggleStreaming();
+    }
+
+    function updateResolutionDimensions() {
+        const resSelection = document.getElementById('resolution').value;
+        const canvas = document.getElementById('canvasView');
+        currentWidth = (resSelection === "VGA") ? 640 : 320;
+        currentHeight = (resSelection === "VGA") ? 480 : 240;
+        canvas.width = currentWidth;
+        canvas.height = currentHeight;
+        resetImageBuffers();
+    }
+
+    function resetImageBuffers() {
+        const expectedBytes = currentWidth * currentHeight * 2;
+        imageReassemblyBuffer = new Uint8Array(expectedBytes);
+        imageBytesCopied = 0;
+    }
+
+    function setPipelineStage(stageIndex, textId) {
+        currentStageIndex = stageIndex;
+        document.querySelectorAll('.stage').forEach(el => el.classList.remove('active-txt'));
+        document.getElementById(textId).classList.add('active-txt');
+        
+        const indicator = document.getElementById('pipelineIndicator');
+        
+        if (isStreaming) {
+            document.getElementById('txt-sent').classList.add('active-txt');
+            document.getElementById('txt-recv').classList.add('active-txt');
+            indicator.style.width = 'calc(50% - 0px)';
+            indicator.style.transform = 'translateX(100%)';
+        } else {
+            indicator.style.width = 'calc(25% - 4px)';
+            indicator.style.transform = `translateX(${stageIndex * 100}%)`;
+        }
+        updateButtonInterlocks();
+    }
+
+    function updateButtonInterlocks() {
+        const captureBtn = document.getElementById('captureBtn');
+        const streamBtn = document.getElementById('streamBtn');
+        if (isStreaming) {
+            captureBtn.disabled = true;
+            streamBtn.disabled = false;
+        } else {
+            captureBtn.disabled = false;
+            streamBtn.disabled = false; 
+        }
+    }
 
     async function connectSerial() {
         try {
             port = await navigator.serial.requestPort();
-            await port.open({ baudRate: 9600 }); 
+            await port.open({ baudRate: 115200 }); 
             keepReading = true;
-            document.getElementById('status').innerText = "Status: Connected.";
+            
+            // Monitor for sudden physical disconnection (e.g., USB unplugged)
+            // Place this at the absolute top of your script block
+            navigator.serial.addEventListener('disconnect', (event) => {
+                // Check if the pulled device matches our active port
+                if (port && event.target === port) {
+                    console.warn("Hardware device yanked.");
+                    disconnectSerial();
+                }
+            });
+            
+            const stateBtn = document.getElementById('stateBtn');
+            stateBtn.innerText = "Disconnect";
+            stateBtn.classList.add('connected', 'active-action');
+            
+            resetImageBuffers();
+            setPipelineStage(1, 'txt-conn');
             readLoop(); 
-        } catch (err) {
-            //alert("Error: " + err.message);
-        }
+        } catch (err) { /* handled silently */ }
     }
 
     async function disconnectSerial() {
-        if (!port) {
-            alert("No port connected.");
-            return;
-        }
-        
+        if (!port) return;
         try {
             keepReading = false;
+            isStreaming = false;
+            currentHardwareState = "IDLE";
+            updateStreamButtonUI();
             
-            if (reader) {
-                await reader.cancel(); 
+            if (reader) { 
+                await reader.cancel().catch(() => {}); 
+                try { reader.releaseLock(); } catch(e) {}
             }
             
-            document.getElementById('status').innerText = "Status: Disconnected.";
-        } catch (err) {
-            console.error("Disconnection processing error:", err);
-        }
+            if (port) {
+                await port.close().catch(() => {});
+                port = null;
+            }
+            
+            const stateBtn = document.getElementById('stateBtn');
+            stateBtn.innerText = "Disconnected";
+            stateBtn.classList.remove('connected', 'active-action');
+            
+            setPipelineStage(0, 'txt-disc');
+        } catch (err) { console.error(err); }
     }
 
     async function sendParameters() {
-        const message = 'S';
-        console.log("Generated Message:", message);
-        document.getElementById('status').innerText = "Status: Command Sent.";
+        if (!port) return;
+        setPipelineStage(2, 'txt-sent');
         
-        // Reset pixel indices immediately when a new capture is ordered
-        currentByteIndex = 0;
-        oddByte = null;
-        
-        if (port && port.writable) {
+        if (port.writable) {
             const encoder = new TextEncoder();
             const writer = port.writable.getWriter();
-            await writer.write(encoder.encode(message));
+
+            // Start
+            await writer.write(new Uint8Array([255])); // Sends exact raw byte 0xFF
+
+            // Colour Mode
+            const colourVal = document.getElementById('colour').value;
+            if (colourVal === "RGB565")         { await writer.write(new Uint8Array([0])); } // 0x00
+            else if (colourVal === "Grayscale") { await writer.write(new Uint8Array([1])); } // 0x01
+            else if (colourVal === "YCbCr")     { await writer.write(new Uint8Array([2])); } // 0x02
+
+            // Resolution
+            const resVal = document.getElementById('resolution').value;
+            if (resVal === "VGA")  { await writer.write(new Uint8Array([0])); } // 0x00
+            else if (resVal === "QVGA") { await writer.write(new Uint8Array([1])); } // 0x01
+
+            // Test Pattern
+            const isPatternEnabled = document.getElementById('testPatternCheck').checked;
+            if (!isPatternEnabled) { 
+                await writer.write(new Uint8Array([0])); // 0x00
+            } else { 
+                await writer.write(new Uint8Array([1])); // 0x01
+            }
+
+            // End
+            await writer.write(new Uint8Array([254])); // Sends exact raw byte 0xFE
+
             writer.releaseLock();
         }
     }
 
-    async function readLoop() {
+    function toggleStreaming() {
+        if (!port) return;
+        isStreaming = !isStreaming;
+        updateStreamButtonUI();
+        if (isStreaming) {
+            currentHardwareState = "IMAGE_CAPTURE";
+            sendParameters(); 
+        } else {
+            currentHardwareState = "IDLE";
+            setPipelineStage(1, 'txt-conn');
+        }
+    }
+
+    function updateStreamButtonUI() {
+        const btn = document.getElementById('streamBtn');
+        if (isStreaming) {
+            btn.innerText = "Stop Streaming";
+            btn.classList.add('streaming');
+        } else {
+            btn.innerText = "Start Streaming";
+            btn.classList.remove('streaming');
+        }
+    }
+
+    function generateTimestampName() {
+        const now = new Date();
+        const padding = (n) => String(n).padStart(2, '0');
+        const dateStr = `${now.getFullYear()}${padding(now.getMonth()+1)}${padding(now.getDate())}`;
+        const timeStr = `${padding(now.getHours())}${padding(now.getMinutes())}${padding(now.getSeconds())}`;
+        saveIndex++;
+        return `C2S_capture_${dateStr}_${timeStr}_${String(saveIndex).padStart(3, '0')}.png`;
+    }
+
+    async function selectTargetFolder() {
+        try {
+            directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+            const folderBtn = document.getElementById('folderBtn');
+            folderBtn.innerText = "Folder Set";
+            folderBtn.style.background = "#065f46";
+        } catch (err) { console.error(err); }
+    }
+
+    async function saveCanvasImage() {
+        const canvas = document.getElementById('canvasView');
+        const filename = generateTimestampName();
+
+        if (directoryHandle) {
+            try {
+                const fileHandle = await directoryHandle.getFileHandle(filename, { create: true });
+                const writable = await fileHandle.createWritable();
+                canvas.toBlob(async (blob) => {
+                    await writable.write(blob);
+                    await writable.close();
+                }, 'image/png');
+                return;
+            } catch (err) { /* fallback */ }
+        }
+
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    async function copyToClipboard() {
+        const canvas = document.getElementById('canvasView');
+        try {
+            canvas.toBlob(async (blob) => {
+                const item = new ClipboardItem({ "image/png": blob });
+                await navigator.clipboard.write([item]);
+            }, 'image/png');
+        } catch (err) { console.error(err); }
+    }
+
+    function renderReassembledFrame() {
         const canvas = document.getElementById('canvasView');
         const ctx = canvas.getContext('2d');
-        
-        const width = 320;
-        const height = 240;
-        const expectedBytes = width * height * 2; 
+        const expectedBytes = currentWidth * currentHeight * 2;
 
-        // Create a local buffer memory allocation to stack raw incoming chunks
-        const rawFrameBuffer = new Uint8Array(expectedBytes);
-        let frameBytesReceived = 0;
-
-        // Off-screen canvas canvas pipeline to handle rapid pixel blitting
-        const imageBufferCanvas = new OffscreenCanvas(width, height);
+        const imageBufferCanvas = new OffscreenCanvas(currentWidth, currentHeight);
         const ibCtx = imageBufferCanvas.getContext('2d');
-        const imgData = ibCtx.createImageData(width, height);
-        
-        // Uint32 view allows writing a full RGBA pixel (4 bytes) in a single instruction
+        const imgData = ibCtx.createImageData(currentWidth, currentHeight);
         const data32 = new Uint32Array(imgData.data.buffer);
-        const statusEl = document.getElementById('status');
 
-        while (port && port.readable && keepReading) {
-            reader = port.readable.getReader();
-            try {
-                while (keepReading) {
-                    const { value, done } = await reader.read();
-                    if (done) break;
+        for (let i = 0, p = 0; i < expectedBytes; i += 2, p++) {
+            const b1 = imageReassemblyBuffer[i];
+            const b2 = imageReassemblyBuffer[i + 1];
+            const rgb565 = (b1 << 8) | b2;
 
-                    // 1. Fast binary memory copy into our local frame builder
-                    rawFrameBuffer.set(value, frameBytesReceived);
-                    frameBytesReceived += value.length;
+            const r = ((rgb565 >> 11) & 0x1F) * 255 / 31;
+            const g = ((rgb565 >> 5) & 0x3F) * 255 / 63;
+            const b = (rgb565 & 0x1F) * 255 / 31;
 
-                    // 2. Process only when a clean complete frame barrier is hit
-                    if (frameBytesReceived >= expectedBytes) {
-                        
-                        // 3. Fast Bitwise Unrolling: Process 2 bytes at a time directly
-                        for (let i = 0, p = 0; i < expectedBytes; i += 2, p++) {
-                            const b1 = rawFrameBuffer[i];
-                            const b2 = rawFrameBuffer[i + 1];
-                            const rgb565 = (b1 << 8) | b2;
+            data32[p] = (255 << 24) | (b << 16) | (g << 8) | r;
+        }
 
-                            // Unpack components cleanly
-                            const r = ((rgb565 >> 11) & 0x1F) * 255 / 31;
-                            const g = ((rgb565 >> 5) & 0x3F) * 255 / 63;
-                            const b = (rgb565 & 0x1F) * 255 / 31;
+        ibCtx.putImageData(imgData, 0, 0);
+        ctx.drawImage(imageBufferCanvas, 0, 0);
 
-                            // Write an entire 32-bit pixel (RGBA) at once via Little Endian mask
-                            // Layout: Alpha (255) | Blue | Green | Red
-                            data32[p] = (255 << 24) | (b << 16) | (g << 8) | r;
-                        }
+        if (document.getElementById('autoSaveCheck').checked) {
+            saveCanvasImage();
+        }
 
-                        // 4. Draw to the UI viewport using standard hardware acceleration
-                        ibCtx.putImageData(imgData, 0, 0);
-                        ctx.drawImage(imageBufferCanvas, 0, 0);
+        setPipelineStage(3, 'txt-recv');
+        imageBytesCopied = 0;
 
-                        // Reset slice tracking index
-                        frameBytesReceived = 0;
-                        statusEl.innerText = "Status: Frame Rendered.";
-                    }
-                }
-            } catch (err) {
-                console.error("Processing channel disrupted:", err);
-            } finally {
-                reader.releaseLock();
+        if (!isStreaming) {
+            currentHardwareState = "IDLE";
+            setTimeout(() => { setPipelineStage(1, 'txt-conn'); }, 800);
+        } else if (isStreaming && keepReading) {
+            setTimeout(() => { sendParameters(); }, 10);
+        }
+    }
+
+    function dispatchValidatedPacket(id, dataPayload) {
+        if (id === 0x01) {
+            const expectedBytes = currentWidth * currentHeight * 2;
+            if (!imageReassemblyBuffer || imageBytesCopied >= expectedBytes) {
+                resetImageBuffers();
+            }
+
+            if (imageBytesCopied + dataPayload.length <= expectedBytes) {
+                imageReassemblyBuffer.set(dataPayload, imageBytesCopied);
+                imageBytesCopied += dataPayload.length;
+            }
+
+            if (imageBytesCopied >= expectedBytes) {
+                renderReassembledFrame();
             }
         }
     }
 
+    async function readLoop() {
+        while (port && port.readable && keepReading) {
+            try {
+                reader = port.readable.getReader();
+                while (keepReading) {
+                    const { value, done } = await reader.read();
+                    if (done || !keepReading) break;
+
+                    for (let i = 0; i < value.length; i++) {
+                        byteBuffer.push(value[i]);
+                    }
+
+                    while (byteBuffer.length >= 8) {
+                        if (byteBuffer[0] !== 0x55 || byteBuffer[1] !== 0xAA) {
+                            byteBuffer.shift();
+                            continue;
+                        }
+
+                        const packetId = byteBuffer[2];
+                        
+                        const length = (byteBuffer[3] & 0xFF) | 
+                                       ((byteBuffer[4] & 0xFF) << 8) | 
+                                       ((byteBuffer[5] & 0xFF) << 16) | 
+                                       (((byteBuffer[6] & 0xFF) << 24) >>> 0);
+                                       
+                        const totalPacketLength = 7 + length + 1; 
+
+                        if (byteBuffer.length < totalPacketLength) {
+                            break; 
+                        }
+
+                        if (byteBuffer[7 + length] === 0xBB) {
+                            const payload = new Uint8Array(byteBuffer.slice(7, 7 + length));
+                            dispatchValidatedPacket(packetId, payload);
+                        }
+
+                        byteBuffer.splice(0, totalPacketLength);
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (reader) {
+                    try { reader.releaseLock(); } catch(e) {}
+                }
+            }
+        }
+    }
 </script>
 
 </body>

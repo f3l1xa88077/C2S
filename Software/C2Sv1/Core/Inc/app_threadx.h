@@ -76,6 +76,8 @@ void MX_ThreadX_Init(void);
 
 /* USER CODE BEGIN EFP */
 
+void tx_thread_sleep_ms(ULONG ms);
+
 /* USER CODE END EFP */
 
 /* USER CODE BEGIN 1 */

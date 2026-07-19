@@ -56,8 +56,9 @@ TX_THREAD cam_thread;
 void INA219_ThreadEntry();
 void USB_ThreadEntry();
 void Cam_ThreadEntry();
-ULONG tx_time_ms(ULONG ms);
-void transmit_image(uint8_t* image_data, uint32_t total_bytes);
+void tx_thread_sleep_ms(ULONG ms);
+void tud_transmit_data(uint8_t* image_data, uint32_t total_bytes);
+void tud_transmit(uint8_t packet_id, uint8_t * data, uint32_t total_bytes);
 
 /* USER CODE END PFP */
 
@@ -75,7 +76,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
 	// Current Sense Amplifier
 	void *ina219_stack_ptr;
-	if (1)
+	if (CSA_ACTIVE)
 	{
 		if (tx_byte_allocate(byte_pool, &ina219_stack_ptr, 1024, TX_NO_WAIT) != TX_SUCCESS)
 		{
@@ -109,11 +110,14 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
 
 	// Current Sense Amplifier
-	tx_thread_create(&ina219_thread, "INA219 Thread",
-					INA219_ThreadEntry, 0,
-					ina219_stack_ptr, 1024,
-					20, 20, TX_NO_TIME_SLICE, TX_AUTO_START
-					);
+	if (CSA_ACTIVE)
+	{
+		tx_thread_create(&ina219_thread, "INA219 Thread",
+							INA219_ThreadEntry, 0,
+							ina219_stack_ptr, 1024,
+							20, 20, TX_NO_TIME_SLICE, TX_AUTO_START
+							);
+	}
 
 	// TinyUSB
 	if (OPERATIONAL_MODE == USB_MODE) {
@@ -172,7 +176,14 @@ void INA219_ThreadEntry()
 	{
 		// Read CSA Data
 		INA219_ReadAll(&INA219_Chip);
-		tx_thread_sleep(tx_time_ms(500));
+
+		if (tud_cdc_n_connected(0) && tud_cdc_available())
+		{
+			uint16_t power_to_send = (uint16_t)INA219_Chip.power_mW;
+			tud_transmit(0x02, (uint8_t*)(&power_to_send), sizeof(uint16_t));
+		}
+
+		tx_thread_sleep_ms(500);
 	}
 }
 
@@ -192,7 +203,7 @@ void USB_ThreadEntry()
 	{
 		// Poll PC
 		tud_task();
-		//tx_thread_sleep(tx_time_ms(20));
+		//tx_thread_sleep_ms(20));
 		tx_thread_relinquish();
 	}
 }
@@ -207,13 +218,10 @@ void Cam_ThreadEntry()
 	extern I2C_HandleTypeDef hi2c2;
 	extern DMA_QListTypeDef DCMIQueue;
 
-	// OV7670 Configuration
-	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET); 	// Camera PWDN to GND (Enable Camera)
-	ov7670_init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);						// Basic interface test
-	ov7670_config(OV7670_MODE_QVGA_RGB565);										// Register configuration
-	//ov7670_testpattern(&hdcmi);												// RGB Test Pattern
-	tx_thread_sleep(tx_time_ms(300));												// 300 ms setting time specified by datasheet (Table 4)
-	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);	// Disable Camera
+	// Reset & Disable Camera
+	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
+	OV7670_Init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);
+	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
 
 	// DCMI Setup
 	MX_DCMIQueue_Config();
@@ -228,50 +236,57 @@ void Cam_ThreadEntry()
 		if (tud_cdc_n_connected(0) && tud_cdc_available())
 		{
 			// Read incoming data to check for start condition
-			uint8_t buf[1] = {0};
+			uint8_t buf[5];
 			tud_cdc_read(buf, sizeof(buf));
 			tud_cdc_read_flush();
 
-			if ((char)buf[0] == 'S')
+			if ((buf[0] == 0xFF) && (buf[4] == 0xFE)) // Check start and end condition
 			{
+				// Extract data
+				uint8_t colour_mode = buf[1];
+				uint8_t resolution_mode = buf[2];
+				uint8_t test_pattern_mode = buf[3];
+
 				// Enable camera and wait for stabilisation
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
-				tx_thread_sleep(tx_time_ms(300));
+				OV7670_Config(colour_mode, resolution_mode, test_pattern_mode);
+				tx_thread_sleep_ms(300); // Pause for register configuration
 
 				// Capture Image
 				FrameProcessed = 0;
 				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, MAX_PICTURE_BUFF);
 
 				// Block until hardware completes the capture
-				while (!FrameProcessed)
-				{
-					tx_thread_sleep(5);
-				}
+				while (!FrameProcessed) { tx_thread_sleep(5); }
 
-				// IMAGE CAPTURED AT THIS POINT
+				/*  ----------------------------
+				 *  IMAGE CAPTURED AT THIS POINT
+				 *  ----------------------------
+				 */
 
 				// Stop DCMI and shut down camera power until next request
 				HAL_DCMI_Stop(&hdcmi);
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
 
 				// Transmit
-				transmit_image((uint8_t *)pBuffer, MAX_PICTURE_BUFF*4);
+				tud_transmit(0x01, (uint8_t*)pBuffer, MAX_PICTURE_BUFF*4);
 			}
 
 		}
 
 	// Free up thread
-	tx_thread_sleep(tx_time_ms(500));
+	tx_thread_sleep_ms(500);
 
 	}
 }
 
 /**
-  * @brief  Transmits a given image over TinyUSB to the dashboard
-  * @param image_data: 8-bit array of image data to be sent
+  * @brief  Transmits given data over TinyUSB to the dashboard
+  *
+  * @param image_data: 8-bit array of data to be sent
   * @param total_bytes: Total Bytes of image
   */
-void transmit_image(uint8_t* image_data, uint32_t total_bytes)
+void tud_transmit_data(uint8_t* data, uint32_t total_bytes)
 {
     uint32_t bytes_sent = 0;
 
@@ -283,7 +298,7 @@ void transmit_image(uint8_t* image_data, uint32_t total_bytes)
         {
             uint32_t remaining_bytes = total_bytes - bytes_sent;
             uint32_t chunk_size = (remaining_bytes < available_space) ? remaining_bytes : available_space;
-            uint32_t written = tud_cdc_write(&image_data[bytes_sent], chunk_size);
+            uint32_t written = tud_cdc_write(&data[bytes_sent], chunk_size);
             bytes_sent += written;
         }
 
@@ -293,13 +308,42 @@ void transmit_image(uint8_t* image_data, uint32_t total_bytes)
 }
 
 /**
-  * @brief  Returns threadx sleep ticks for an input milliseconds.
+  * @brief  Threadx sleep ticks for an input milliseconds.
+  *
   * @param ms: time to sleep in milliseconds
-  * @retval ticks
   */
-ULONG tx_time_ms(ULONG ms)
+void tx_thread_sleep_ms(ULONG ms)
 {
-	return ((ms * TX_TIMER_TICKS_PER_SECOND) / 1000);
+	tx_thread_sleep((ms * TX_TIMER_TICKS_PER_SECOND) / 1000);
+}
+
+/**
+  * @brief Sends data in packet format
+  *
+  * @param packet_id: Identifier of the data being sent (0x01: Image, 0x02: CSA)
+  * @param data: Data to be sent in 8-bit pointer format
+  * @param total_bytes: Total Bytes of image
+  */
+void tud_transmit(uint8_t packet_id, uint8_t * data, uint32_t total_bytes)
+{
+	// Definitions
+	uint16_t start_packet = 0xAA55;
+	uint8_t end_packet = 0xBB;
+
+	// Start of packet
+	tud_transmit_data((uint8_t*)(&start_packet), 2);
+
+	// Packet identifier
+	tud_transmit_data(&packet_id, 1);
+
+	// Data length
+	tud_transmit_data((uint8_t*)(&total_bytes), 4);
+
+	// Send data
+	tud_transmit_data(data, total_bytes);
+
+	// End of packet
+	tud_transmit_data((uint8_t*)(&end_packet), 1);
 }
 
 /* USER CODE END 1 */

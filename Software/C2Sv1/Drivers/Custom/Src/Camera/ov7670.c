@@ -1,15 +1,16 @@
 /*
- * ov7670.c
+ * OV7670.c
  *
  * Created on: 2017/08/25
  * Author: take-iwiw
  * Modified for STM32U575 GPDMA & D-Cache
  */
+
+#include "OV7670.h"
 #include <stdio.h>
 #include "main.h"
-#include "stm32u5xx_hal.h"
-#include "ov7670.h"
 #include "ov7670_config.h"
+#include "app_threadx.h"
 
 /*** Internal Const Values, Macros ***/
 #define OV7670_QVGA_WIDTH  320
@@ -30,11 +31,33 @@ static uint32_t s_currentH;
 static uint32_t s_currentV;
 
 /*** Internal Function Declarations ***/
-static RET ov7670_write(uint8_t regAddr, uint8_t data);
-static RET ov7670_read(uint8_t regAddr, uint8_t *data);
+static RET OV7670_Write_Register(uint8_t regAddr, uint8_t data);
+static RET OV7670_Read_Register(uint8_t regAddr, uint8_t *data);
+
+/*** Internal Function Defines ***/
+static RET OV7670_Write_Register(uint8_t regAddr, uint8_t data)
+{
+  HAL_StatusTypeDef ret;
+  do {
+    ret = HAL_I2C_Mem_Write(sp_hi2c, SLAVE_ADDR, regAddr, I2C_MEMADD_SIZE_8BIT, &data, 1, 100);
+  } while (ret != HAL_OK && 0);
+  return ret;
+}
+
+static RET OV7670_Read_Register(uint8_t regAddr, uint8_t *data)
+{
+  HAL_StatusTypeDef ret;
+  do {
+    // HAL_I2C_Mem_Read doesn't work (because of SCCB protocol(doesn't have ack))? */
+//    ret = HAL_I2C_Mem_Read(sp_hi2c, SLAVE_ADDR, regAddr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
+    ret = HAL_I2C_Master_Transmit(sp_hi2c, SLAVE_ADDR, &regAddr, 1, 100);
+    ret |= HAL_I2C_Master_Receive(sp_hi2c, SLAVE_ADDR, data, 1, 100);
+  } while (ret != HAL_OK && 0);
+  return ret;
+}
 
 /*** External Function Defines ***/
-RET ov7670_init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C_HandleTypeDef *p_hi2c)
+RET OV7670_Init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C_HandleTypeDef *p_hi2c)
 {
   sp_hdcmi     = p_hdcmi;
   sp_hdma_dcmi = p_hdma_dcmi;
@@ -45,53 +68,91 @@ RET ov7670_init(DCMI_HandleTypeDef *p_hdcmi, DMA_HandleTypeDef *p_hdma_dcmi, I2C
   s_bufferLengthBytes = OV7670_QVGA_WIDTH * OV7670_QVGA_HEIGHT * 2;
 
   HAL_GPIO_WritePin(DCMI_RESET_GPIO_Port, DCMI_RESET_Pin, GPIO_PIN_RESET);
-  HAL_Delay(100);
+  tx_thread_sleep_ms(100);
   HAL_GPIO_WritePin(DCMI_RESET_GPIO_Port, DCMI_RESET_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
+  tx_thread_sleep_ms(100);
 
-  ov7670_write(0x12, 0x80);  // RESET
-  HAL_Delay(30);
+  OV7670_Write_Register(0x12, 0x80);  // RESET
+  tx_thread_sleep_ms(30);
 
   uint8_t buffer[4];
-  ov7670_read(0x0b, buffer);
+  OV7670_Read_Register(0x0b, buffer);
   printf("[OV7670] dev id = %02X\n", buffer[0]);
 
   return RET_OK;
 }
 
-RET ov7670_config(uint32_t mode)
+/**
+  * @brief  Configures OV7670 sensor according to given input mode
+  *
+  * @param colour_mode: Defines colour format (0) RGB565; (1) Grayscale; (2) YCbCr
+  * @param resolution_mode: Defines image resolution (0) VGA; (1) QVGA
+  * @param test_pattern_mode: Displays the 8-bar test-pattern with the configured colour and resolution (0) No; (1) Yes.
+  */
+RET OV7670_Config(uint8_t colour_mode, uint8_t resolution_mode, uint8_t test_pattern_mode)
 {
-  //ov7670_stopCap();
-  ov7670_write(0x12, 0x80);  // RESET
-  HAL_Delay(200);
-  for(int i = 0; OV7670_Config[i][0] != REG_BATT; i++) {
-    ov7670_write(OV7670_Config[i][0], OV7670_Config[i][1]);
-    HAL_Delay(1);
-  }
-  return RET_OK;
-}
+	// PM Declarations
+	#define RGB565			0
+	#define GRAYSCALE		1
+	#define YCBCR			2
+	#define VGA_RESOLUTION 	0
+	#define QVGA_RESOLUTION 1
 
-RET ov7670_startCap(uint32_t capMode, uint32_t destAddress)
-{
-  ov7670_stopCap();
+	// PV Declarations
+//	extern const uint8_t RGB565_Config[][2];
+//	extern const uint8_t Grayscale_Config[][2];
+//	extern const uint8_t YCbCr_Config[][2];
+//	extern const uint8_t Test_Config[][2];
+//	extern const uint8_t QVGA_Config[][2];
+//	extern const uint8_t VGA_Config[][2];
 
-  // Convert bytes to 32-bit words for GPDMA transfer length
-  uint32_t lengthWords = s_bufferLengthBytes / 4;
+	// Clear Registers
+	OV7670_Write_Register(0x12, 0x80);
 
-  if (capMode == OV7670_CAP_CONTINUOUS) {
-    s_destAddressForContinuousMode = destAddress;
-    HAL_DCMI_Start_DMA(sp_hdcmi, DCMI_MODE_CONTINUOUS, destAddress, lengthWords);
-  } else if (capMode == OV7670_CAP_SINGLE_FRAME) {
-    s_destAddressForContinuousMode = 0;
-    HAL_DCMI_Start_DMA(sp_hdcmi, DCMI_MODE_SNAPSHOT, destAddress, lengthWords);
-  }
+	// Resolution Configuration
+	const uint8_t (*Resolution_Config)[2] = NULL;
+	if (resolution_mode == QVGA_RESOLUTION) { Resolution_Config = QVGA_Config; }
+	else if (resolution_mode == VGA_RESOLUTION) { Resolution_Config = VGA_Config; }
 
-  return RET_OK;
-}
+	// Colour Configuration
+	const uint8_t (*Colour_Config)[2] = NULL;
+	if (colour_mode == RGB565) { Colour_Config = RGB565_Config; }
+	else if (colour_mode == GRAYSCALE) { Colour_Config = Grayscale_Config; }
+	else if (colour_mode == YCBCR) { Colour_Config = YCbCr_Config; }
 
-RET ov7670_stopCap()
-{
-  HAL_DCMI_Stop(sp_hdcmi);
+	// Apply System-wide Configuration
+	for (int i = 0; System_Config[i][0] != REG_EOF; i++) {
+		OV7670_Write_Register(System_Config[i][0], System_Config[i][1]);
+	}
+
+	// Apply COM7 Register
+	uint8_t COM7_Val = (16 * resolution_mode);
+	if (test_pattern_mode) { COM7_Val += 2; }
+	if (colour_mode == RGB565) { COM7_Val += 4; }
+	else if (colour_mode == YCBCR || colour_mode == GRAYSCALE) { COM7_Val += 0; }
+	OV7670_Write_Register(OV7670_COM7_ADDRESS, COM7_Val);
+
+	// Apply Resolution Configuration
+	if (Resolution_Config != NULL) {
+		for (int i = 0; Resolution_Config[i][0] != REG_EOF; i++) {
+			OV7670_Write_Register(Resolution_Config[i][0], Resolution_Config[i][1]);
+		}
+	}
+
+	// Apply Colour Configuration
+	if (Colour_Config != NULL) {
+		for (int i = 0; Colour_Config[i][0] != REG_EOF; i++) {
+			OV7670_Write_Register(Colour_Config[i][0], Colour_Config[i][1]);
+		}
+	}
+
+	// Apply Test Pattern (if applicable)
+	if (test_pattern_mode) {
+		for (int i = 0; Test_Config[i][0] != REG_EOF; i++) {
+			OV7670_Write_Register(Test_Config[i][0], Test_Config[i][1]);
+		}
+	}
+
   return RET_OK;
 }
 
@@ -115,51 +176,4 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)
 {
   // Intentionally blank - GPDMA handles transfers automatically
-}
-
-/*** Internal Function Defines ***/
-static RET ov7670_write(uint8_t regAddr, uint8_t data)
-{
-  HAL_StatusTypeDef ret;
-  do {
-    ret = HAL_I2C_Mem_Write(sp_hi2c, SLAVE_ADDR, regAddr, I2C_MEMADD_SIZE_8BIT, &data, 1, 100);
-  } while (ret != HAL_OK && 0);
-  return ret;
-}
-
-static RET ov7670_read(uint8_t regAddr, uint8_t *data)
-{
-  HAL_StatusTypeDef ret;
-  do {
-    // HAL_I2C_Mem_Read doesn't work (because of SCCB protocol(doesn't have ack))? */
-//    ret = HAL_I2C_Mem_Read(sp_hi2c, SLAVE_ADDR, regAddr, I2C_MEMADD_SIZE_8BIT, data, 1, 1000);
-    ret = HAL_I2C_Master_Transmit(sp_hi2c, SLAVE_ADDR, &regAddr, 1, 100);
-    ret |= HAL_I2C_Master_Receive(sp_hi2c, SLAVE_ADDR, data, 1, 100);
-  } while (ret != HAL_OK && 0);
-  return ret;
-}
-
-void ov7670_testpattern(DCMI_HandleTypeDef *hdcmi)
-{
-	// Setup
-//	ov7670_write(0x12, 0x15);
-//
-//	// Change SCALING Registers
-//	//ov7670_write(0x70, 0xF5); // scaling_xsc
-//	ov7670_write(0x71, 0xB5); // scaling_ysc
-
-	//ov7670_write(0x42, 0x08);
-
-	//ov7670_write(0x12, 0x80); //Software reset, YUV
-
-	ov7670_write(0x1E, 0x31);  //Flip image vertically
-	ov7670_write(0x13, 0x81); //Auto gain enable, White balance enable, Auto exposure enable
-	ov7670_write(0x3f, 0x01 ); //Edge enhancement factor
-
-	ov7670_write(0x70, 0x3A); // Enable pattern
-	ov7670_write(0x71, 0x35 | 0x80); // Enable pattern
-
-	ov7670_write(0x3A, 0x1D); // Fixed MANU, MANV
-	ov7670_write(0x3D, 0x88 | 0x40); // UV saturation
-
 }
