@@ -24,6 +24,7 @@
 !/Software/C2Sv[01]*/Drivers/Custom/
 
 # Core / Source
+Software/C2Sv0.1/Drivers/Custom/Inc/Peripherals/test_image.h
 !/Software/C2Sv[01]*/Core/
 /Software/C2Sv[01]*/Core/*
 !/Software/C2Sv[01]*/Core/Inc/main.h

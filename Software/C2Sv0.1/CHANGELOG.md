@@ -1,10 +1,25 @@
 # Changelog
 
+## Stream JPEG encoding band-by-band to support high-quality image inputs
+
+### Added
+- HAL_JPEG_GetDataCallback feeds the codec one band at a time via HAL_JPEG_ConfigInputBuffer.
+- JPEG_Encode_Progress state struct + MAX_WIDTH image dimension bound.
+
+### Changed
+- 'JPEG_Encode_Gray' no longer tiles the whole frame into a 128x128 'mcu_buf'.
+
+### Notes
+- Still a static test image and harness, no live DCMI capture.
+- Verified on board
+
+
+
 ## Fix JPEG encoded-length reporting
 
 ### Fixed
 - `JPEG_Encode_Gray` reported `*out_len` from `hjpeg->OutDataLength` — the output
-  buffer *capacity* (~20000), not the real compressed size, so SD files were
+  buffer capacity (~20000), not the real compressed size, so SD files were
   written padded to the full buffer. The true length is now accumulated from
   `HAL_JPEG_DataReadyCallback` into a file-scope counter (reset before each
   encode) and returned via `*out_len`.
