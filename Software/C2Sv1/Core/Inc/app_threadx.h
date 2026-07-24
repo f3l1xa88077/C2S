@@ -42,6 +42,9 @@ extern "C" {
 #include "linked_list.h"
 #include "stm32u5xx_hal_dcmi.h"
 
+// QSPI
+#include "AT25xF2561C.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

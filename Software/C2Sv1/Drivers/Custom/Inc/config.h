@@ -24,9 +24,6 @@
 
 // ------------ USER INPUT ENDS HERE ------------
 
-// QSPI
-#define QSPI_DUMMY_CYCLES_NUM 	14 					// Can be changed to 6 if speed is lower than 80MHz
-
 // CSA
 #define SHUNT_RESISTANCE 		1.6f
 #define INA219_GAIN 			8 					// The dividing factor for the gain. Either 1, 2, 4, or 8.

@@ -218,6 +218,13 @@ void Cam_ThreadEntry()
 	extern I2C_HandleTypeDef hi2c2;
 	extern DMA_QListTypeDef DCMIQueue;
 
+	extern OSPI_HandleTypeDef hospi1;
+	extern QSPI_HandleTypeDef QSPI_Memory;
+	extern OSPI_RegularCmdTypeDef sCommand;
+
+	// Setup QSPI
+	QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
+
 	// Reset & Disable Camera
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
 	OV7670_Init(&hdcmi, &handle_GPDMA1_Channel0, &hi2c2);
@@ -267,6 +274,12 @@ void Cam_ThreadEntry()
 				// Stop DCMI and shut down camera power until next request
 				HAL_DCMI_Stop(&hdcmi);
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
+
+				// QSPI
+				QSPI_DataBlock_HandleTypeDef DataChunk;
+				QSPI_Init_DataBlock(&DataChunk, MAX_PICTURE_BUFF*4, pBuffer, pBuffer);
+				QSPI_Write_Data(&QSPI_Memory, &DataChunk);
+				QSPI_Read_Data(&QSPI_Memory, &DataChunk);
 
 				// Transmit
 				tud_transmit(0x01, (uint8_t*)pBuffer, MAX_PICTURE_BUFF*4);

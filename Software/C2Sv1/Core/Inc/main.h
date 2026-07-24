@@ -32,7 +32,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
-#include "AT25SF2561C.h"
+#include "AT25xF2561C.h"
 #include <tinyusb/tusb.h>
 #include "interrupt.h"
 

@@ -48,16 +48,16 @@ const uint8_t QVGA_Config[][2] = {
 const uint8_t VGA_Config[][2] = {
 
 		// Windowing
-//		{OV7670_HSTART_ADDRESS, 0x14}, 		// HSTART
-//		{OV7670_HSTOP_ADDRESS, 0x02}, 		// HSTOP
-//		{OV7670_HREF_ADDRESS, 0x80}, 		// HREF
-//
-//		{OV7670_VSTART_ADDRESS, 0x02},   	// VSTART
-//		{OV7670_VSTOP_ADDRESS, 0x7A},   	// VSTOP
-//		{OV7670_VREF_ADDRESS, 0x0A},   		// VREF
-//
-//		{OV7670_COM4_ADDRESS, 0x00},
-//		{OV7670_COM17_ADDRESS, 0x00},
+		{OV7670_HSTART_ADDRESS, 0x13}, 		// HSTART
+		{OV7670_HSTOP_ADDRESS, 0x01}, 		// HSTOP
+		{OV7670_HREF_ADDRESS, 0xB6}, 		// HREF
+
+		{OV7670_VSTART_ADDRESS, 0x03},   	// VSTART
+		{OV7670_VSTOP_ADDRESS, 0x7B},   	// VSTOP
+		{OV7670_VREF_ADDRESS, 0x0A},   		// VREF
+
+		{OV7670_COM4_ADDRESS, 0x00},
+		{OV7670_COM17_ADDRESS, 0x00},
 
 		{REG_EOF, REG_EOF},
 };
@@ -69,41 +69,28 @@ const uint8_t RGB565_Config[][2] = {
 		{OV7670_COM15_ADDRESS, 0xD0},   	// RGB565, 00 - FF
 		{OV7670_TSLB_ADDRESS, 0x04},   		// UYVY, Dynamic Resolution Change (bits 1&2 reserved as 01)
 		{OV7670_COM13_ADDRESS, 0x88},   	// Gamma Enable, UV auto adjust, UYVY
+		{OV7670_COM11_ADDRESS, 0xE0},
+		{OV7670_RSVD_B0_ADDRESS, OV7670_RSVD_B0_RESET_VALUE}, // DO NOT CLEAR (Inverts colours if removed)
 
-		// Auto White Balance
-		{0x13, 0x84},
-		{0x14, 0x0a},   // AGC Ceiling = 2x
-		{0x5F, 0x2f},   // AWB B Gain Range (empirically decided). without this bright scene becomes yellow (purple). might be because of color matrix.
-		{0x60, 0x98},   // AWB R Gain Range (empirically decided)
-		{0x61, 0x70},   // AWB G Gain Range (empirically decided)
-		{0x41, 0x38},   // edge enhancement, de-noise, AWG gain enabled
+		// AGC, AEC, AWB
+		{OV7670_GAIN_ADDRESS, 0xFF},
+		{OV7670_COM8_ADDRESS, 0x4A},		// Fast AGC/AEC, AWB Enabled
+		{OV7670_COM9_ADDRESS, 0x4a},   		// AGC Ceiling = 32x
+		{OV7670_COM16_ADDRESS, 0x38},   	// edge enhancement, de-noise, AWG gain enabled
+
+		// Exposure Timing (16-bit controller, MSB to LSB)
+		{OV7670_AECHH_ADDRESS, 0x00}, 	// [5:0]
+		{OV7670_AECH_ADDRESS, 0xF0},	// [7:0]
+		{OV7670_COM1_ADDRESS, 0x00},	// [1:0]
 
 		// Colour Matrix
-		{0x4f, 0x80},
-		{0x50, 0x80},
-		{0x51, 0x00},
-		{0x52, 0x22},
-		{0x53, 0x5e},
-		{0x54, 0x80},
-		{0x58, 0x9e},
-
-		// Gamma Curve
-		{0x7b, 16},
-		{0x7c, 30},
-		{0x7d, 53},
-		{0x7e, 90},
-		{0x7f, 105},
-		{0x80, 118},
-		{0x81, 130},
-		{0x82, 140},
-		{0x83, 150},
-		{0x84, 160},
-		{0x85, 180},
-		{0x86, 195},
-		{0x87, 215},
-		{0x88, 230},
-		{0x89, 244},
-		{0x7a, 16},
+		{OV7670_MTX1_ADDRESS, 0xB3},
+		{OV7670_MTX2_ADDRESS, 0xB3},
+		{OV7670_MTX3_ADDRESS, 0x00},
+		{OV7670_MTX4_ADDRESS, 0x3D},
+		{OV7670_MTX5_ADDRESS, 0xA7},
+		{OV7670_MTX6_ADDRESS, 0xE4},
+		{OV7670_MTXS_ADDRESS, 0x9E},
 
 		{REG_EOF, REG_EOF},
 };

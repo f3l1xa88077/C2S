@@ -14,7 +14,7 @@
  */
 
 
-#include"AT25SF2561C.h"
+#include"AT25xF2561C.h"
 
 /**
  * @brief  Resets the OSPI command structure to default values.
@@ -68,7 +68,7 @@ HAL_StatusTypeDef QSPI_Init_Memory(OSPI_HandleTypeDef *hospi, OSPI_RegularCmdTyp
  * @param *rx_pData Pointer to data that will be read into
  *
  */
-void QSPI_Init_DataBlock(QSPI_DataChunk_HandleTypeDef *DataBlock, uint32_t data_size, void *tx_pData, void *rx_pData)
+void QSPI_Init_DataBlock(QSPI_DataBlock_HandleTypeDef *DataBlock, uint32_t data_size, void *tx_pData, void *rx_pData)
 {
 	DataBlock->data_size = data_size;
 	DataBlock->tx_pData = tx_pData;
@@ -390,7 +390,7 @@ HAL_StatusTypeDef QSPI_Write_Page(QSPI_HandleTypeDef *QSPI_Memory, uint32_t addr
  * @retval Confirmation of operation, HAL_OK for successful, HAL_ERROR for unsuccessful
  *
  */
-HAL_StatusTypeDef QSPI_Write_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataChunk_HandleTypeDef *DataBlock)
+HAL_StatusTypeDef QSPI_Write_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataBlock_HandleTypeDef *DataBlock)
 {
 	if (QSPI_Command(QSPI_Memory, QSPI_WRITE_ENABLE) != HAL_OK) return HAL_ERROR;
     if (QSPI_Validate_Rdy(QSPI_Memory, QSPI_TIMEOUT_GENERAL) != HAL_OK) return HAL_ERROR;
@@ -437,7 +437,7 @@ HAL_StatusTypeDef QSPI_Write_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataChun
  * @retval Confirmation of operation, HAL_OK for successful, HAL_ERROR for unsuccessful
  *
  */
-HAL_StatusTypeDef QSPI_Read_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataChunk_HandleTypeDef *DataBlock)
+HAL_StatusTypeDef QSPI_Read_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataBlock_HandleTypeDef *DataBlock)
 {
 	if (QSPI_Validate_Rdy(QSPI_Memory, QSPI_TIMEOUT_GENERAL) != HAL_OK) return HAL_ERROR;
 
@@ -468,7 +468,7 @@ HAL_StatusTypeDef QSPI_Read_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataChunk
  * @retval Confirmation of operation, HAL_OK for successful, HAL_ERROR for unsuccessful
  *
  */
-HAL_StatusTypeDef QSPI_Erase_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataChunk_HandleTypeDef *DataBlock)
+HAL_StatusTypeDef QSPI_Erase_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataBlock_HandleTypeDef *DataBlock)
 {
 	uint32_t curAddress = DataBlock->address_block_start;
 	uint16_t NumBlocks = (DataBlock->data_size + 4095) >> 12;
@@ -517,7 +517,7 @@ uint32_t QSPI_Test_Reliability(QSPI_HandleTypeDef *QSPI_Memory)
     QSPI_Erase_64kB(QSPI_Memory, start_address);
 
     // Create DataBlock
-    QSPI_DataChunk_HandleTypeDef DataBlock;
+    QSPI_DataBlock_HandleTypeDef DataBlock;
     QSPI_Init_DataBlock(&DataBlock, test_size, tx_buf, rx_buf);
 
     // 1. Prepare dummy data (0, 1, 2, 3...)

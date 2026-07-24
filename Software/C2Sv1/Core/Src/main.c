@@ -58,7 +58,6 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 // QSPI
 QSPI_HandleTypeDef QSPI_Memory;
-QSPI_DataChunk_HandleTypeDef DataChunk;
 OSPI_RegularCmdTypeDef sCommand;
 
 // Interrupt
