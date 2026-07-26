@@ -1,8 +1,6 @@
-Because there were no publicly available drivers for the \href{https://www.renesas.com/en/products/at25sf2561c/part-details/at25sf2561c-mwub-t}{AT25SF2561C} QSPI memory, I developed a custom driver to interface with our hardware.
-While STM32CubeIDE provides the underlying HAL functions to support the QSPI interface, the driver logic had to be built from scratch by following the device \href{https://www.renesas.com/en/document/dst/at25sf2561cat25qf2561c-datasheet?r=25559121}{datasheet}.
+Because there were no publicly available drivers for the \href{https://www.renesas.com/en/products/at25sf2561c/part-details/at25sf2561c-mwub-t}{AT25SF2561C} QSPI memory, I developed a custom driver to interface with our hardware. While STM32CubeIDE provides the underlying HAL functions to support the QSPI interface, the driver logic had to be built from scratch by following the device \href{https://www.renesas.com/en/document/dst/at25sf2561cat25qf2561c-datasheet?r=25559121}{datasheet}.
 \nl
-The HAL functions operate on \verb|sCommand|, a struct that tells the HAL everything it needs to know like the address, the amount of bytes, how many lines the instruction will be sent on, etc.
-At its core, my driver simply grabs all the information it needs to, packages it into this \verb|sCommand| struct and feeds that to the HAL to handle the read/write.
+The HAL functions operate on \verb|sCommand|, a struct that tells the HAL everything it needs to know like the address, the amount of bytes, how many lines the instruction will be sent on, etc. At its core, my driver simply grabs all the information it needs to, packages it into this \verb|sCommand| struct and feeds that to the HAL to handle the read/write.
 Naturally the driver is more complex than this, but if you analyse the code, you will see lots of lines like \verb|QSPI_Memory->sCommand->...| which are just packing the data into the struct.
 \nl
 Now, by analysing the command set and register maps, I identified four primary operations required for the driver:
@@ -16,53 +14,26 @@ Every other high-level function in the driver is essentially a combination of th
 
 Before the chip can handle standard read, write, or erase tasks, a specific initialisation sequence is required:
 \begin{itemize}
-    \item \textbf{WEL Bit:} Setting the Write Enable Latch in Status Register 1 (SR1).
-    \item \textbf{RDY/BSY Polling:} Validating the Ready/Busy bit in SR1 to ensure the chip isn't mid-operation.
-    \item \textbf{Quad I/O Mode:} Enabling 4-line data transfer in SR2.
-    \item \textbf{Dummy Cycles:} Configuring latency in SR3 to match our clock frequency.
-    \item \textbf{4-Byte Addressing:} Entering 4-byte address mode (Command $B7h$) to access the full memory capacity beyond $16$\,MB.
+    \item Setting the Write Enable Latch in Status Register (SR) 1.
+    \item Validating the Ready/Busy bit in SR1 to ensure the chip isn't mid-operation.
+    \item Enabling 4-line data transfer in SR2.
+    \item Configuring latency in SR3 to match our clock frequency.
+    \item Entering 4-byte address mode to access the full memory capacity beyond $16$\,MB.
 \end{itemize}
 
-A technical constraint of the hardware is that the standard write command is limited to a single $256$-byte page.
-To handle larger data payloads, the driver segments the data into $256$-byte chunks and automatically increments the address pointer to the next page once the current one is full.
-This allows for contiguous data logging without manual page management in the main application.
+A technical constraint of the hardware is that the standard write command is limited to a single $256$-byte page. To handle larger data writes, the driver segments the data into $256$-byte chunks and automatically increments the address pointer to the next page once the current one is full. This allows for contiguous data writing without manual page management.
 \nl
 Beyond the basic command set, several hardware-level constraints were addressed to ensure data integrity:
 \begin{itemize}
-    \item \textbf{Erasure Granularity:} While the device supports 256-byte page programming, memory must be cleared in 4\,kB sectors before a rewrite can occur. The driver includes safety checks to prevent writing to non-erased blocks.
-    \item \textbf{Volatility of Configuration:} The 4-byte address mode and dummy cycle configurations are volatile; the driver re-initialises these parameters on every power-on reset (POR) to ensure the memory map is consistently accessible.
-    \item \textbf{Bus Reliability:} All polling loops for the RDY/BSY bit incorporate defined timeout periods (\texttt{QSPI\_TIMEOUT\_GENERAL}) to prevent CPU hang-ups in the event of hardware communication failure.
+    \item While the device supports 256-byte page programming, memory must be cleared in 4\,kB sectors before a rewrite can occur. The driver includes safety checks to prevent writing to non-erased blocks.
+    \item The 4-byte address mode and dummy cycle configurations are volatile; the driver re-initialises these parameters on every power-on reset to ensure the memory map is consistently accessible.
+    \item All polling loops for the RDY/BSY bit incorporate defined timeout periods to prevent CPU hang-ups in the event of hardware communication failure.
 \end{itemize}
 
-To simplify the integration of the driver into the flight software, I have created a \verb|DataChunk| structure to manage data transfers. This structure bundles the data size, source/destination pointers, and memory addresses into a single object, helping to abstract and simplify the code. 
-A typical write-then-read verification cycle is implemented as follows:
-
-\begin{verbatim}
-        // 1. Define the buffers and chunk
-        uint8_t tx_data[] = "IMAGE_DATA_001";
-        uint8_t rx_buffer[sizeof(tx_data)];
-        QSPI_DataChunk_HandleTypeDef special_message;
-
-        // 2. Initialize the chunk with source and destination
-        QSPI_Init_DataBlock(&special_message, sizeof(tx_data), tx_data, rx_buffer);
-
-        // 3. Execute the write and read operations
-        if (QSPI_Write_Data(&QSPI_Memory, &special_message) == HAL_OK) {
-            // Data is written and special_message updated with end addresses
-            QSPI_Read_Data(&QSPI_Memory, &special_message);
-        }
-\end{verbatim}
-
-The driver's internal address management automatically updates the \texttt{occupied\_data} tracker within the \texttt{QSPI\_Memory} handle.
-This ensures that subsequent calls to \texttt{QSPI\_Write\_Data} will append data to the next available 4\,kB-aligned sector, preventing accidental data overwrites during high-frequency logging.
+To simplify the integration of the driver into the flight software, I had created a \verb|DataBlock| structure to manage data transfers. This structure bundles the data size, source/destination pointers, and memory addresses into a single object, helping to abstract and simplify the code.
 \nl
-The driver utilises a \textbf{LIFO (Last-In, First-Out)} stack architecture for memory management. The \texttt{occupied\_data} variable functions as a stack pointer, tracking the boundary between used and available memory.
-\begin{itemize}
-    \item \textbf{Stack Behavior:} New data chunks are "pushed" onto the next available address. Erase operations are designed to "pop" the most recent data by moving the \texttt{occupied\_data} tracker backward.
-    \item \textbf{Erasure Constraints:} Because the address tracker is a single scalar value, erasure must occur in reverse-chronological order. Erasing a chunk at the start or middle of the memory would cause the tracker to point toward valid data further up the stack, leading to addressing conflicts. 
-    \item \textbf{Granular Deletion:} The \texttt{QSPI\_Erase\_Data} function calculates the number of 4kB sectors required to clear the specific \texttt{DataChunk} and resets the pointer only after a successful hardware wipe.
-\end{itemize}
-Although the data chunks could be managed with a data structure, the symptoms of implementing a structure introduces far more complex problems than positive benefits.
-For example, two image chunks $I_1$ and $I_2$ with two characteristic sizes cannot be stored side by side without wastage.
-If $I_1$ is stored directly before $I_2$ in memory, then $I_1$ cannot be deleted and replaced with a chunk of different size without overwriting $I_2$ of leaving empty space between the chunks.
-For these reasons, implementing data structures is not within the current scope. Instead careful usage of the driver is urged.
+The driver's internal address management automatically updates its tracker. This ensures that subsequent write calls will append data to the next available 4\,kB-aligned sector, preventing data overwrites.
+\nl
+The driver utilises a LIFO (Last-In, First-Out) stack architecture for memory management, so new data chunks are pushed onto the next available address. Erase operations are designed to pop the most recent data by moving the address tracker backward. Because the address tracker is a single scalar value, erasure must occur in reverse-chronological order. Erasing a chunk at the start or middle of the memory would cause the tracker to point toward valid data further up the stack, leading to addressing conflicts.
+\nl
+Although the data chunks could be managed with a data structure, the symptoms of implementing a structure introduces far more complex problems than positive benefits. For example, two image chunks $I_1$ and $I_2$ with two characteristic sizes cannot be stored side by side without wastage. If $I_1$ is stored directly before $I_2$ in memory, then $I_1$ cannot be deleted and replaced with a chunk of different size without overwriting $I_2$ of leaving empty space between the chunks. For these reasons, implementing data structures is not within the current scope. Instead careful usage of the driver is urged.
