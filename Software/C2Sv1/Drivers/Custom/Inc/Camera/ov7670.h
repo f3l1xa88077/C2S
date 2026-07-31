@@ -19,7 +19,7 @@
 typedef uint32_t RET;
 
 // 320 * 240 pixels. 2 pixels per word. 4 Bytes per word.
-#define MAX_PICTURE_BUFF     	(320 * 240 * 2 / 4)
+#define MAX_PICTURE_BUFF (320 * 240 * 2 / 4)
 
 #define SLAVE_ADDR 0x42
 

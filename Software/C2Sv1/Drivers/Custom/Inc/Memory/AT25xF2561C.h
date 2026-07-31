@@ -27,6 +27,7 @@
 #define QSPI_ERASE_4KB 0X21
 #define QSPI_ERASE_32KB 0X5C
 #define QSPI_ERASE_64KB 0XDC
+#define QSPI_ERASE_CHIP 0xC7
 
 #define QSPI_ENTER_SLEEP 0xB9
 #define QSPI_ENTER_4BYTE_ADDRESS 0xB7
@@ -45,8 +46,8 @@ typedef struct {
 	uint32_t 	data_size;
 	void 		*tx_pData;
 	void 		*rx_pData;
-	uint16_t 	address_block_start;
-	uint16_t 	address_block_end;
+	uint32_t 	address_block_start;
+	uint32_t 	address_block_end;
 }QSPI_DataBlock_HandleTypeDef;
 
 typedef struct {

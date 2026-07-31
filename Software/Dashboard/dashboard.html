@@ -435,10 +435,7 @@
             await port.open({ baudRate: 115200 }); 
             keepReading = true;
             
-            // Monitor for sudden physical disconnection (e.g., USB unplugged)
-            // Place this at the absolute top of your script block
             navigator.serial.addEventListener('disconnect', (event) => {
-                // Check if the pulled device matches our active port
                 if (port && event.target === port) {
                     console.warn("Hardware device yanked.");
                     disconnectSerial();
@@ -486,33 +483,27 @@
         setPipelineStage(2, 'txt-sent');
         
         if (port.writable) {
-            const encoder = new TextEncoder();
             const writer = port.writable.getWriter();
 
-            // Start
-            await writer.write(new Uint8Array([255])); // Sends exact raw byte 0xFF
+            await writer.write(new Uint8Array([255]));
 
-            // Colour Mode
             const colourVal = document.getElementById('colour').value;
-            if (colourVal === "RGB565")         { await writer.write(new Uint8Array([0])); } // 0x00
-            else if (colourVal === "Grayscale") { await writer.write(new Uint8Array([1])); } // 0x01
-            else if (colourVal === "YCbCr")     { await writer.write(new Uint8Array([2])); } // 0x02
+            if (colourVal === "RGB565")         { await writer.write(new Uint8Array([0])); }
+            else if (colourVal === "Grayscale") { await writer.write(new Uint8Array([1])); }
+            else if (colourVal === "YCbCr")     { await writer.write(new Uint8Array([2])); }
 
-            // Resolution
             const resVal = document.getElementById('resolution').value;
-            if (resVal === "VGA")  { await writer.write(new Uint8Array([0])); } // 0x00
-            else if (resVal === "QVGA") { await writer.write(new Uint8Array([1])); } // 0x01
+            if (resVal === "VGA")  { await writer.write(new Uint8Array([0])); }
+            else if (resVal === "QVGA") { await writer.write(new Uint8Array([1])); }
 
-            // Test Pattern
             const isPatternEnabled = document.getElementById('testPatternCheck').checked;
             if (!isPatternEnabled) { 
-                await writer.write(new Uint8Array([0])); // 0x00
+                await writer.write(new Uint8Array([0]));
             } else { 
-                await writer.write(new Uint8Array([1])); // 0x01
+                await writer.write(new Uint8Array([1]));
             }
 
-            // End
-            await writer.write(new Uint8Array([254])); // Sends exact raw byte 0xFE
+            await writer.write(new Uint8Array([254]));
 
             writer.releaseLock();
         }
@@ -592,19 +583,24 @@
         } catch (err) { console.error(err); }
     }
 
-    function renderReassembledFrame() {
+    function drawChunkToCanvas(payload, byteOffset) {
         const canvas = document.getElementById('canvasView');
         const ctx = canvas.getContext('2d');
-        const expectedBytes = currentWidth * currentHeight * 2;
 
-        const imageBufferCanvas = new OffscreenCanvas(currentWidth, currentHeight);
-        const ibCtx = imageBufferCanvas.getContext('2d');
-        const imgData = ibCtx.createImageData(currentWidth, currentHeight);
+        const pixelStart = Math.floor(byteOffset / 2);
+        const pixelCount = Math.floor(payload.length / 2);
+
+        if (pixelCount === 0) return;
+
+        const startX = pixelStart % currentWidth;
+        const startY = Math.floor(pixelStart / currentWidth);
+
+        const imgData = ctx.createImageData(pixelCount, 1);
         const data32 = new Uint32Array(imgData.data.buffer);
 
-        for (let i = 0, p = 0; i < expectedBytes; i += 2, p++) {
-            const b1 = imageReassemblyBuffer[i];
-            const b2 = imageReassemblyBuffer[i + 1];
+        for (let i = 0, p = 0; i < pixelCount * 2; i += 2, p++) {
+            const b1 = payload[i];
+            const b2 = payload[i + 1];
             const rgb565 = (b1 << 8) | b2;
 
             const r = ((rgb565 >> 11) & 0x1F) * 255 / 31;
@@ -614,9 +610,32 @@
             data32[p] = (255 << 24) | (b << 16) | (g << 8) | r;
         }
 
-        ibCtx.putImageData(imgData, 0, 0);
-        ctx.drawImage(imageBufferCanvas, 0, 0);
+        if (startX + pixelCount <= currentWidth) {
+            ctx.putImageData(imgData, startX, startY);
+        } else {
+            let pxOffset = 0;
+            let currentX = startX;
+            let currentY = startY;
 
+            while (pxOffset < pixelCount) {
+                const chunkLen = Math.min(pixelCount - pxOffset, currentWidth - currentX);
+                const lineImgData = ctx.createImageData(chunkLen, 1);
+                const lineData32 = new Uint32Array(lineImgData.data.buffer);
+
+                for (let i = 0; i < chunkLen; i++) {
+                    lineData32[i] = data32[pxOffset + i];
+                }
+
+                ctx.putImageData(lineImgData, currentX, currentY);
+
+                pxOffset += chunkLen;
+                currentX = 0;
+                currentY++;
+            }
+        }
+    }
+
+    function onFrameComplete() {
         if (document.getElementById('autoSaveCheck').checked) {
             saveCanvasImage();
         }
@@ -628,24 +647,32 @@
             currentHardwareState = "IDLE";
             setTimeout(() => { setPipelineStage(1, 'txt-conn'); }, 800);
         } else if (isStreaming && keepReading) {
-            setTimeout(() => { sendParameters(); }, 10);
+            setTimeout(() => { 
+                resetImageBuffers();
+                sendParameters(); 
+            }, 10);
         }
     }
 
     function dispatchValidatedPacket(id, dataPayload) {
         if (id === 0x01) {
             const expectedBytes = currentWidth * currentHeight * 2;
+            
             if (!imageReassemblyBuffer || imageBytesCopied >= expectedBytes) {
                 resetImageBuffers();
             }
 
+            const currentByteOffset = imageBytesCopied;
+
             if (imageBytesCopied + dataPayload.length <= expectedBytes) {
                 imageReassemblyBuffer.set(dataPayload, imageBytesCopied);
                 imageBytesCopied += dataPayload.length;
+                
+                drawChunkToCanvas(dataPayload, currentByteOffset);
             }
 
             if (imageBytesCopied >= expectedBytes) {
-                renderReassembledFrame();
+                onFrameComplete();
             }
         }
     }

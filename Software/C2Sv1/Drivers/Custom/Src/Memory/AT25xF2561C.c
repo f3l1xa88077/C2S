@@ -73,6 +73,8 @@ void QSPI_Init_DataBlock(QSPI_DataBlock_HandleTypeDef *DataBlock, uint32_t data_
 	DataBlock->data_size = data_size;
 	DataBlock->tx_pData = tx_pData;
 	DataBlock->rx_pData = rx_pData;
+	DataBlock->address_block_start = (uint32_t)NULL;
+	DataBlock->address_block_end = (uint32_t)NULL;
 }
 
 /**
@@ -413,8 +415,8 @@ HAL_StatusTypeDef QSPI_Write_Data(QSPI_HandleTypeDef *QSPI_Memory, QSPI_DataBloc
     if (curAddress != (QSPI_Memory->occupied_data + DataBlock->data_size)) return HAL_ERROR;
 
     // Set addresses for data block management
-    DataBlock->address_block_start = QSPI_Memory->occupied_data;
     DataBlock->address_block_end = curAddress;
+    if (DataBlock->address_block_start == (uint32_t)NULL) DataBlock->address_block_start = QSPI_Memory->occupied_data;
 
     // Update Data Management variable to reflect occupied blocks
     QSPI_Memory->occupied_data += ((DataBlock->data_size + 4095) & ~4095);

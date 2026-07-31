@@ -36,4 +36,10 @@
 #define DCMI_RESET_Pin			DCMI_GPIO2_Pin
 #define DCMI_RESET_GPIO_Port	DCMI_GPIO2_GPIO_Port
 
+#define IMAGE_COLS				320
+#define IMAGE_ROWS				240
+#define DB_ROWS					4
+#define DB_SIZE_BYTES 			(IMAGE_COLS*DB_ROWS*2) // 320 columns, 1 row, 2 bytes per pixel
+#define DB_SIZE_WORDS 			(DB_SIZE_BYTES / 4)
+
 #endif /* CUSTOM_INC_CONFIG_H_ */

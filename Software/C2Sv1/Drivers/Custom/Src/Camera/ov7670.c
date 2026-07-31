@@ -17,7 +17,8 @@
 #define OV7670_QVGA_HEIGHT 240
 
 /*** External Variables ***/
-extern uint8_t FrameProcessed;
+extern volatile uint8_t FrameProcessed;
+extern volatile uint32_t processedRows;
 
 /*** Internal Static Variables ***/
 static DCMI_HandleTypeDef *sp_hdcmi;
@@ -171,6 +172,11 @@ void HAL_DCMI_FrameEventCallback(DCMI_HandleTypeDef *hdcmi)
 
   // Update snapshot flag
   FrameProcessed = 1;
+}
+
+void HAL_DCMI_LineEventCallback(DCMI_HandleTypeDef *hdcmi)
+{
+	processedRows++;
 }
 
 void HAL_DCMI_VsyncEventCallback(DCMI_HandleTypeDef *hdcmi)

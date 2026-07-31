@@ -65,7 +65,11 @@ volatile bool c2s_should_sleep = 0;
 
 // Camera
 ALIGN_32BYTES(uint32_t pBuffer[MAX_PICTURE_BUFF]);//__attribute__((section(".sram3"))); 	// Force the buffer into SRAM3
+ALIGN_32BYTES(uint32_t bufferA[DB_SIZE_WORDS]);
+ALIGN_32BYTES(uint32_t bufferB[DB_SIZE_WORDS]);
+ALIGN_32BYTES(uint32_t bufferC[DB_SIZE_WORDS]);
 volatile uint8_t FrameProcessed = 0;													// Image captured to RAM (1); not (0)
+volatile uint32_t processedRows = 0;
 
 /* USER CODE END PV */
 
@@ -388,7 +392,7 @@ static void MX_OCTOSPI1_Init(void)
   hospi1.Init.FreeRunningClock = HAL_OSPI_FREERUNCLK_DISABLE;
   hospi1.Init.ClockMode = HAL_OSPI_CLOCK_MODE_0;
   hospi1.Init.WrapSize = HAL_OSPI_WRAP_NOT_SUPPORTED;
-  hospi1.Init.ClockPrescaler = 5;
+  hospi1.Init.ClockPrescaler = 2;
   hospi1.Init.SampleShifting = HAL_OSPI_SAMPLE_SHIFTING_HALFCYCLE;
   hospi1.Init.DelayHoldQuarterCycle = HAL_OSPI_DHQC_DISABLE;
   hospi1.Init.ChipSelectBoundary = 0;

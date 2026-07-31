@@ -15,8 +15,14 @@
 
 const uint8_t System_Config[][2] = {
 
-		{OV7670_CLKRC_ADDRESS, 0x80}, 		// pre-scalar = 1/1
+		//{OV7670_CLKRC_ADDRESS, 0x80}, 		// pre-scalar = 1/1
 		{OV7670_MVFP_ADDRESS, 0x31}, 		// H & V Flip
+
+		// Scale PCLK
+		{OV7670_CLKRC_ADDRESS, 0x8F}, // Divide by 16
+//		{OV7670_COM14_ADDRESS, 0x14},
+//		{OV7670_SCALING_PCLK_DIV_ADDRESS, 0x04},
+		//{OV7670_, },
 
 //		{0x0C, 0x04},  // DCW enable
 //		{0x3E, 0x19},  // manual scaling, pclk/=2
@@ -73,15 +79,15 @@ const uint8_t RGB565_Config[][2] = {
 		{OV7670_RSVD_B0_ADDRESS, OV7670_RSVD_B0_RESET_VALUE}, // DO NOT CLEAR (Inverts colours if removed)
 
 		// AGC, AEC, AWB
-		{OV7670_GAIN_ADDRESS, 0xFF},
+		{OV7670_GAIN_ADDRESS, 0x04},
 		{OV7670_COM8_ADDRESS, 0x4A},		// Fast AGC/AEC, AWB Enabled
-		{OV7670_COM9_ADDRESS, 0x4a},   		// AGC Ceiling = 32x
+		{OV7670_COM9_ADDRESS, 0x4A},   		// AGC Ceiling = 32x
 		{OV7670_COM16_ADDRESS, 0x38},   	// edge enhancement, de-noise, AWG gain enabled
 
 		// Exposure Timing (16-bit controller, MSB to LSB)
-		{OV7670_AECHH_ADDRESS, 0x00}, 	// [5:0]
-		{OV7670_AECH_ADDRESS, 0xF0},	// [7:0]
-		{OV7670_COM1_ADDRESS, 0x00},	// [1:0]
+//		{OV7670_AECHH_ADDRESS, 0x00}, 	// [5:0]
+//		{OV7670_AECH_ADDRESS, 0xF0},	// [7:0]
+//		{OV7670_COM1_ADDRESS, 0x00},	// [1:0]
 
 		// Colour Matrix
 		{OV7670_MTX1_ADDRESS, 0xB3},

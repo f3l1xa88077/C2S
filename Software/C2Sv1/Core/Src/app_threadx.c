@@ -212,7 +212,13 @@ void Cam_ThreadEntry()
 {
 	// External variables
 	extern uint32_t pBuffer[MAX_PICTURE_BUFF];
-	extern uint8_t FrameProcessed;
+	extern uint32_t bufferA[DB_SIZE_WORDS];
+	extern uint32_t bufferB[DB_SIZE_WORDS];
+	extern uint32_t bufferC[DB_SIZE_WORDS];
+
+	extern volatile uint8_t FrameProcessed;
+	extern volatile uint32_t processedRows;
+
 	extern DMA_HandleTypeDef handle_GPDMA1_Channel0;
 	extern DCMI_HandleTypeDef hdcmi;
 	extern I2C_HandleTypeDef hi2c2;
@@ -238,6 +244,11 @@ void Cam_ThreadEntry()
 	// Pause DCMI until requested
 	HAL_DCMI_Suspend(&hdcmi);
 
+	QSPI_DataBlock_HandleTypeDef DataBlock;
+	QSPI_Init_DataBlock(&DataBlock, DB_SIZE_BYTES, NULL, bufferC);
+
+	QSPI_Command(&QSPI_Memory, QSPI_ERASE_CHIP);
+
 	while(1)
 	{
 		if (tud_cdc_n_connected(0) && tud_cdc_available())
@@ -259,36 +270,108 @@ void Cam_ThreadEntry()
 				OV7670_Config(colour_mode, resolution_mode, test_pattern_mode);
 				tx_thread_sleep_ms(300); // Pause for register configuration
 
-				// Capture Image
+				/*
+				 * 	----------------------
+				 * 		IMAGE CAPTURE
+				 * 	----------------------
+				 */
+
+				// Reset Flags
 				FrameProcessed = 0;
+				processedRows = 0;
+
+				// Declare Variables
+				uint32_t volatile rowCnt = 0;
+				uint32_t volatile dataCount = 0;
+
+				// Create Pseudo Data Block
+				DataBlock.address_block_end = DataBlock.address_block_start;
+				uint32_t volatile curAddress = DataBlock.address_block_start;
+				uint16_t volatile pageRemaining = QSPI_PAGE_SIZE - (curAddress % QSPI_PAGE_SIZE);
+				if (pageRemaining == 0) pageRemaining = QSPI_PAGE_SIZE;
+
+				DataBlock.data_size = DB_SIZE_BYTES;
+
+				// Start Image Capture
+				//HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)bufferA, DB_SIZE_WORDS);
 				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, MAX_PICTURE_BUFF);
 
-				// Block until hardware completes the capture
-				while (!FrameProcessed) { tx_thread_sleep(5); }
+
+				// Write Data to QSPI Memory
+				while (!FrameProcessed) {
+//					if ((processedRows/DB_ROWS) > (rowCnt/DB_ROWS)) // Need to handle edge case of first row with bufferB
+//					{
+//						// Declare the transmitting buffer
+//						tx_thread_sleep_ms(1);
+//						uint8_t *activeBuffer = (uint8_t*)(((rowCnt/DB_ROWS) % 2 == 0) ? bufferB : bufferA);
+//						uint32_t bufferRemaining = DB_SIZE_BYTES;
+//
+//						// Keep writing until buffer has been fully written to memory
+//						while (bufferRemaining > 0)
+//						{
+//							// Calculate how much data left in current page
+//							uint16_t dataRemaining = (bufferRemaining >= pageRemaining) ? pageRemaining : bufferRemaining;
+//							pageRemaining = QSPI_PAGE_SIZE - dataRemaining;
+//
+//							// Write [dataRemaining] bytes to memory and increment address to reflect memory change
+//							QSPI_Write_Page(&QSPI_Memory, curAddress, activeBuffer, dataRemaining);
+//							curAddress += dataRemaining;		// Increment QSPI address
+//							activeBuffer += (dataRemaining);	// Increment buffer position.
+//							bufferRemaining -= dataRemaining;	// Decrement buffer counter
+//							dataCount += dataRemaining;
+//
+//							// If the page has been completely written to, reset bytes left for page.
+//							if (pageRemaining == 0) pageRemaining = QSPI_PAGE_SIZE;
+//						}
+//						// If the buffer has been fully written, increment row and reset buffer counter.
+//						rowCnt++;
+//						bufferRemaining = DB_SIZE_BYTES;
+//						DataBlock.address_block_end += DB_SIZE_BYTES;
+//
+//					}
+				}
+
+				// Stop DCMI and shut down camera power until next request
+				HAL_DCMI_Stop(&hdcmi);
+				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
+
+				//QSPI_Memory.occupied_data += ((dataCount + 4095) & ~4095);
+
+				// Sanity Check
+				//if (DataBlock.address_block_end != curAddress) Error_Handler();
 
 				/*  ----------------------------
 				 *  IMAGE CAPTURED AT THIS POINT
 				 *  ----------------------------
 				 */
 
-				// Stop DCMI and shut down camera power until next request
-				HAL_DCMI_Stop(&hdcmi);
-				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
+				// Temporarily put in memory
+				QSPI_Init_DataBlock(&DataBlock, MAX_PICTURE_BUFF*4, pBuffer, bufferC);
+				QSPI_Write_Data(&QSPI_Memory, &DataBlock);
+				rowCnt = IMAGE_ROWS / DB_ROWS;
 
-				// QSPI
-				QSPI_DataBlock_HandleTypeDef DataChunk;
-				QSPI_Init_DataBlock(&DataChunk, MAX_PICTURE_BUFF*4, pBuffer, pBuffer);
-				QSPI_Write_Data(&QSPI_Memory, &DataChunk);
-				QSPI_Read_Data(&QSPI_Memory, &DataChunk);
+				// Read information from QSPI memory
+				uint32_t origin = DataBlock.address_block_start;
+				DataBlock.data_size = DB_SIZE_BYTES;
+				uint32_t transmittedData = 0;
+				while (rowCnt > 0) {
+					QSPI_Read_Data(&QSPI_Memory, &DataBlock);
+					tud_transmit(0x01, (uint8_t*)bufferC, DB_SIZE_BYTES);
+					DataBlock.address_block_start += DB_SIZE_BYTES;
+					transmittedData += DB_SIZE_BYTES;
+					rowCnt--;
+				}
 
-				// Transmit
-				tud_transmit(0x01, (uint8_t*)pBuffer, MAX_PICTURE_BUFF*4);
+				// Clear LIFO buffer for next image
+				DataBlock.address_block_start = origin;
+				DataBlock.data_size = DataBlock.address_block_end - DataBlock.address_block_start;
+				QSPI_Erase_Data(&QSPI_Memory, &DataBlock);
 			}
 
 		}
 
 	// Free up thread
-	tx_thread_sleep_ms(500);
+	tx_thread_sleep_ms(50);
 
 	}
 }
