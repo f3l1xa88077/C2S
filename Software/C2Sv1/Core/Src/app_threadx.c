@@ -59,6 +59,7 @@ void Cam_ThreadEntry();
 void tx_thread_sleep_ms(ULONG ms);
 void tud_transmit_data(uint8_t* image_data, uint32_t total_bytes);
 void tud_transmit(uint8_t packet_id, uint8_t * data, uint32_t total_bytes);
+static void CUSTOM_DCMI_DMAXferCplt(DMA_HandleTypeDef *hdma);
 
 /* USER CODE END PFP */
 
@@ -211,10 +212,10 @@ void USB_ThreadEntry()
 void Cam_ThreadEntry()
 {
 	// External variables
-	extern uint32_t pBuffer[MAX_PICTURE_BUFF];
+	extern uint32_t pBuffer[LL_MAX_NODE_SIZE*2];
 	extern uint32_t bufferA[DB_SIZE_WORDS];
 	extern uint32_t bufferB[DB_SIZE_WORDS];
-	extern uint32_t bufferC[DB_SIZE_WORDS];
+	extern uint32_t bufferC[LL_MAX_NODE_SIZE];
 
 	extern volatile uint8_t FrameProcessed;
 	extern volatile uint32_t processedRows;
@@ -290,45 +291,47 @@ void Cam_ThreadEntry()
 				uint16_t volatile pageRemaining = QSPI_PAGE_SIZE - (curAddress % QSPI_PAGE_SIZE);
 				if (pageRemaining == 0) pageRemaining = QSPI_PAGE_SIZE;
 
-				DataBlock.data_size = DB_SIZE_BYTES;
+				DataBlock.data_size = LL_MAX_NODE_SIZE;
 
 				// Start Image Capture
 				//HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)bufferA, DB_SIZE_WORDS);
-				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, MAX_PICTURE_BUFF);
+				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, LL_MAX_NODE_SIZE/4*2);
+				hdcmi.DMA_Handle->XferCpltCallback = CUSTOM_DCMI_DMAXferCplt;
+				__HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME); // Ensure VSYNC/Frame callback fires!
 
 
 				// Write Data to QSPI Memory
 				while (!FrameProcessed) {
-//					if ((processedRows/DB_ROWS) > (rowCnt/DB_ROWS)) // Need to handle edge case of first row with bufferB
-//					{
-//						// Declare the transmitting buffer
-//						tx_thread_sleep_ms(1);
-//						uint8_t *activeBuffer = (uint8_t*)(((rowCnt/DB_ROWS) % 2 == 0) ? bufferB : bufferA);
-//						uint32_t bufferRemaining = DB_SIZE_BYTES;
-//
-//						// Keep writing until buffer has been fully written to memory
-//						while (bufferRemaining > 0)
-//						{
-//							// Calculate how much data left in current page
-//							uint16_t dataRemaining = (bufferRemaining >= pageRemaining) ? pageRemaining : bufferRemaining;
-//							pageRemaining = QSPI_PAGE_SIZE - dataRemaining;
-//
-//							// Write [dataRemaining] bytes to memory and increment address to reflect memory change
-//							QSPI_Write_Page(&QSPI_Memory, curAddress, activeBuffer, dataRemaining);
-//							curAddress += dataRemaining;		// Increment QSPI address
-//							activeBuffer += (dataRemaining);	// Increment buffer position.
-//							bufferRemaining -= dataRemaining;	// Decrement buffer counter
-//							dataCount += dataRemaining;
-//
-//							// If the page has been completely written to, reset bytes left for page.
-//							if (pageRemaining == 0) pageRemaining = QSPI_PAGE_SIZE;
-//						}
-//						// If the buffer has been fully written, increment row and reset buffer counter.
-//						rowCnt++;
-//						bufferRemaining = DB_SIZE_BYTES;
-//						DataBlock.address_block_end += DB_SIZE_BYTES;
-//
-//					}
+					if (processedRows > rowCnt)
+					{
+						// Declare the transmitting buffer
+						uint8_t *activeBuffer = (uint8_t*)((processedRows % 2 == 0) ? pBuffer + (LL_MAX_NODE_SIZE/4) : pBuffer);
+						uint32_t bufferRemaining = LL_MAX_NODE_SIZE;
+
+						// Keep writing until buffer has been fully written to memory
+						while (bufferRemaining > 0)
+						{
+							// Calculate how much data left in current page
+							uint16_t dataRemaining = (bufferRemaining >= pageRemaining) ? pageRemaining : bufferRemaining;
+							pageRemaining = QSPI_PAGE_SIZE - dataRemaining;
+
+							// Write [dataRemaining] bytes to memory and increment address to reflect memory change
+							QSPI_Write_Page(&QSPI_Memory, curAddress, activeBuffer, dataRemaining);
+							curAddress += dataRemaining;		// Increment QSPI address
+							activeBuffer += (dataRemaining);	// Increment buffer position.
+							bufferRemaining -= dataRemaining;	// Decrement buffer counter
+							dataCount += dataRemaining;
+
+							// If the page has been completely written to, reset bytes left for page.
+							if (pageRemaining == 0) pageRemaining = QSPI_PAGE_SIZE;
+						}
+						// If the buffer has been fully written, increment row and reset buffer counter.
+						rowCnt++;
+						bufferRemaining = LL_MAX_NODE_SIZE;
+						DataBlock.address_block_end += LL_MAX_NODE_SIZE;
+						QSPI_Memory.occupied_data += LL_MAX_NODE_SIZE;
+
+					}
 				}
 
 				// Stop DCMI and shut down camera power until next request
@@ -346,14 +349,15 @@ void Cam_ThreadEntry()
 				 */
 
 				// Temporarily put in memory
-				QSPI_Init_DataBlock(&DataBlock, MAX_PICTURE_BUFF*4, pBuffer, bufferC);
-				QSPI_Write_Data(&QSPI_Memory, &DataBlock);
-				rowCnt = IMAGE_ROWS / DB_ROWS;
+				//QSPI_Init_DataBlock(&DataBlock, LL_MAX_NODE_SIZE*4, pBuffer, bufferC);
+				//QSPI_Write_Data(&QSPI_Memory, &DataBlock);
+				//rowCnt = IMAGE_ROWS / DB_ROWS;
 
 				// Read information from QSPI memory
 				uint32_t origin = DataBlock.address_block_start;
 				DataBlock.data_size = DB_SIZE_BYTES;
 				uint32_t transmittedData = 0;
+				rowCnt = rowCnt * (LL_MAX_NODE_SIZE / DB_SIZE_BYTES);
 				while (rowCnt > 0) {
 					QSPI_Read_Data(&QSPI_Memory, &DataBlock);
 					tud_transmit(0x01, (uint8_t*)bufferC, DB_SIZE_BYTES);
@@ -440,6 +444,75 @@ void tud_transmit(uint8_t packet_id, uint8_t * data, uint32_t total_bytes)
 
 	// End of packet
 	tud_transmit_data((uint8_t*)(&end_packet), 1);
+}
+
+static void CUSTOM_DCMI_DMAXferCplt(DMA_HandleTypeDef *hdma)
+{
+
+  DCMI_HandleTypeDef *hdcmi = (DCMI_HandleTypeDef *)((DMA_HandleTypeDef *)hdma)->Parent;
+  uint32_t tmp1;
+  uint32_t tmp2;
+  DMA_NodeTypeDef *pnode;
+  uint32_t pbuff;
+  uint32_t transfernumber;
+  uint32_t transfercount;
+  uint32_t transfersize ;
+
+	extern volatile uint32_t processedRows;
+	processedRows++;
+
+  /* Update Nodes destinations */
+  if (hdcmi->XferSize != 0U)
+  {
+    pbuff          = hdcmi->pBuffPtr;
+    transfernumber = hdcmi->XferTransferNumber;
+    transfercount  = hdcmi->XferCount;
+    transfersize   = hdcmi->XferSize;
+
+    tmp1 = hdcmi->DMA_Handle->Instance->CLLR & DMA_CLLR_LA;
+    tmp2 = hdcmi->DMA_Handle->Instance->CLBAR & DMA_CLBAR_LBA;
+    pnode = (DMA_NodeTypeDef *)(uint32_t)(tmp1 | tmp2);
+
+    if (hdcmi->XferCount > 1U)
+    {
+      pnode->LinkRegisters[NODE_CDAR_DEFAULT_OFFSET] = pbuff + ((transfernumber - transfercount + 2U) * transfersize);
+      hdcmi->XferCount--;
+    }
+
+    else if (hdcmi->XferCount == 1U)
+    {
+      pnode->LinkRegisters[NODE_CDAR_DEFAULT_OFFSET] = hdcmi->pBuffPtr;
+      hdcmi->XferCount--;
+    }
+    else
+    {
+      pnode->LinkRegisters[NODE_CDAR_DEFAULT_OFFSET] = hdcmi->pBuffPtr + hdcmi->XferSize;
+
+      /* When Continuous mode, re-set dcmi XferCount */
+      if ((hdcmi->Instance->CR & DCMI_CR_CM) == DCMI_MODE_CONTINUOUS)
+      {
+        hdcmi->XferCount = hdcmi->XferTransferNumber ;
+      }
+      /* When snapshot mode, set dcmi state to ready */
+      else
+      {
+        hdcmi->State = HAL_DCMI_STATE_READY;
+      }
+
+      __HAL_DCMI_ENABLE_IT(hdcmi, DCMI_IT_FRAME);
+    }
+  }
+  else  /* Snapshot Mode */
+  {
+    /* Enable the Frame interrupt */
+    __HAL_DCMI_ENABLE_IT(hdcmi, DCMI_IT_FRAME);
+
+    /* When snapshot mode, set dcmi state to ready */
+    if ((hdcmi->Instance->CR & DCMI_CR_CM) == DCMI_MODE_SNAPSHOT)
+    {
+      hdcmi->State = HAL_DCMI_STATE_READY;
+    }
+  }
 }
 
 /* USER CODE END 1 */

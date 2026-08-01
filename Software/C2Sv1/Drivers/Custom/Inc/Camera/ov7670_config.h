@@ -19,9 +19,9 @@ const uint8_t System_Config[][2] = {
 		{OV7670_MVFP_ADDRESS, 0x31}, 		// H & V Flip
 
 		// Scale PCLK
-		{OV7670_CLKRC_ADDRESS, 0x8F}, // Divide by 16
-//		{OV7670_COM14_ADDRESS, 0x14},
-//		{OV7670_SCALING_PCLK_DIV_ADDRESS, 0x04},
+		{OV7670_CLKRC_ADDRESS, 0xBF}, // Divide by 64
+		//{OV7670_COM14_ADDRESS, 0x11},
+		//{OV7670_SCALING_PCLK_DIV_ADDRESS, 0x01},
 		//{OV7670_, },
 
 //		{0x0C, 0x04},  // DCW enable

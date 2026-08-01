@@ -36,6 +36,8 @@
 #define DCMI_RESET_Pin			DCMI_GPIO2_Pin
 #define DCMI_RESET_GPIO_Port	DCMI_GPIO2_GPIO_Port
 
+#define LL_MAX_NODE_SIZE		38400
+
 #define IMAGE_COLS				320
 #define IMAGE_ROWS				240
 #define DB_ROWS					4
