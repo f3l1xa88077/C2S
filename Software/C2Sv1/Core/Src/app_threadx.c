@@ -48,6 +48,9 @@ TX_THREAD ina219_thread;
 TX_THREAD usb_thread;
 TX_THREAD cam_thread;
 
+// Add global Mutex handle
+TX_MUTEX usb_tx_mutex;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +96,7 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 		{
 		return TX_NOT_DONE;
 		}
+		tx_mutex_create(&usb_tx_mutex, "USB TX Mutex", TX_NO_INHERIT);
 	}
 
 	// OV7670
@@ -178,13 +182,13 @@ void INA219_ThreadEntry()
 		// Read CSA Data
 		INA219_ReadAll(&INA219_Chip);
 
-		if (tud_cdc_n_connected(0) && tud_cdc_available())
+		if (tud_cdc_n_connected(0))
 		{
 			uint16_t power_to_send = (uint16_t)INA219_Chip.power_mW;
 			tud_transmit(0x02, (uint8_t*)(&power_to_send), sizeof(uint16_t));
 		}
 
-		tx_thread_sleep_ms(500);
+		tx_thread_sleep_ms(75);
 	}
 }
 
@@ -204,7 +208,7 @@ void USB_ThreadEntry()
 	{
 		// Poll PC
 		tud_task();
-		//tx_thread_sleep_ms(20));
+		//tx_thread_sleep_ms(20);
 		tx_thread_relinquish();
 	}
 }
@@ -212,10 +216,8 @@ void USB_ThreadEntry()
 void Cam_ThreadEntry()
 {
 	// External variables
-	extern uint32_t pBuffer[LL_MAX_NODE_SIZE*2];
-	extern uint32_t bufferA[DB_SIZE_WORDS];
-	extern uint32_t bufferB[DB_SIZE_WORDS];
-	extern uint32_t bufferC[LL_MAX_NODE_SIZE];
+	extern uint32_t pBuffer[LL_MAX_NODE_SIZE/4*2];
+	extern uint32_t bufferC[DB_SIZE_WORDS];
 
 	extern volatile uint8_t FrameProcessed;
 	extern volatile uint32_t processedRows;
@@ -231,6 +233,8 @@ void Cam_ThreadEntry()
 
 	// Setup QSPI
 	QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
+	QSPI_Command(&QSPI_Memory, QSPI_ERASE_CHIP);
+	//QSPI_Command_Sleep(&QSPI_Memory, QSPI_ENTER_SLEEP);
 
 	// Reset & Disable Camera
 	HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_RESET);
@@ -244,11 +248,6 @@ void Cam_ThreadEntry()
 
 	// Pause DCMI until requested
 	HAL_DCMI_Suspend(&hdcmi);
-
-	QSPI_DataBlock_HandleTypeDef DataBlock;
-	QSPI_Init_DataBlock(&DataBlock, DB_SIZE_BYTES, NULL, bufferC);
-
-	QSPI_Command(&QSPI_Memory, QSPI_ERASE_CHIP);
 
 	while(1)
 	{
@@ -285,6 +284,9 @@ void Cam_ThreadEntry()
 				uint32_t volatile rowCnt = 0;
 				uint32_t volatile dataCount = 0;
 
+				QSPI_DataBlock_HandleTypeDef DataBlock;
+				QSPI_Init_DataBlock(&DataBlock, MAX_PICTURE_BUFF, pBuffer, bufferC);
+
 				// Create Pseudo Data Block
 				DataBlock.address_block_end = DataBlock.address_block_start;
 				uint32_t volatile curAddress = DataBlock.address_block_start;
@@ -294,10 +296,13 @@ void Cam_ThreadEntry()
 				DataBlock.data_size = LL_MAX_NODE_SIZE;
 
 				// Start Image Capture
+
 				//HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)bufferA, DB_SIZE_WORDS);
 				HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)pBuffer, LL_MAX_NODE_SIZE/4*2);
 				hdcmi.DMA_Handle->XferCpltCallback = CUSTOM_DCMI_DMAXferCplt;
 				__HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME); // Ensure VSYNC/Frame callback fires!
+
+				QSPI_Command_Sleep(&QSPI_Memory, QSPI_EXIT_SLEEP);
 
 
 				// Write Data to QSPI Memory
@@ -329,16 +334,19 @@ void Cam_ThreadEntry()
 						rowCnt++;
 						bufferRemaining = LL_MAX_NODE_SIZE;
 						DataBlock.address_block_end += LL_MAX_NODE_SIZE;
-						QSPI_Memory.occupied_data += LL_MAX_NODE_SIZE;
 
+					}
+					else
+					{
+						//tx_thread_sleep_ms(20);
 					}
 				}
 
 				// Stop DCMI and shut down camera power until next request
-				HAL_DCMI_Stop(&hdcmi);
 				HAL_GPIO_WritePin(DCMI_PWRDWN_GPIO_Port, DCMI_PWRDWN_Pin, GPIO_PIN_SET);
+				HAL_DCMI_Stop(&hdcmi);
 
-				//QSPI_Memory.occupied_data += ((dataCount + 4095) & ~4095);
+				QSPI_Memory.occupied_data += ((dataCount + 4095) & ~4095);
 
 				// Sanity Check
 				//if (DataBlock.address_block_end != curAddress) Error_Handler();
@@ -364,12 +372,15 @@ void Cam_ThreadEntry()
 					DataBlock.address_block_start += DB_SIZE_BYTES;
 					transmittedData += DB_SIZE_BYTES;
 					rowCnt--;
+					//tx_thread_sleep_ms(50);
+					//tx_thread_relinquish();
 				}
 
 				// Clear LIFO buffer for next image
 				DataBlock.address_block_start = origin;
 				DataBlock.data_size = DataBlock.address_block_end - DataBlock.address_block_start;
 				QSPI_Erase_Data(&QSPI_Memory, &DataBlock);
+				QSPI_Command_Sleep(&QSPI_Memory, QSPI_ENTER_SLEEP);
 			}
 
 		}
@@ -400,10 +411,12 @@ void tud_transmit_data(uint8_t* data, uint32_t total_bytes)
             uint32_t chunk_size = (remaining_bytes < available_space) ? remaining_bytes : available_space;
             uint32_t written = tud_cdc_write(&data[bytes_sent], chunk_size);
             bytes_sent += written;
+            tud_cdc_write_flush();
         }
-
-        tud_cdc_write_flush();
-
+        else
+        {
+        	//tx_thread_sleep_ms(1);
+        }
     }
 }
 
@@ -424,28 +437,32 @@ void tx_thread_sleep_ms(ULONG ms)
   * @param data: Data to be sent in 8-bit pointer format
   * @param total_bytes: Total Bytes of image
   */
+
+// Update tud_transmit:
 void tud_transmit(uint8_t packet_id, uint8_t * data, uint32_t total_bytes)
 {
-	// Definitions
-	uint16_t start_packet = 0xAA55;
-	uint8_t end_packet = 0xBB;
+    uint16_t start_packet = 0xAA55;
+    uint8_t end_packet = 0xBB;
 
-	// Start of packet
-	tud_transmit_data((uint8_t*)(&start_packet), 2);
+    // Lock USB transmission
+    tx_mutex_get(&usb_tx_mutex, TX_WAIT_FOREVER);
 
-	// Packet identifier
-	tud_transmit_data(&packet_id, 1);
+    tud_transmit_data((uint8_t*)(&start_packet), 2);
+    tud_transmit_data(&packet_id, 1);
+    tud_transmit_data((uint8_t*)(&total_bytes), 4);
+    tud_transmit_data(data, total_bytes);
+    tud_transmit_data((uint8_t*)(&end_packet), 1);
 
-	// Data length
-	tud_transmit_data((uint8_t*)(&total_bytes), 4);
-
-	// Send data
-	tud_transmit_data(data, total_bytes);
-
-	// End of packet
-	tud_transmit_data((uint8_t*)(&end_packet), 1);
+    // Unlock USB transmission
+    tx_mutex_put(&usb_tx_mutex);
 }
 
+/**
+  * @brief  DMA conversion complete callback.
+  * @param  hdma pointer to a DMA_HandleTypeDef structure that contains
+  *                the configuration information for the specified DMA module.
+  * @retval None
+  */
 static void CUSTOM_DCMI_DMAXferCplt(DMA_HandleTypeDef *hdma)
 {
 
@@ -458,8 +475,8 @@ static void CUSTOM_DCMI_DMAXferCplt(DMA_HandleTypeDef *hdma)
   uint32_t transfercount;
   uint32_t transfersize ;
 
-	extern volatile uint32_t processedRows;
-	processedRows++;
+  extern volatile uint32_t processedRows;
+  processedRows++;
 
   /* Update Nodes destinations */
   if (hdcmi->XferSize != 0U)
@@ -514,5 +531,6 @@ static void CUSTOM_DCMI_DMAXferCplt(DMA_HandleTypeDef *hdma)
     }
   }
 }
+
 
 /* USER CODE END 1 */

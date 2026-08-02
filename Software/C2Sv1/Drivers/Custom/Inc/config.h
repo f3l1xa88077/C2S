@@ -20,7 +20,7 @@
 
 #define OPERATIONAL_MODE 		USB_MODE
 
-#define CSA_ACTIVE				0					// (0) Off; (1) On
+#define CSA_ACTIVE				1					// (0) Off; (1) On
 
 // ------------ USER INPUT ENDS HERE ------------
 

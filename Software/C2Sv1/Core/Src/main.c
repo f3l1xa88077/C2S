@@ -64,10 +64,8 @@ OSPI_RegularCmdTypeDef sCommand;
 volatile bool c2s_should_sleep = 0;
 
 // Camera
-ALIGN_32BYTES(uint32_t pBuffer[LL_MAX_NODE_SIZE*2]);//__attribute__((section(".sram3"))); 	// Force the buffer into SRAM3
-ALIGN_32BYTES(uint32_t bufferA[DB_SIZE_WORDS]);
-ALIGN_32BYTES(uint32_t bufferB[DB_SIZE_WORDS]);
-ALIGN_32BYTES(uint32_t bufferC[LL_MAX_NODE_SIZE]);
+ALIGN_32BYTES(uint32_t pBuffer[LL_MAX_NODE_SIZE/4*2]);//__attribute__((section(".sram3"))); 	// Force the buffer into SRAM3
+ALIGN_32BYTES(uint32_t bufferC[DB_SIZE_WORDS]);
 volatile uint8_t FrameProcessed = 0;													// Image captured to RAM (1); not (0)
 volatile uint32_t processedRows = 0;
 

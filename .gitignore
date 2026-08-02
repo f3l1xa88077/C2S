@@ -9,6 +9,12 @@
 !/Report/Chapters/
 !/Report/Ref/
 
+# --- Testing ---
+/Testing/**
+!/Testing/**/
+!/Testing/**/*.csv
+!/Testing/**/*.xlsx
+
 # --- Software (C2Sv0.1 and C2Sv1) ---
 
 !/Software/C2Sv[01]*/

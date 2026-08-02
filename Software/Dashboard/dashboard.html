@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>C2Sv1.0 Camera Dashboard</title>
+    <title>C2Sv1.0 Camera & Power Dashboard</title>
     <style>
         @font-face {
             font-family: 'JetBrainsMono';
@@ -58,7 +58,6 @@
         .btn-group { display: flex; gap: 12px; }
         
         label { font-size: 0.85rem; color: #94a3b8; font-weight: 500; }
-        .disabled-label { color: #475569 !important; }
         
         select, input[type="number"] { 
             width: 50%; 
@@ -69,11 +68,6 @@
             border-radius: 8px; 
             font-size: 0.85rem;
             outline: none;
-        }
-        input[type="number"]:disabled, select:disabled {
-            background: #0f172a;
-            color: #475569;
-            cursor: not-allowed;
         }
 
         .checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; position: relative; }
@@ -118,22 +112,6 @@
             line-height: 1.3;
         }
         .info-tip:hover::after { opacity: 1; }
-
-        .rgb-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .rgb-input-wrap {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .rgb-grid input[type="number"] {
-            width: 100%;
-            text-align: center;
-        }
         
         button { 
             width: 100%; 
@@ -148,8 +126,6 @@
         button:disabled {
             opacity: 0.25;
             cursor: not-allowed !important;
-            transform: none !important;
-            box-shadow: none !important;
         }
         .btn-connect { background: #1d4ed8; color: white; }
         .btn-connect:hover { background: #2563eb; }
@@ -162,26 +138,13 @@
         }
         .btn-state-indicator.connected { background: #065f46; }
         .btn-state-indicator.active-action { cursor: pointer; pointer-events: auto; }
-        .btn-state-indicator.active-action:hover { opacity: 0.9; }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-        .shake-alert {
-            animation: shake 0.3s ease-in-out;
-            background: #dc2626 !important;
-            box-shadow: 0 0 15px #dc2626;
-        }
 
         .btn-capture { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
         .btn-capture:hover { background: #3b82f6; transform: translateY(-1px); }
         
         .btn-stream { background: #0f172a; color: #60a5fa; border: 1px solid #222f47; margin-top: -6px; }
         .btn-stream:hover { background: #1e293b; }
-        .btn-stream.streaming { background: #1d4ed8; color: #ffffff; border-color: transparent; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
-        .btn-stream.streaming:hover { background: #2563eb; }
+        .btn-stream.streaming { background: #1d4ed8; color: #ffffff; border-color: transparent; }
 
         input[type="range"] { -webkit-appearance: none; width: 100%; height: 6px; background: #222f47; border-radius: 4px; outline: none; margin-top: 4px; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; cursor: pointer; }
@@ -214,7 +177,6 @@
             color: #64748b;
             padding: 10px 0;
             z-index: 2;
-            transition: color 0.2s ease;
         }
         .stage.active-txt { color: #ffffff; }
 
@@ -232,6 +194,37 @@
             border-radius: 12px;
             image-rendering: pixelated; 
             box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+
+        .power-card {
+            width: 100%;
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #10b981;
+        }
+        .power-val-box {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .power-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #10b981;
+        }
+        .power-unit {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .power-stats {
+            text-align: right;
+            font-size: 0.75rem;
+            color: #64748b;
         }
         
         .storage-bar {
@@ -254,6 +247,11 @@
             width: auto;
         }
         .btn-storage:hover { background: #475569; }
+        .btn-csv {
+            background: #059669;
+            color: #ffffff;
+        }
+        .btn-csv:hover { background: #10b981; }
     </style>
 </head>
 <body>
@@ -278,7 +276,7 @@
         <div class="checkbox-row">
             <input type="checkbox" id="testPatternCheck">
             <label for="testPatternCheck">Enable Test Pattern</label>
-            <span class="info-tip" data-help="Forces the camera sensor to output a static or shifting internal test bar pattern for link debugging.">ⓘ</span>
+            <span class="info-tip" data-help="Forces the camera sensor to output a test bar pattern.">ⓘ</span>
         </div>
     </div>
     
@@ -298,7 +296,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 6px;">
                 <label for="jpegInput">JPEG Quality</label>
-                <span class="info-tip" data-help="Sets compression level. 0 is the lowest quality (maximum compression), 100 is the highest quality (uncompressed).">ⓘ</span>
+                <span class="info-tip" data-help="Sets compression level.">ⓘ</span>
             </div>
             <input type="number" id="jpegInput" min="0" max="100" value="100" 
                 oninput="document.getElementById('jpegSlider').value = this.value" style="width: 80px; text-align: center;">
@@ -310,11 +308,9 @@
     <hr>
     <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
         <button id="captureBtn" class="btn-capture" onclick="handleCaptureClick()">Send & Capture</button>
-        <span class="info-tip" data-help="Transmits configuration payload down to camera subsystem, triggers single burst window frame capture.">ⓘ</span>
     </div>
     <div style="display: flex; align-items: center; gap: 8px; width: 100%;">
         <button id="streamBtn" class="btn-stream" onclick="handleStreamClick()">Start Streaming</button>
-        <span class="info-tip" data-help="Launches continuous frame request loops, refreshing the pipeline canvas at maximum hardware frame rate.">ⓘ</span>
     </div>
 </div>
 
@@ -331,14 +327,28 @@
         <canvas id="canvasView" width="320" height="240"></canvas>
     </div>
 
+    <div class="power-card">
+        <div>
+            <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">CSA Power Reading</span>
+            <div class="power-val-box">
+                <span id="powerVal" class="power-value">--</span>
+                <span class="power-unit">mW</span>
+            </div>
+        </div>
+        <div class="power-stats">
+            <div>Samples Logged: <span id="sampleCount" style="color: #f1f5f9;">0</span></div>
+            <div style="margin-top: 4px;">Status: <span id="powerStatus" style="color: #64748b;">Idle</span></div>
+        </div>
+    </div>
+
     <div class="storage-bar">
         <div class="checkbox-row">
             <input type="checkbox" id="autoSaveCheck">
             <label for="autoSaveCheck">Auto-Save Streams</label>
         </div>
         <div class="storage-actions">
+            <button class="btn-storage btn-csv" onclick="exportPowerCSV()">Export Power CSV</button>
             <button id="folderBtn" class="btn-storage" onclick="selectTargetFolder()">Set Folder</button>
-            <span class="info-tip" data-help="Launches native file system system prompt to select a local directory context for saved captures." style="margin-right: 4px;">ⓘ</span>
             <button class="btn-storage" onclick="copyToClipboard()">Copy Frame</button>
             <button class="btn-storage" onclick="saveCanvasImage()">Save As</button>
         </div>
@@ -350,7 +360,6 @@
     let reader;
     let keepReading = true;
     let isStreaming = false;
-    let currentStageIndex = 0; 
     let saveIndex = 0;
     let directoryHandle = null;
     
@@ -360,8 +369,143 @@
     let byteBuffer = [];
     let imageReassemblyBuffer = null;
     let imageBytesCopied = 0;
-    
-    let currentHardwareState = "IDLE"; 
+
+    let dataLog = [];
+
+    function logEvent(eventType, powerVal = "", notes = "") {
+        dataLog.push({
+            timestamp: new Date().toISOString(),
+            eventType: eventType,
+            power_mW: powerVal,
+            notes: notes
+        });
+    }
+
+    function dispatchValidatedPacket(id, dataPayload) {
+        if (id === 0x01) {
+            // Image Data Frame
+            const expectedBytes = currentWidth * currentHeight * 2;
+            
+            if (!imageReassemblyBuffer || imageBytesCopied >= expectedBytes) {
+                resetImageBuffers();
+            }
+
+            const currentByteOffset = imageBytesCopied;
+
+            if (imageBytesCopied + dataPayload.length <= expectedBytes) {
+                imageReassemblyBuffer.set(dataPayload, imageBytesCopied);
+                imageBytesCopied += dataPayload.length;
+                drawChunkToCanvas(dataPayload, currentByteOffset);
+            }
+
+            if (imageBytesCopied >= expectedBytes) {
+                onFrameComplete();
+            }
+        } 
+        else if (id === 0x02) {
+            // Power Data (uint16_t, Little-Endian) asynchronously parsed anytime
+            if (dataPayload.length >= 2) {
+                const power_mW = dataPayload[0] | (dataPayload[1] << 8);
+
+                logEvent("POWER_SAMPLE", power_mW, "");
+
+                document.getElementById('powerVal').innerText = power_mW;
+                
+                const pCount = dataLog.filter(e => e.eventType === "POWER_SAMPLE").length;
+                document.getElementById('sampleCount').innerText = pCount;
+                
+                document.getElementById('powerStatus').innerText = "Receiving";
+                document.getElementById('powerStatus').style.color = "#10b981";
+            }
+        }
+    }
+
+    async function exportPowerCSV() {
+        if (dataLog.length === 0) {
+            alert("No data recorded to export.");
+            return;
+        }
+
+        let csvContent = "Timestamp,Event Type,Power (mW),Notes\n";
+        dataLog.forEach(row => {
+            csvContent += `"${row.timestamp}","${row.eventType}","${row.power_mW}","${row.notes}"\n`;
+        });
+
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10);
+        const timeStr = now.toTimeString().slice(0, 8).replace(/:/g, "-");
+        const filename = `power_log_${dateStr}_${timeStr}.csv`;
+
+        if (directoryHandle) {
+            try {
+                const fileHandle = await directoryHandle.getFileHandle(filename, { create: true });
+                const writable = await fileHandle.createWritable();
+                await writable.write(csvContent);
+                await writable.close();
+                return;
+            } catch (err) {
+                console.warn("Folder save failed, falling back to browser downloads:", err);
+            }
+        }
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    async function sendParameters() {
+        if (!port) return;
+        setPipelineStage(2, 'txt-sent');
+        
+        const resVal = document.getElementById('resolution').value;
+        const colVal = document.getElementById('colour').value;
+        logEvent("IMAGE_REQUESTED", "", `Res: ${resVal}, Mode: ${colVal}`);
+
+        if (port.writable) {
+            const writer = port.writable.getWriter();
+            await writer.write(new Uint8Array([255]));
+
+            if (colVal === "RGB565")         { await writer.write(new Uint8Array([0])); }
+            else if (colVal === "Grayscale") { await writer.write(new Uint8Array([1])); }
+            else if (colVal === "YCbCr")     { await writer.write(new Uint8Array([2])); }
+
+            if (resVal === "VGA")  { await writer.write(new Uint8Array([0])); }
+            else if (resVal === "QVGA") { await writer.write(new Uint8Array([1])); }
+
+            const isPatternEnabled = document.getElementById('testPatternCheck').checked;
+            await writer.write(new Uint8Array([isPatternEnabled ? 1 : 0]));
+            await writer.write(new Uint8Array([254]));
+
+            writer.releaseLock();
+        }
+    }
+
+    function onFrameComplete() {
+        logEvent("IMAGE_RENDERED", "", `${currentWidth}x${currentHeight}`);
+
+        if (document.getElementById('autoSaveCheck').checked) {
+            saveCanvasImage();
+        }
+
+        setPipelineStage(3, 'txt-recv');
+        imageBytesCopied = 0;
+
+        if (!isStreaming) {
+            setTimeout(() => { setPipelineStage(1, 'txt-conn'); }, 800);
+        } else if (isStreaming && keepReading) {
+            setTimeout(() => { 
+                resetImageBuffers();
+                sendParameters(); 
+            }, 10);
+        }
+    }
 
     function triggerDisconnectAlert() {
         const stateBtn = document.getElementById('stateBtn');
@@ -373,7 +517,6 @@
 
     function handleCaptureClick() {
         if (!port) { triggerDisconnectAlert(); return; }
-        currentHardwareState = "IMAGE_CAPTURE";
         sendParameters();
     }
 
@@ -399,12 +542,10 @@
     }
 
     function setPipelineStage(stageIndex, textId) {
-        currentStageIndex = stageIndex;
         document.querySelectorAll('.stage').forEach(el => el.classList.remove('active-txt'));
         document.getElementById(textId).classList.add('active-txt');
         
         const indicator = document.getElementById('pipelineIndicator');
-        
         if (isStreaming) {
             document.getElementById('txt-sent').classList.add('active-txt');
             document.getElementById('txt-recv').classList.add('active-txt');
@@ -413,19 +554,6 @@
         } else {
             indicator.style.width = 'calc(25% - 4px)';
             indicator.style.transform = `translateX(${stageIndex * 100}%)`;
-        }
-        updateButtonInterlocks();
-    }
-
-    function updateButtonInterlocks() {
-        const captureBtn = document.getElementById('captureBtn');
-        const streamBtn = document.getElementById('streamBtn');
-        if (isStreaming) {
-            captureBtn.disabled = true;
-            streamBtn.disabled = false;
-        } else {
-            captureBtn.disabled = false;
-            streamBtn.disabled = false; 
         }
     }
 
@@ -437,7 +565,6 @@
             
             navigator.serial.addEventListener('disconnect', (event) => {
                 if (port && event.target === port) {
-                    console.warn("Hardware device yanked.");
                     disconnectSerial();
                 }
             });
@@ -449,7 +576,7 @@
             resetImageBuffers();
             setPipelineStage(1, 'txt-conn');
             readLoop(); 
-        } catch (err) { /* handled silently */ }
+        } catch (err) { }
     }
 
     async function disconnectSerial() {
@@ -457,7 +584,6 @@
         try {
             keepReading = false;
             isStreaming = false;
-            currentHardwareState = "IDLE";
             updateStreamButtonUI();
             
             if (reader) { 
@@ -474,39 +600,11 @@
             stateBtn.innerText = "Disconnected";
             stateBtn.classList.remove('connected', 'active-action');
             
+            document.getElementById('powerStatus').innerText = "Disconnected";
+            document.getElementById('powerStatus').style.color = "#64748b";
+            
             setPipelineStage(0, 'txt-disc');
         } catch (err) { console.error(err); }
-    }
-
-    async function sendParameters() {
-        if (!port) return;
-        setPipelineStage(2, 'txt-sent');
-        
-        if (port.writable) {
-            const writer = port.writable.getWriter();
-
-            await writer.write(new Uint8Array([255]));
-
-            const colourVal = document.getElementById('colour').value;
-            if (colourVal === "RGB565")         { await writer.write(new Uint8Array([0])); }
-            else if (colourVal === "Grayscale") { await writer.write(new Uint8Array([1])); }
-            else if (colourVal === "YCbCr")     { await writer.write(new Uint8Array([2])); }
-
-            const resVal = document.getElementById('resolution').value;
-            if (resVal === "VGA")  { await writer.write(new Uint8Array([0])); }
-            else if (resVal === "QVGA") { await writer.write(new Uint8Array([1])); }
-
-            const isPatternEnabled = document.getElementById('testPatternCheck').checked;
-            if (!isPatternEnabled) { 
-                await writer.write(new Uint8Array([0]));
-            } else { 
-                await writer.write(new Uint8Array([1]));
-            }
-
-            await writer.write(new Uint8Array([254]));
-
-            writer.releaseLock();
-        }
     }
 
     function toggleStreaming() {
@@ -514,10 +612,8 @@
         isStreaming = !isStreaming;
         updateStreamButtonUI();
         if (isStreaming) {
-            currentHardwareState = "IMAGE_CAPTURE";
             sendParameters(); 
         } else {
-            currentHardwareState = "IDLE";
             setPipelineStage(1, 'txt-conn');
         }
     }
@@ -564,7 +660,7 @@
                     await writable.close();
                 }, 'image/png');
                 return;
-            } catch (err) { /* fallback */ }
+            } catch (err) {}
         }
 
         const link = document.createElement('a');
@@ -586,7 +682,6 @@
     function drawChunkToCanvas(payload, byteOffset) {
         const canvas = document.getElementById('canvasView');
         const ctx = canvas.getContext('2d');
-
         const pixelStart = Math.floor(byteOffset / 2);
         const pixelCount = Math.floor(payload.length / 2);
 
@@ -627,52 +722,9 @@
                 }
 
                 ctx.putImageData(lineImgData, currentX, currentY);
-
                 pxOffset += chunkLen;
                 currentX = 0;
                 currentY++;
-            }
-        }
-    }
-
-    function onFrameComplete() {
-        if (document.getElementById('autoSaveCheck').checked) {
-            saveCanvasImage();
-        }
-
-        setPipelineStage(3, 'txt-recv');
-        imageBytesCopied = 0;
-
-        if (!isStreaming) {
-            currentHardwareState = "IDLE";
-            setTimeout(() => { setPipelineStage(1, 'txt-conn'); }, 800);
-        } else if (isStreaming && keepReading) {
-            setTimeout(() => { 
-                resetImageBuffers();
-                sendParameters(); 
-            }, 10);
-        }
-    }
-
-    function dispatchValidatedPacket(id, dataPayload) {
-        if (id === 0x01) {
-            const expectedBytes = currentWidth * currentHeight * 2;
-            
-            if (!imageReassemblyBuffer || imageBytesCopied >= expectedBytes) {
-                resetImageBuffers();
-            }
-
-            const currentByteOffset = imageBytesCopied;
-
-            if (imageBytesCopied + dataPayload.length <= expectedBytes) {
-                imageReassemblyBuffer.set(dataPayload, imageBytesCopied);
-                imageBytesCopied += dataPayload.length;
-                
-                drawChunkToCanvas(dataPayload, currentByteOffset);
-            }
-
-            if (imageBytesCopied >= expectedBytes) {
-                onFrameComplete();
             }
         }
     }
@@ -696,7 +748,6 @@
                         }
 
                         const packetId = byteBuffer[2];
-                        
                         const length = (byteBuffer[3] & 0xFF) | 
                                        ((byteBuffer[4] & 0xFF) << 8) | 
                                        ((byteBuffer[5] & 0xFF) << 16) | 
