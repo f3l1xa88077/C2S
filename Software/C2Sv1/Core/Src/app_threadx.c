@@ -384,6 +384,10 @@ void Cam_ThreadEntry()
 			}
 
 		}
+		if (c2s_should_sleep)
+		{
+			// ENTER SLEEP/STOP HERE
+		}
 
 	// Free up thread
 	tx_thread_sleep_ms(50);
