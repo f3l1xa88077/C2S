@@ -45,6 +45,10 @@ extern "C" {
 // QSPI
 #include "AT25xF2561C.h"
 
+// SLEEP/STOP
+#include "interrupt.h"
+#include "stm32u5xx_hal_tim.h"
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

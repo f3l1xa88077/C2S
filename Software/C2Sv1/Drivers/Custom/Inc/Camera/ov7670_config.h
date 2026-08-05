@@ -16,7 +16,7 @@
 const uint8_t System_Config[][2] = {
 
 		//{OV7670_CLKRC_ADDRESS, 0x80}, 		// pre-scalar = 1/1
-		{OV7670_MVFP_ADDRESS, 0x31}, 		// H & V Flip
+		{OV7670_MVFP_ADDRESS, 0x01}, 		// H Flip
 
 		// Scale PCLK
 		{OV7670_CLKRC_ADDRESS, 0xA7}, // Divide by 40
@@ -85,17 +85,17 @@ const uint8_t RGB565_Config[][2] = {
 		{OV7670_COM16_ADDRESS, 0x38},   	// edge enhancement, de-noise, AWG gain enabled
 
 		// Exposure Timing (16-bit controller, MSB to LSB)
-//		{OV7670_AECHH_ADDRESS, 0x00}, 	// [5:0]
-//		{OV7670_AECH_ADDRESS, 0xF0},	// [7:0]
-//		{OV7670_COM1_ADDRESS, 0x00},	// [1:0]
+		{OV7670_AECHH_ADDRESS, 0x00}, 	// [5:0]
+		{OV7670_AECH_ADDRESS, 0x06},	// [7:0]
+		{OV7670_COM1_ADDRESS, 0x00},	// [1:0]
 
 		// Colour Matrix
-		{OV7670_MTX1_ADDRESS, 0xB3},
-		{OV7670_MTX2_ADDRESS, 0xB4},
+		{OV7670_MTX1_ADDRESS, 0xAC},
+		{OV7670_MTX2_ADDRESS, 0x90},
 		{OV7670_MTX3_ADDRESS, 0x20},
 		{OV7670_MTX4_ADDRESS, 0x2D},
-		{OV7670_MTX5_ADDRESS, 0x50},
-		{OV7670_MTX6_ADDRESS, 0xF4},
+		{OV7670_MTX5_ADDRESS, 0x60},
+		{OV7670_MTX6_ADDRESS, 0xE0},
 		{OV7670_MTXS_ADDRESS, 0x9E},
 
 		{REG_EOF, REG_EOF},
