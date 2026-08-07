@@ -37,3 +37,7 @@ Pin assignment was decided by first generating a generic PCB layout to identify 
 Supply voltages were configured according to \autoref{sec:app-u5-powersupply} as like in the \href{https://www.st.com/resource/en/application_note/an5373-getting-started-with-stm32u5-mcu-hardware-development-stmicroelectronics.pdf}{Getting started with STM32U5 MCU hardware development - Application note}.
 \nl
 The MCU pinout justification can be found in \autoref{tab:stm32u575-pin-justification}. SPI CS pins were configured as GPIO inputs or outputs. Button pins were set as external interrupts.
+
+\paragraph{Remark}
+The filters used to identify potential MCUs did not search for the JPEG codec which is why the compression was implemented via software.
+Future versions of the project should use an alternative chip if JPEG compression is used.

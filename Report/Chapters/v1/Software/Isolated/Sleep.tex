@@ -1,0 +1,3 @@
+The WAKEUP pin was not configured on a Standby pin, meaning the microcontroller cannot be placed into the lowest power consumption mode (standby). Instead, it can be freely placed in sleep and stop mode directly by code, so it can be triggered from the configured external interrupt on WAKEUP.
+\nl
+Inside the interrupt, the chip exits stop mode on the falling edge (when NCS is driven low / C2S is selected by OBC) and enters stop mode on the rising edge (when NCS is driven high / C2S is deselected by OBC). There wasn't a safety check for when the chip enters/exits stop mode as it assumes OBC makes the decision, it also gives priority to OBC to disable C2S if anything goes wrong.
