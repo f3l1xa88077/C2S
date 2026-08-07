@@ -1,5 +1,3 @@
-\textit{Any proprietary information has been excluded.}
-\nl
 Version 1 (v1) of C2S focuses on developing a CubeSat prototype - an early functional model built to test functionality. One major difference in this version explores a top-down systems-engineering approach, something that lacked in versions 0 and 0.1. Previously, all systems were developed in parallel to each other, meaning my component selection for the MCU was occuring at the same time I was selecting the CMOS Image Sensor (CIS). At first glance, this may seem fine, but this parallel approach fails to consider the system requirements. The CIS is the main component that everything should be designed around, not the other way around. To avoid this problem, certain goals were put in place to ensure this version was mission-oriented:
 
 \begin{enumerate}
@@ -48,10 +46,10 @@ These goals were developed from my experiences of what had and hadn't worked wit
     \subsubsection{Memory}
         \subimport{./Hardware/Schematic/}{Memory.tex}
 
-    \subsubsection{microSD}
+    \subsubsection{microSD}\label{sec:v1-microSD}
         \subimport{./Hardware/Schematic/}{microSD.tex}
 
-    \subsubsection{Connectors}
+    \subsubsection{Connectors}\label{sec:v1-connectors}
         \subimport{./Hardware/Schematic/}{Connectors.tex}
 
     \subsubsection{Power}\label{sec:v1-schematic-power}
