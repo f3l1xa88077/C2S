@@ -42,6 +42,7 @@ extern "C" {
 #include "config.h"
 #include "sensor.h"
 #include "uSD.h"
+#include "fx_stm32_spi_sd_driver.h"
 
 /* USER CODE END Includes */
 

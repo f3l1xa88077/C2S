@@ -14,11 +14,13 @@ static FX_MEDIA        sd_disk;
 static FX_FILE         my_file;
 static uint8_t         media_memory[512];
 
+extern VOID fx_stm32_spi_sd_driver(FX_MEDIA *media_ptr);
+
 uint32_t uSD_Init(void) {
     fx_system_initialize();
 
     /* Initialises the SD driver and opens the media */
-    return fx_media_open(&sd_disk, "STM32_SD", fx_stm32_sd_driver,
+    return fx_media_open(&sd_disk, "STM32_SPI_SD", fx_stm32_spi_sd_driver,
                          (VOID *)FX_NULL, media_memory, sizeof(media_memory));
 }
 
