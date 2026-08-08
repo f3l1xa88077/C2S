@@ -1,3 +1,14 @@
-The WAKEUP pin was not configured on a Standby pin, meaning the microcontroller cannot be placed into the lowest power consumption mode (standby). Instead, it can be freely placed in sleep and stop mode directly by code, so it can be triggered from the configured external interrupt on WAKEUP.
+The WAKEUP pin was not configured on a Standby pin, meaning the microcontroller cannot be placed into the lowest power consumption mode (standby). Instead, it can be freely placed in sleep and stop mode directly by code, which can be triggered from the configured external interrupt on WAKEUP.
 \nl
-Inside the interrupt, the chip exits stop mode on the falling edge (when NCS is driven low / C2S is selected by OBC) and enters stop mode on the rising edge (when NCS is driven high / C2S is deselected by OBC). There wasn't a safety check for when the chip enters/exits stop mode as it assumes OBC makes the decision, it also gives priority to OBC to disable C2S if anything goes wrong.
+There were four modes that the chip could be placed into:
+
+\begin{enumerate}
+    \item Sleep: A low-power state where the CPU is halted, but peripherals continue to operate
+    \item Stop0: All internal clocks are halted, retaining RAM and register contents
+    \item Stop1: A more conservative mode than the above.
+    \item Stop2: A more conservative mode than the above.
+\end{enumerate}
+
+To enter one of the mentioned modes, the CPU was halted and the selected mode was entered uring Wait For Interrupt (WFI). With this configuration. the chip exits stop mode on any interrupt. There wasn't a safety check for when the chip enters/exits stop mode as it assumes the operator has made the correct decision, it also gives priority to OBC to disable C2S if anything goes wrong. One caveat with the minimal safety check is that the chip can be woken up by noisy/bouncing interrupt lines, which resulted in an unpredictable state when using the button.
+\nl
+I could not figure out how to enter/exit the modes inside a ThreadX thread, so all of the testing was conducted in a super loop inside \verb|main.c|.

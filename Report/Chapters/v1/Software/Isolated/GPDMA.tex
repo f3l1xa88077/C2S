@@ -1,0 +1,16 @@
+The GPDMA is what most of my programming hours were focused around. It was a difficult topic as I had not previously worked with a DMA, and my requirements extended beyond those that ST supported with DCMI. Nevertheless, I was able to hack a solution and implement my desired software plan.
+\nl
+The GPDMA is its own processor alongside the CPU that performs memory-specific tasks, like receving, moving, and transmitting data. Unlike a CPU, it only moves memory around. To buffer the image in memory, I needed to receive the incoming image data and place it in the external memory, a peripheral-to-peripheral transfer as the external memory is via QSPI. The main issue was that DCMI GPDMA requests did not support peripheral-to-peripheral, so I had to figure out how to move the memory from an internal buffer to QSPI memory before the GPDMA caught up.
+\nl
+My hack solution was to slow down the incoming data enough that the CPU could transmit the data as the GPDMA brought more data in, this is called a double buffer. I configured the GPDMA in a circular-linked-list buffer and declared the middle-man buffer and the destination. Unfortunately the DCMI DMA library did not include the callback for a half-transfer which double buffer systems require, so I implemented my own inside \verb|app_threadx.c| and linked it to the \verb|hdcmi| struct immediately after the DMA configuration. I had one buffer the size of a linked list node, which triggered QSPI transmits on the halfway and end-markers of the buffer i.e., as the DMA wrote to the second half, the CPU transmitted the first half.
+\nl
+This approach did work and I was able to successfully buffer an image to external memory without data loss, but it came with several caveats and limitations:
+
+\begin{itemize}
+    \item The buffer size could only be set to the maximum size of a linked-list node. Changing the size resulted in immediate data loss.
+    \item It relied on the CPU not slowing down, getting halted by interrupts, or stopped by other threads.
+    \item It needed to blindly send data to QSPI memory very quickly, so there was no checking. If data was lost, it was lost for good.
+    \item The QSPI needed to keep up the entire time and not time out at any interval.
+\end{itemize}
+
+The solution allowed me to test image basic capture, but nothing further without difficulty. The above points highlight that the fix only worked under very careful test parameters, which is what drove me to halt testing at basic image capture and not proceed further, as altering the code could take more time and effort than just waiting for a revised version.

@@ -1,0 +1,48 @@
+Characterising the power profile of the board was the most critical test performed, as it provided the Systems Engineering Department with estimates of the payload's power consumption during all modes. This testing focused around building an understanding of how much power each component on the board draws, so we can then estimate how much power will be used during different run modes, using measurements to back up these estimates.
+\nl
+Before I could begin measuring data, it was critical to understand how I would be collecting the data and how current flows through the system. Measurements taken after the 3V3 voltage regulation could be taken at face value, but measurements from before the regulation, like the CSA, needed to be scaled to account for the power dissipation from the LDO. In a simplified sense, the LDO dissipates power proportional to the voltage drop and current through the IC, $P=(V_B - V_{3V3})\cdot I$, where $I=I_S=V_S / R_S$ is the current calculated from the shunt resistor. I calculated that at any given current draw, that approximately 34\% of the power was dissipated by the LDO. This mean that if the CSA measured the board consuming 150 mW, we could infer that the board itself would be drawing approximately 100 mW and the LDO would dissipate the other 50 mW.
+\nl
+I then proceeded to take some baseline measurements e.g., how much the LEDs dissipated, the power difference between the QSPI memory in active and sleep mode, as well as the system's power without activity, using datasheet values to verify up my measurements.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{Images/v1/Testing/Image_Power_Annotated.png}
+    \caption{Plot of system power consumption during VGA RGB565 image capture and delivery. Coloured sections represent intervals with different components powered.}
+    \label{fig:v1-image-power}
+\end{figure}
+
+Using the \href{https://community.st.com/stm32cubemx-mcus-29/pcc-power-consumption-calculator-explanation-inside-cubemx-137664}{STM32CubeMX Power Consumption Calculator (PCC)}, I was able to verify the expected MCU power consumption. I calculated the power consumption during Run Mode, Sleep, and Stop0, comparing the power differences to my measurements. I found that my measurements closely reflected the PCC values. Moreover, using datasheet values, I was able to estimate the power consumption of peripherals like the CSA, HSE, and LSE.
+\nl
+Using the dashboard's power collection feature, I was able to export the CSA data over an entire image request. \autoref{fig:v1-image-power} shows the measured power from the CSA from requesting a VGA RGB565 image to receiving it. Data was collected over four different trials (grey) and compiled into a mean timeline (blue). This was also repeated for the QVGA resolution, but it is not necessary to show here. The different colour sections are what I have interpreted to be time intervals where certain peripherals are active:
+
+\begin{itemize}
+    \item Red: Typical system + camera
+    \item Blue: Red + QSPI (writing)
+    \item Green: Typical system + USB (write)
+    \item Yellow: Typical system + USB (write) + QSPI (system erase)
+\end{itemize}
+
+where "typical system" simply means the system in an idle state without disabling peripherals (except for the camera) e.g., HSE, LSE, LED, MCU, CSA. These intervals line up with the order that the peripherals would activate/deactivate during an image capture, and somewhat align with the expected runtime e.g., for a VGA RGB565 image, it would take approximately $640\cdot480\cdot2 \times 2200\cdot10^{-9} = 1.35$ s to write to the QSPI memory, which is approximately the same width as the blue section (how long it actually wrote for, roughly 1.2 s).
+
+\begin{table}[htbp]
+    \centering
+    \begin{tabular}{|l|c|c|l|}
+        \hline
+        \textbf{Item} & \textbf{Power (mW)} & \textbf{Source} \\ \hline
+        CSA & 3.30 & Datasheet \\ \hline
+        LED & 10.65 & Measurement \\ \hline
+        HSE & 19.80 & Datasheet \\ \hline
+        LSE & $\approx$0.00 & Datasheet \\ \hline
+        MCU (Run) & 64.68 & STM32CubeMX PCC \\ \hline
+        MCU (Sleep) & 31.19 & STM32CubeMX PCC \\ \hline
+        MCU (Stop0) & 0.41 & STM32CubeMX PCC \\ \hline
+        QSPI (Write/Erase) & 49.50 & Datasheet \\ \hline
+        Camera & 52.30 & Measurement \\ \hline
+        USB (Data) & 7.46 & Measurement \\ \hline
+        LDO & $\times$0.52 & Calculation \\ \hline
+    \end{tabular}
+    \caption{C2Sv1 power consumption table for each peripheral.}
+    \label{tab:v1-power}
+\end{table}
+
+Comparing the plot from \autoref{fig:v1-image-power} to the gathered data in \autoref{tab:v1-power}, we can see that the estimations align with the measured data almost exactly, suggesting that the power profile is accurate. This suggests that we can predict the power profile of the board with different peripherals running, allowing us to comfortably predict the consumption at any time and determine what peripherals should be powered-down if a specific power target needs to be reached during conservative modes. The two main benefits of a power profile is that it provides the Systems Department with more data for the payload, but that we can now select LDOs knowing what our maximum current consumption should be - which was an issue faced in v0.1 and v1 hardware selection i.e., shouldn't need to worry if we exceed $x$ mA as we can calculate how much we should draw at any given time.

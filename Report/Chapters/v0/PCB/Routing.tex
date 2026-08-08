@@ -2,6 +2,6 @@ I used \href{https://www.ti.com/lit/an/spraar7j/spraar7j.pdf?ts=1755945140120}{T
 From Table A-7 of the guide (pg. 19), I found that the differential pair impedance is $100\pm15\Omega$, with lane skew of $40\texttt{ps}$, with 2 total vias per pair.
 Using Altium's impedance calculator and \href{https://files.resources.altium.com/sites/default/files/2020-03/Impedance%20Calculation_fin2.pdf}{guide}, I found the required separation distance between the 3.5mil differential traces to be 3.542mil, or approximately the trace width.
 According to the STM32N6 getting started guide, I require a length match of $\pm5\texttt{mil}$, and the MIRA220 datasheet (although not used) specifies a delay match of $40\texttt{ps}$ (which is greater than 5mil on the microstrip). I length matched the data pairs to achieve this low delay ($\pm2\texttt{mil}$).
-Additionally, the getting started guide specifies a length match of $\pm100texttt{mil}$ between the data and clock lines, which was achieved.
+Additionally, the getting started guide specifies a length match of $\pm100\texttt{mil}$ between the data and clock lines, which was achieved.
 \nl
 It was not possible to keep all the differential pairs on the top layer because of how the MIRA and STM pins aligned, one pair always ended up using vias. To ensure that each signal was grounded, I made sure to place sitching vias around the layer changes.

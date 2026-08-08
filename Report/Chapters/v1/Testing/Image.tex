@@ -1,0 +1,100 @@
+These tests aimed at exploring how well the OV7670 camera performs in a colour range and sharpness test. I was able to obtain the two boards from the Curtin Photography department:
+
+\begin{itemize}
+    \item The Macbeth ColorChecker - Color Rendition Chart
+    \item Focus chart - \href{http://regex.info/blog/photo-tech/focus-chart}{http://regex.info/blog/photo-tech/focus-chart}
+\end{itemize}
+
+I conducted the image testing in the Binar workstation room, with ambient lighting of 300-350 Lux (obtained from the Q1270A Lux Meter). As seen in \autoref{fig:v1-rig}, the board was placed at a distance that it would occupy as much of the frame as possible, and the camera was rested on some electrical tape. In hindsight, a mechanical housing for the camera should have been printed as I had much difficulty levelling the image, and I highly recommend printing one for any future testing. I controlled the camera through the dashboard on my laptop, requesting QVGA and VGA images in RGB565 mode. At the time of testing, I was only able to capture a single image before memory management issues occured (i.e., from the second image, the output would be jumbled) so I unplugged and plugged in the camera after each image to ensure a full image was captured. The results from the colour checker and sharpness board can be seen in \autoref{fig:v1-OV7670-colour} and \autoref{fig:v1-OV7670}, respectively.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{Images/v1/Testing/Rig.jpg}
+    \caption{Image testing setup.}
+    \label{fig:v1-rig}
+\end{figure}
+
+\autoref{fig:v1-OV7670-colour} shows that the OV7670 camera does a fair job at capturing the correct colours, with some minor differences, but these can be attributed to empirical register configurations for the colour matrix. Overall, the captured image closely resembles the colour chart, proving that with the correct configuration and white balance applied in post-production, that correct colours can be captured with this camera.
+\nl
+Comparing \autoref{fig:v1-OV7670} to \autoref{fig:v1-A6700}, we can see that there is a clear difference in image quality between the two cameras. On the A6700, we can see that all aspects of the board are captured, even the very fine details. In contrast, the OV7670 picks up information from high-contrast and large element areas like the inverted numbers, but not the thin lines.
+\nl
+The takeaways from this sharpness test were:
+
+\begin{enumerate}
+    \item Resolution plays a pivotal role for capturing smaller information - features that are smaller than the pixel resolution blend together or don't appear at all.
+    \item Large objects can be detected and identified using cheap camera modules
+    \item We can now expect how images will look from the minimum CubeSat resolution.
+\end{enumerate}
+
+As I briefly touched on with the apparatus, but there were errors involved with the test that could have led to impairments in image quality for the OV7670 camera. As mentioned, there was no fitted housing for the board, so both images were slightly cropped and unaligned - as one side would have been further away than the other for the sharpness board, one side would have less resolution than the other (the further side), making it an unfair comparison to the A6700. For the colour chart, I empirically determined the colour matrix values for the best white balance in the Binar workstation environment, meaning the colour balance could be compeltely incorrect in other environments (e.g., outside, in another room with different light temerature).
+\nl
+Overall, the results from these tests should serve only as a guideline for the image quality, and not as true representations of the camera's capabilities. Nevertheless, the camera performs well at capturing images and would appear suitable for HAB and/or CubeSat missions if configured correctly.
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/ColourAdjusted.png}
+        \caption{OV7670 colour chart image, white balance corrected.}
+    \end{subfigure}
+    \hspace{1.5cm}
+    \begin{subfigure}[b]{0.35\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/Macbeth.jpg}
+        \caption{Reference colour chart (\href{https://www.flickr.com/photos/basslinegfx/85931066}{source}).}
+    \end{subfigure}
+    \caption{Comparison of colour profile.}
+    \label{fig:v1-OV7670-colour}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/Sharpness_Highlighted.png}
+        \caption{Full-view with zoom-in sections highlighed.}
+        \label{fig:v1-vo_a}
+    \end{subfigure}\nl
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/OV_Zoom1.png}
+        \caption{Zoom in (1).}
+        \label{fig:v1-ov_b}
+    \end{subfigure}
+    \hspace{1.5cm}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/OV_Zoom2.png}
+        \caption{Zoom in (2).}
+        \label{fig:v1-ov_c}
+    \end{subfigure}
+    \caption{Performance of OV7670 against sharpness board.}
+    \label{fig:v1-OV7670}
+\end{indentedfigure}
+
+\begin{indentedfigure}
+    \centering
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/A6700_Sharpness.png}
+        \caption{Full-view with zoom-in sections highlighed.}
+        \label{fig:v1-a6700_a}
+    \end{subfigure}\nl
+    \hfill
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/A6700_Zoom1.png}
+        \caption{Zoom in (1).}
+        \label{fig:v1-a6700_b}
+    \end{subfigure}
+    \hspace{1.5cm}
+    \begin{subfigure}[b]{0.3\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Images/v1/Testing/A6700_Zoom2.png}
+        \caption{Zoom in (2).}
+        \label{fig:v1-a6700_c}
+    \end{subfigure}
+    \caption{Performance of Sony A6700 against sharpness board.}
+    \label{fig:v1-A6700}
+\end{indentedfigure}

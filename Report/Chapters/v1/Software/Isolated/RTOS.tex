@@ -1,5 +1,5 @@
 It was important to use an RTOS specifically for testing so the CSA could be called at specific intervals, rather than at arbitrary times when using a super-loop. It should be noted that the final software will most likely inherit a super-loop-like structure. It will be woken up and execute a set instructions, in strict order and only once, before it goes to sleep.
 \nl
-Three threads were created using ThreadX, one for the CSA with the highest priority triggering every [x] ms (for a consistent power profile), another for the camera thread with medium priority (executing the instruction loop), and another for the TinyUSB thread with the lowest priority (as when nothing is running, TinyUSB should be polling the PC to keep the virtual COM port open).
+Three threads were created using ThreadX, one for the CSA with the highest priority triggering every 75 ms (for a consistent power profile), another for the camera thread with medium priority (executing the instruction loop), and another for the TinyUSB thread with the lowest priority (as when nothing is running, TinyUSB should be polling the PC to keep the virtual COM port open).
 \nl
-\verb|tx_thread_sleep| was used over \verb|tx_thread_relinquish| for both the since they need to execute at specific intervals, whereas \verb|tx_thread_relinquish| was used on the camera thread since it is called aperiodically.
+\verb|tx_thread_sleep| was used over \verb|tx_thread_relinquish| for both the since the threads need to execute at specific intervals.

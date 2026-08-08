@@ -1,0 +1,41 @@
+The camera (\href{https://web.mit.edu/6.111/www/f2016/tools/OV7670_2006.pdf}{OV7670}), is just like any other intergrated circuit, it needed to be configured via registers. Fortunately, there was little setup required to get the image sensor working correctly, most of the work simply went into fine-tuning the settings.
+\nl
+As the OV7670 uses DCMI, it natively uses I2C as its configuration interface. Register writing was performed by basic I2C HAL commands, where the register specified the address, and the register value specified the value (and vice versa for reading). I adapted a source file for configuring the image sensor, and copied over a header file for macro definitions. After getting to know the datasheet, register configuration was intuitive as the description typically outlined dependencies and their function. The datasheet was not finalised though, so there were still minor mistakes like \verb|CLKRC| that should have a 6-bit range instead of 5-bit on the dot-point, but nothing that wasn't easy to fix. The hardest part was getting the window set correctly, as the horizontal and vertical start and stop registers needed to agree completely with the set resolution, otherwise the image would appear cropped. It was also confusing as the values were spread across several registers, which made the process unintuitive.
+\nl
+I implemented the framework for mode-switching via the dashboard which worked well for switching between the test-pattern and RGB565, and QVGA and VGA resolution. This just configured the camera with specific register sets which align with certain colour-spaces and resolutions.
+\nl
+Colour balance was a tricky part of the process, as the colour matrix registers mapped to a 2x1 CrCb matrix. From experiementation, I found that increasing the value of each colour matrix register produced the following effects in \autoref{tab:v1-colourmatrix}. I empirically tuned the colour matrix values until I obtained image quality that I found to be reasonable. I also found that configuring \verb|RSVD\_B0| to its reset value was critical to prevent the colours from being inverted.
+
+\begin{indentedfigure}
+    \centering
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Register \#} & \textbf{Effect} \\
+        \hline
+        1 & Pink \\
+        \hline
+        2 & Cyan \\
+        \hline
+        3 & Turquoise \\
+        \hline
+        4 & Yellow \\
+        \hline
+        5 & Amber \\
+        \hline
+        6 & Magenta \\
+        \hline
+    \end{tabular}
+    \caption{Visual effects of increasing colour matrix registers}
+    \label{tab:v1-colourmatrix}
+\end{indentedfigure}
+
+I handled the exposure through the \verb|GAIN| and \verb|AEC| registers. This also took some experimentation to get correct. I was not successful in implementing automatic exposure control, as I found that it would over expose itself after a few images were taken. It was important to balance those registers with the system clock prescalars, as slower clocks resulted in longer exposure times.
+\nl
+To comply with the memory limitations on this board, I was able to derive a formula for the required PCLK speed in \autoref{eq:ov7670-pclk}.
+
+\begin{equation}
+    \frac{S}{TP} \leq \frac{4}{2.2\times10^{-6}}
+    \label{eq:ov7670-pclk}
+\end{equation}
+
+where $S$ represents the data size in bytes, $T$ the time taken for a single image to be ouput from the camera without prescalars, and $P$ the prescalar value. At QVGA resolution ($S=153600$, $T=88.2$ms), I found $P=10$ to be the minimum value before data corruption occured (verified by testing). The LHS of \autoref{eq:ov7670-pclk} represents the data-rate (B/s) coming out of the camera and the RHS represents the data-rate that the QSPI memory can handle (determined empirically).
