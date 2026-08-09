@@ -1,1 +1,0 @@
-/usr/bin/cc -Wall -Wextra -O2 CMakeFiles/icer_util.dir/example/src/icer_util.c.o CMakeFiles/icer_util.dir/example/src/stb_lib.c.o -o icer_util  -lm lib_icer/libicer.a 

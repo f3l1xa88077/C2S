@@ -1,1 +1,0 @@
-/usr/bin/cc -Wall -Wextra -O2 CMakeFiles/decompress_color.dir/example/src/example_decode_color.c.o CMakeFiles/decompress_color.dir/example/src/stb_lib.c.o -o decompress_color  -lm lib_icer/libicer.a 

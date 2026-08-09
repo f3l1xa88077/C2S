@@ -20,6 +20,9 @@
 #include "main.h"
 #include "jpeg_utils_conf.h"
 #include "app_filex.h"
+#include "icer.h"
+#include "compress_test_harness.h"
+
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -38,6 +41,8 @@
 #define POWER_AVG_WINDOW_MS 1000
 
 #define ENCODER_VAL scroll_encoder.cfg.arr[scroll_encoder.cfg.idx]
+
+
 
 /* USER CODE END PD */
 
@@ -71,7 +76,7 @@ USART_HandleTypeDef husart2;
 
 /* USER CODE BEGIN PV */
 
-// Scoll Encoder
+// Scroll Encoder
 Encoder_HandleTypeDef scroll_encoder;
 int BOOT0 = 0;
 
@@ -94,10 +99,6 @@ OSPI_RegularCmdTypeDef sCommand;
 // Image Sensor
 uint16_t sensor_temp = 0;
 
-static uint8_t gray[128*128];;
-static uint8_t jpeg_out[20000];
-uint32_t jpeg_size = 20000;
-JPEG_ConfTypeDef conf;
 
 /* USER CODE END PV */
 
@@ -179,18 +180,12 @@ int main(void)
 
   // Initialise subsystems
 
+  	  // Must call for ICER compression
+  	  icer_init();
+
+	  uint32_t status = uSD_Init();
 	  // Image Sensor
-	  for (int y=0; y<128;y++) {
-		for (int x=0;x<128;x++){
-			gray[y*128+x] = (x % 32 < 16) ? 50: 200;
-		}
-	  }
-	  conf.ColorSpace = JPEG_GRAYSCALE_COLORSPACE;
-	  conf.ChromaSubsampling = JPEG_444_SUBSAMPLING;
-	  HAL_JPEG_ConfigEncoding(&hjpeg, &conf);
-	  HAL_JPEG_Encode(&hjpeg, gray, 128*128, jpeg_out, jpeg_size, HAL_MAX_DELAY);
-	  uSD_Init();
-	  SD_Stream_Data("test.jpg", jpeg_out, hjpeg.JpegOutCount, 1);
+	  //SD_Stream_Data("test.jpg", jpeg_out, hjpeg.JpegOutCount, 1);
 //	  AR_Init_Temperature(&hi2c1);
 //	  AR_Read_Temperature(&hi2c1, &sensor_temp);
 //	  AR_Init_ImageSensor(&hi2c1);
@@ -210,7 +205,7 @@ int main(void)
 	  Encoder_Init(&scroll_encoder, SCROLL_A_GPIO_Port, SCROLL_A_Pin,
 					   SCROLL_B_GPIO_Port, SCROLL_B_Pin);
 	  // LCD Screen
-	  if (SELECTED_LCD) { sLCD_Init(&hi2c4); }
+//	  if (SELECTED_LCD) { sLCD_Init(&hi2c4); }
 
 	  // QSPI Memory
 	  QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
@@ -239,6 +234,7 @@ int main(void)
 
 	  // Read BOOT0 Pin State
 	  BOOT0 = HAL_GPIO_ReadPin(BOOT0_GPIO_Port, BOOT0_Pin);
+	  Test_ICER_Compress_From_YUV_File_SD();
 
 	  powerSum   += csa.sys_power;
 	  currentSum += csa.current;
@@ -1066,6 +1062,17 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+int _write(int file, char *ptr, int len)
+{
+  (void)file;
+  int DataIdx;
+
+  for (DataIdx = 0; DataIdx < len; DataIdx++)
+  {
+    ITM_SendChar(*ptr++);
+  }
+  return len;
+}
 
 /* USER CODE END 4 */
 
