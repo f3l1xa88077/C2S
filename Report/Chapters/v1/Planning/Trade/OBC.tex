@@ -1,6 +1,6 @@
 The two communications interfaces that can realistically transmit to the Onboard Computer (OBC) are I2C and SPI. Although USART was considered in \autoref{sec:v0.1-mcu}, it is not a high-speed serial protocol, so it will not be considered. The interfaces were considered using \href{https://resources.altium.com/p/spi-versus-i2c-how-choose-best-protocol-your-memory-chips}{this article}.
 \nl
-The OCB interface selection is driven by three primary features: speed, power consumption, and signal integrity. Faster interfaces will transfer data quicker, allowing the entire camera system to enter deep sleep quicker and save power. While the inherent power consumption of the interface is a consideration, the entire system has a higher consumption, so it is weighted considerably higher. Furthermore, the signal integrity of each interface is incredibly important, as a corrupted image is not desired.
+The OBC interface selection is driven by three primary features: speed, power consumption, and signal integrity. Faster interfaces will transfer data quicker, allowing the entire camera system to enter deep sleep quicker and save power. While the inherent power consumption of the interface is a consideration, the entire system has a higher consumption, so it is weighted considerably higher. Furthermore, the signal integrity of each interface is incredibly important, as a corrupted image is not desired.
 
 \begin{indentedtable}
     \centering

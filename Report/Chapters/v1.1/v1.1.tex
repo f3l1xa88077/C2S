@@ -1,0 +1,141 @@
+Version 1.1 (v1.1) of C2S refined v1 with a core focus on accessibility, debugging, and integration. In v1, basic requirements were implemented, which led to the eventual failure of the microSD component and memory management issues. This version placed system requirements at a higher priority, almost developing a virtual version before hardware development occurred, to minimise the risk of failure as much as reasonably possible.
+
+Just like the previous board, the version milestones were ordered to ensure planning was executed in the correct order and no aspects of the design were skipped or shortcut:
+
+\begin{enumerate}
+    \item Systems Planning
+    \item Capabilities
+    \item CIS Agreements (N/A)
+    \item Component Selection
+    \item Development
+\end{enumerate}
+
+The purpose this version aimed to serve was to be a universal board for FlatSat/HAB/CubeSat integration until requirements were further solidified and budget was available for final versions i.e., a product to fill the payload bay of all three. If successful, the integration procedure and interface would be greatly simplified via a single board, so prepping the board for a HAB is a matter of ensuring its connection was the same as used on FlatSat and vice versa.
+
+At the time of development, the need for a functioning payload was greater than the need for a CubeSat payload, hence the rationale behind this version. Nevertheless, this version employed little new methods or components that weren't already introduced or implemented on previous versions, simply more structured and organised.
+
+% -----------------------
+% Introduction
+% -----------------------
+% \subsection{Introduction}\label{sec:v1.1-intro}
+%     \subimport{./Introduction/}{Intro.tex}
+
+% -----------------------
+% Systems Planning
+% -----------------------
+\subsection{Systems Planning}\label{sec:v1.1-planning}
+
+    \subsubsection{Capabilities}\label{sec:v1.1-capabilities}
+        \subimport{./Planning/}{Capabilities.tex}
+
+    \subsubsection{System Requirements}\label{sec:v1.1-requirements}
+        \subimport{./Planning/}{Requirements.tex}
+
+    \subsubsection{Systems Integration Diagram}
+        \subimport{./Planning/}{Planning.tex}
+
+    \subsubsection{Trade Study}
+        \subimport{./Planning/}{Trade.tex}
+
+% -----------------------
+% Schematic and Component Selection
+% -----------------------
+\subsection{Schematic Design \& Component Selection}\label{sec:v1.1-schematic}
+
+    % \subsubsection{MCU}\label{sec:v1.1-schematic-mcu}
+    %     \subimport{./Hardware/Schematic/}{MCU.tex}
+
+    % \subsubsection{Sensor}\label{sec:v1.1-schematic-sensor}
+    %     \subimport{./Hardware/Schematic/}{Sensor.tex}
+
+    % \subsubsection{Memory}
+    %     \subimport{./Hardware/Schematic/}{Memory.tex}
+
+    % \subsubsection{microSD}\label{sec:v1.1-microSD}
+    %     \subimport{./Hardware/Schematic/}{microSD.tex}
+
+    % \subsubsection{Connectors}\label{sec:v1.1-connectors}
+    %     \subimport{./Hardware/Schematic/}{Connectors.tex}
+
+    % \subsubsection{Power}\label{sec:v1.1-schematic-power}
+    %     \subimport{./Hardware/Schematic/}{Power.tex}
+
+    % \subsubsection{USB-C}
+    %     \subimport{./Hardware/Schematic/}{USBC.tex}
+
+    % \subsubsection{STLINK}\label{sec:v1.1-schematic-stlink}
+    %     \subimport{./Hardware/Schematic/}{STLINK.tex}
+
+    % \subsubsection{Clocks}
+    %     \subimport{./Hardware/Schematic/}{Clocks.tex}
+
+    % \subsubsection{Button}
+    %     \subimport{./Hardware/Schematic/}{Button.tex}
+
+    % \subsubsection{LEDs}
+    %     \subimport{./Hardware/Schematic/}{LEDs.tex}
+
+    % \subsubsection{Test Points}
+    %     \subimport{./Hardware/Schematic/}{TP.tex}
+
+% -----------------------
+% PCB Design
+% -----------------------
+\subsection{PCB Design}\label{sec:v1.1-pcb}
+
+    % \subsubsection{Stackup}
+    %     \subimport{./Hardware/PCB/}{Stackup.tex}
+
+    % \subsubsection{Layout}\label{sec:v1.1-layout}
+    %     \subimport{./Hardware/PCB/}{Layout.tex}
+
+    % \subsubsection{Routing}\label{sec:v1.1-routing}
+    %     \subimport{./Hardware/PCB/}{Routing.tex}
+
+    % \subsubsubsection{Coupling}\label{sec:v1.1-coupling}
+    %     \subimport{./Hardware/PCB/}{Coupling.tex}
+
+    % \subsubsection{Vias}
+    %     \subimport{./Hardware/PCB/}{Vias.tex}
+
+    % \subsubsection{Power Pad}
+    %     \subimport{./Hardware/PCB/}{Power Pad.tex}
+
+    % \subsubsection{Silkscreen}
+    %     \subimport{./Hardware/PCB/}{Silkscreen.tex}
+
+    % \subsubsection{Mounting}
+    %     \subimport{./Hardware/PCB/}{Mounting.tex}
+
+
+% -----------------------
+% Manufacturing
+% -----------------------
+\subsection{Manufacturing}\label{sec:v1.1-manufacturing}
+    \subimport{./Manufacturing/}{Manufacturing.tex}
+
+% -----------------------
+% Software
+% -----------------------
+\subsection{Software}\label{sec:v1.1-software}
+    \subimport{./Software/}{Software.tex}
+
+% -----------------------
+% Testing
+% -----------------------
+\subsection{Testing}\label{sec:v1.1-testing}
+
+    % \subsubsection{QSPI}
+    %     \subimport{./Testing/}{QSPI.tex}
+
+    % \subsubsection{Power Consumption}
+    %     \subimport{./Testing/}{Power.tex}
+
+    % \subsubsection{Image Quality}
+    %     \subimport{./Testing/}{Image.tex}
+
+% -----------------------
+% Conclusion
+% -----------------------
+\subsection{Conclusion}\label{sec:v1.1-conclusion}
+    \subimport{./Conclusion/}{Conclusion.tex}
