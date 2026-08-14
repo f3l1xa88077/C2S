@@ -14,6 +14,8 @@ The purpose this version aimed to serve was to be a universal board for FlatSat/
 
 At the time of development, the need for a functioning payload was greater than the need for a CubeSat payload, hence the rationale behind this version. Nevertheless, this version employed little new methods or components that weren't already introduced or implemented on previous versions, simply more structured and organised.
 
+It should also be noted, that the v0.1 compression tests were being conducted as this version's requirements were being written, so this was the first version to use information from those tests to inform hardware and software choices.
+
 % -----------------------
 % Introduction
 % -----------------------
@@ -31,11 +33,14 @@ At the time of development, the need for a functioning payload was greater than 
     \subsubsection{System Requirements}\label{sec:v1.1-requirements}
         \subimport{./Planning/}{Requirements.tex}
 
-    \subsubsection{Systems Integration Diagram}
-        \subimport{./Planning/}{Planning.tex}
+    \subsubsection{Systems Interface Diagram}
+        \subimport{./Planning/}{Diagram.tex}
 
     \subsubsection{Trade Study}
         \subimport{./Planning/}{Trade.tex}
+
+    \subsubsection{STM32 Compatibility}
+        \subimport{./Planning/}{Compatibility.tex}
 
 % -----------------------
 % Schematic and Component Selection

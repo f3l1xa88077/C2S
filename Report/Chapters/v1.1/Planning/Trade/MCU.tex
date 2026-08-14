@@ -1,29 +1,39 @@
-By applying the following filters in the product selector (below), I got some options. I then chose the best of the remaining and put them into \autoref{tab:v1.1-trade-mcu}.
+As mentioned in \autoref{sec:v1-trade-mcu}, the MCU is the most important aspect as it interfaces with all peripherals on the board. The physical size of the chip was not a large issue as the v1 board was significantly smaller than the CubeSat maximum size (52 x 53 mm vs. 87 x 87 mm), although minimising the chip size is preferable as it reduces trace length. Likewise, reducing the cost of the chip is ideal, but not a dealbreaker all STM32s typically fall within the \$5 - 30AUD price range, which doesn't hurt the project budget much. The temperature rating was not a grave concern as all eligible chips are at least industrial grade (-40 to +85) which, as verified by the Systems Engineering Lead (Kyle H), is okay. Larger internal SRAM meant a smaller extended memory chip needed to be procured, which saves money and allows smaller images to be buffered internally during testing, but doesn't affect the design much since this will marginally reduce the required size of the external memory. Faster clock speeds reduces runtime which saves power, but most importantly, a lower current draw per MHz saves the most amount of power. After applying the minimum chip requirements (like SDMMC, LQFN, minimum clock speed of maximum DCMI speed, etc.), the following chips were presented in the \href{https://www.st.com/content/st_com/en/stm32-mcu-product-selector.html}{ST Product Selector} as found in \autoref{tab:v1.1-trade-mcu}.
 
 \begin{indentedfigure}
     \centering
-    \begin{tabular}{|l|l|l|}
+    \begin{tabular}{|l|c|c|c|c|c|c|c|}
         \hline
-        \textbf{Criteria} & \textbf{Weight} & \textbf{Chip} \\
+        \textbf{Criteria} & \textbf{Weight} & \textbf{H573} & \textbf{H7B3} & \textbf{U5G9} & \textbf{L496} & \textbf{U585} & \textbf{U595} \\
         \hline
-        Size \\
+        Size & 1 & 4 & 4 & 4 & 4 & 4 & 4 \\
         \hline
-        Temperature \\
+        Temperature & 2 & 4 & 2 & 2 & 5 & 2 & 2 \\
         \hline
-        Cost \\
+        Cost & 1 & 2 & 3 & 2 & 4 & 3 & 3 \\
         \hline
-        Power \\
+        Power & 5 & 2 & 3 & 5 & 1 & 5 & 5 \\
         \hline
-        Speed \\
+        Speed & 3 & 4 & 4 & 2 & 1 & 2 & 2 \\
         \hline
-        SRAM \\
+        SRAM & 2 & 2 & 3 & 5 & 1 & 2 & 4 \\
         \hline
-        JPEG \\ % Checkbox
+        JPEG & - & & \checkmark & \checkmark & & & \\
+        \hline
+        FMC & - & \checkmark & \checkmark & & \checkmark & & \\
+        \hline
+        FSMC & - & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
         \hline \hline
-        \textbf{Total Score} & & \textbf{x} \\
+        \textbf{Total Score} & & \textbf{40} & \textbf{44} & \textbf{51} & \textbf{28} & \textbf{46} & \textbf{50} \\
         \hline
     \end{tabular}
     
-    \caption{C2Sv1.1 MCU trade study between different processor lines on a scale (1-5).}
+    \caption{C2Sv1.1 MCU trade study between different STM32 series on a scale (1-5).}
     \label{tab:v1.1-trade-mcu}
 \end{indentedfigure}
+
+In both cases of JPEG considered and not, the STM32U5G9 marginally won over the other chips. Both the JPEG and non-JPEG cases were considered in-case there was a clear winner for a software-only and JPEG-only approach, however, the results indicate that the U5G9 suits both best.
+\nl
+An FSMC-compatible memory type was selected in \autoref{sec:v1.1-trade-mem}, so the FMC capability did not influence the decision. The non-U-series chips particularly suffered from its higher current draw and smaller internal SRAM. ALthough some, like the H-series, have a clock speed almost twice that of the U5, the current draw per MHz essentially forces itself out of running at a higher clock speed (not feasible), since the power consumption would be almost four times as large.
+\nl
+It should be made clear that the score does not immediately select the chip, rather it suggests which one should win based on the requirements (weights). Here, the U5G9 was selected over the U595 because it has a slightly larger internal SRAM and the cost difference does not impact the budget that much. The fact that the U5G9 can do JPEG meant that it won both cases, rather than JPEG being the deciding factor that resulted in it beating the U595.

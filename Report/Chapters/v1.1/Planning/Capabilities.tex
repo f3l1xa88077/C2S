@@ -1,8 +1,11 @@
 \subsubsubsection{Mechanical}
-.
+Like \autoref{sec:v1-capabilities-mech}, the maximum board size may be 87 x 87 mm, with a square format to conform with the FlatSat bed mount as confirmed by the Mission Manager at the time (Liria S, Aug. 2026). The HAB2 mounting pattern had not been decided at the time this version was being planned.
 
 \subsubsubsection{Communications}
-.
+The same logic was carried over from \autoref{sec:v1-capabilities-comms}, with the file size governed by the Requirements Traceability Verification Matrix v0.3 and Payload Phase B Work Package. Although these documents state the maximum file size and minimum resolution, these constraints apply to the CubeSat and not the FlatSat and HAB, which this version will be designed for. Despite this, the numbers were used as goals.
 
 \subsubsubsection{EPS}
-.
+The 4-pin high power connector (504050-0491) is used to power C2S from the EPS board with 5 V. Current ratings from the v0.01.0 Avionics Connectors Standard document suggest the connector and cable is rated between 4-6 A. The inner two pins are 5 V, the outer pins are ground.
+The symmetrical pinout means that no matter the orientation, a short circuit should not occur unless the pinout is incorrect.
+\nl
+Given that C2Sv1 was estimated to draw a maximum of 350 mW (approximately 70 mA at 5 V), the current ceiling should not be an issue.

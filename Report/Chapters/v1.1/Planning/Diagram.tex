@@ -1,0 +1,51 @@
+\begin{figure}[!ht]
+    \centering
+    \resizebox{0.7\textwidth}{!}{%
+        \begin{circuitikz}
+            \tikzstyle{every node}=[font=\fontsize{10.2pt}{13.3pt}\selectfont]
+            \draw  (15,19.625) rectangle (17.5,13.375);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (16.25,16.5) {\fontsize{18.2pt}{23.7pt}\selectfont MCU};
+            \draw  (10,14.375) rectangle (12.5,13.625);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,14) {\fontsize{11.9pt}{15.5pt}\selectfont HSE};
+            \draw  (10,15.625) rectangle (12.5,14.625);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,15.125) {\fontsize{11.9pt}{15.5pt}\selectfont OBC};
+            \draw  (10,18.5) rectangle (12.5,17.875);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,18.1875) {\fontsize{11.9pt}{15.5pt}\selectfont EPS};
+            \draw  (10,19.625) rectangle (12.5,18.75);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,19.1875) {\fontsize{11.9pt}{15.5pt}\selectfont USB-C};
+            \draw  (20,16.625) rectangle (22.5,15.75);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,16.1875) {\fontsize{11.9pt}{15.5pt}\selectfont Camera};
+            \draw  (20,17.625) rectangle (22.5,16.875);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,17.25) {\fontsize{11.9pt}{15.5pt}\selectfont LEDs};
+            \draw  (20,18.625) rectangle (22.5,17.875);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,18.25) {\fontsize{11.9pt}{15.5pt}\selectfont SWD};
+            \draw  (20,19.625) rectangle (22.5,18.875);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,19.25) {\fontsize{11.9pt}{15.5pt}\selectfont microSD};
+            \draw [{Stealth[scale=1.5]}-{Stealth[scale=1.5]}, ] (12.5,15.125) -- (15,15.125)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SPI};
+            \draw [-{Stealth[scale=1.5]}, ] (12.5,14) -- (15,14)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{CLK};
+            \draw [-{Stealth[scale=1.5]}, ] (17.5,19.25) -- (20,19.25)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SDMMC};
+            \draw [{Stealth[scale=1.5]}-{Stealth[scale=1.5]}, ] (20,18.25) -- (17.5,18.25)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{SWD};
+            \draw [-{Stealth[scale=1.5]}, ] (17.5,17.25) -- (20,17.25)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{GPIO};
+            \draw [-{Stealth[scale=1.5]}, ] (17.5,16.375) -- (20,16.375)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{I2C};
+            \draw [-{Stealth[scale=1.5]}, ] (20,16) -- (17.5,16)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{DCMI};
+            \draw  (10,17.5) rectangle (12.5,16.5);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (11.25,17) {\fontsize{11.9pt}{15.5pt}\selectfont CSA};
+            \draw [-{Stealth[scale=1.5]}, ] (13.75,17.25) -- (12.5,17.25);
+            \draw  (13.75,18.125) circle (0.125cm);
+            \draw [short] (12.5,19) -- (13.75,19);
+            \draw [short] (13.75,18) -- (13.75,17.25)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{PWR};
+            \draw [-{Stealth[scale=1.5]}, ] (13.75,19) -- (13.75,18.25);
+            \draw [-{Stealth[scale=1.5]}, ] (12.5,18.125) -- (13.625,18.125);
+            \draw [-{Stealth[scale=1.5]}, ] (12.5,16.875) -- (15,16.875)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{I2C};
+            \draw [{Stealth[scale=1.5]}-{Stealth[scale=1.5]}, ] (15,19.375) -- (12.5,19.375)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{USB-D};
+            \draw  (20,15.5) rectangle (22.5,14.75);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,15.125) {\fontsize{10.2pt}{13.3pt}\selectfont QSPI FLASH};
+            \draw  (20,14.5) rectangle (22.5,13.375);
+            \node[anchor=center, align=center, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm] at (21.25,13.9375) {\fontsize{10.2pt}{13.3pt}\selectfont NOR FLASH};
+            \draw [{Stealth[scale=1.5]}-{Stealth[scale=1.5]}, ] (20,15.125) -- (17.5,15.125)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{QSPI};
+            \draw [{Stealth[scale=1.5]}-{Stealth[scale=1.5]}, ] (20,14) -- (17.5,14)node[pos=0.5, fill={rgb,255:red,255; green,255; blue,255}, fill opacity=1, text opacity=1, inner xsep=0.080cm, inner ysep=0.085cm, rounded corners=0.020cm]{FSMC};
+        \end{circuitikz}
+    }%
+    \caption{C2Sv1.1 systems interface diagram}
+    \label{fig:v1.1-diagram}
+\end{figure}

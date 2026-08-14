@@ -1,26 +1,35 @@
-.
+The selected memory type heavily influences the selected MCUs as not all extended memory types are supported by all chips (FMC vs. FSMC). The main considerations with memory were how much power it dissipated (during active and standby modes), as well as how future-proof the memory type was for future versions (if larger or smaller memory options needed to be selected). Building on the future-proof mark, whether the memory supported many non-BGA components was a heavy issue, as most memory ICs come in BGA format. Next, the memory needed to be afforable as it scaled, as some are economical in the few Mbit range, but hundreds of dollars at larger sizes. Lastly, the thermal performance and physical size were preferable factors.
 
 \begin{indentedtable}
     \centering
-    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+    \begin{tabular}{|l|l|l|l|l|l|l|}
         \hline
         \textbf{Criteria} & \textbf{Weight} & \textbf{SRAM} & \textbf{PSRAM} & \textbf{SDRAM} & \textbf{NOR} & \textbf{NAND} \\
         \hline
-        Cost \\
+        Cost & 3 & 2 & 3 & 4 & 5 & 1 \\
         \hline
-        Package \\
+        Package & 4 & 4 & 1 & 2 & 4 & 3 \\
         \hline
-        Temperature \\
+        Temperature & 2 & 2 & 2 & 2 & 3 & 3 \\
         \hline
-        Power \\
+        Power & 5 & 3 & 3 & 1 & 3 & 2 \\
         \hline
-        Size \\
+        Size & 1 & 2 & 5 & 1 & 2 & 2 \\
+        \hline
+        Scalability & 5 & 3 & 5 & 5 & 5 & 2 \\
         \hline
         \hline
-        \textbf{Total Score} &   & \textbf{x} & \textbf{x} & \textbf{x} & \textbf{x} & \textbf{x} \\
+        \textbf{Total Score} &   & \textbf{58} & \textbf{62} & \textbf{55} & \textbf{79} & \textbf{43} \\
         \hline
     \end{tabular}
-    
     \caption{C2Sv1.1 trade study comparing different extended memory options for the STM32 on a scale (1-5).}
     \label{tab:v1.1-trade-memory}
 \end{indentedtable}
+
+NOR was the selected option because of its suitability for low-memory chips in non-BGA packages at a cheap price as seen in \autoref{tab:v1.1-trade-memory}. PSRAM was a strong candidate because it is very scalable and power efficient with technologies like HyperBUS, but almost all products are found in BGA packages.
+SRAM was also another contender, but it is an expensive technology, with chips in the 64+ Mbit range costing upwards of \$50AUD, making it less scalable and cost-effective.
+SDRAM, although scalable, consumes a lot of power as it is a dynamic memory option, which means even in stand-by modes, it consumes a lot of power.
+Lastly, NAND memory is best suited for larger memory solutions, as chips are found starting in the 1 Gbit range, far exceeding the requirements of this version, thus hiking the price per component.
+Overall, each memory type appeared to be industrial-grade, which meets thermal requirements, but is not ideal.
+\nl
+Because NOR is a static memory type, it is supported by both FMC and FSMC STM32 chips.

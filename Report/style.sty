@@ -19,6 +19,8 @@
 \RequirePackage{import}
 \RequirePackage{threeparttable}
 \RequirePackage{dirtytalk} % Quotation using \say
+\RequirePackage{amssymb}
+\RequirePackage{longtable, booktabs, array}
 
 % -----------------------
 % References
@@ -271,3 +273,10 @@
 % New commands
 % -----------------------
 \newcommand{\nl}{\newline \newline}
+
+\newcommand{\requirement}[3]{%
+    \noindent\textbf{#1} \\
+    \textbf{Justification:} #2 \\
+    \textbf{Specification:} #3
+    \vspace{0.8em}
+}

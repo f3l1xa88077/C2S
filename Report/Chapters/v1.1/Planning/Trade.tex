@@ -1,11 +1,17 @@
-Scale 1-5 like last time.
-Trade studies were only conducted on components that had unclear or non-immediate choices. The following did not have a trade study conducted because:
+Like in \autoref{sec:v1-trade}, a 1-5 scale was used to evaluate design choices. Trade studies were only conducted on components that had unclear or non-immediate choices. The following did not have a trade study conducted because:
 
-\subsubsubsection{Camera}
-    \subimport{./Trade/}{Camera.tex}
+\begin{itemize}
+    \item \textbf{Camera} Agreed with the same argument from v1.
+    \item \textbf{CSA} The INA219 performed better than the INA181 (in my observations) during v1.
+    \item \textbf{OBC} The OBC board was already procured, with SPI as the set interface.
+    \item \textbf{LDO / Buck} Both components were used in v1.1 to reduce power savings, so there was no need to debate over which needed to be selected.
+    \item \textbf{Memory} The external QSPI memory was functional in v1 and served its purpose. The larger memory also allows buffering several images.
+\end{itemize}
 
-\subsubsubsection{Extended Memory}
+The outcome of \autoref{sec:v1.1-trade-mem} influenced \autoref{sec:v1.1-trade-mcu} as all chips in \autoref{tab:v1.1-trade-mcu} support FSMC.
+
+\subsubsubsection{Extended Memory}\label{sec:v1.1-trade-mem}
     \subimport{./Trade/}{ExMem.tex}
 
-\subsubsubsection{MCU}
+\subsubsubsection{MCU}\label{sec:v1.1-trade-mcu}
     \subimport{./Trade/}{MCU.tex}
