@@ -37,6 +37,7 @@
 !/Software/C2Sv*/Core/Inc/
 /Software/C2Sv*/Core/Inc/*
 !/Software/C2Sv*/Core/Inc/main.h
+!/Software/C2Sv*/Core/Inc/compress_test_harness/h
 
 !/Software/C2Sv*/Core/Src/
 /Software/C2Sv*/Core/Src/*
@@ -44,6 +45,7 @@
 !/Software/C2Sv*/Core/Src/syscalls.c
 !/Software/C2Sv*/Core/Src/sysmem.c
 !/Software/C2Sv*/Core/Src/app_threadx.c
+!/Software/C2Sv*/Core/Src/compress_test_harness.c
 
 !/Software/C2Sv*/Core/Startup/
 /Software/C2Sv*/Core/Startup/*

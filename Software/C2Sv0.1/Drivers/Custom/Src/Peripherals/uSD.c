@@ -6,32 +6,46 @@
  */
 
 #include"uSD.h"
-
+#include "compress_test_harness.h"
 
 
 /* FileX handles and memory */
-static FX_MEDIA        sd_disk;
-static FX_FILE         my_file;
-static uint8_t         media_memory[512];
+FX_MEDIA        sd_disk;
+FX_FILE         my_file;
+#define CHUNK_SIZE 4096
+static uint8_t         media_memory[CHUNK_SIZE]; // was 4096
 
-extern VOID fx_stm32_spi_sd_driver(FX_MEDIA *media_ptr);
+extern VOID fx_stm32_sd_driver(FX_MEDIA *media_ptr);
 
 uint32_t uSD_Init(void) {
     fx_system_initialize();
 
     /* Initialises the SD driver and opens the media */
-    return fx_media_open(&sd_disk, "STM32_SPI_SD", fx_stm32_spi_sd_driver,
+    return fx_media_open(&sd_disk, "STM32_SPI_SD", fx_stm32_sd_driver,
                          (VOID *)FX_NULL, media_memory, sizeof(media_memory));
+}
+
+uint32_t Init_Output_File(FX_FILE* output_file, const char* filename) {
+	uint32_t status;
+
+	status = fx_file_delete(&sd_disk, filename);
+
+    if (status != FX_SUCCESS && status != FX_NOT_FOUND) {
+        return status;
+    }
+
+    return FX_SUCCESS;
+
 }
 
 void uSD_Test(void) {
     uint32_t status;
 
     // 1. Initialise and Open Media
-    status = uSD_Init();
-    if (status != FX_SUCCESS) {
-        return;
-    }
+    //status = uSD_Init();
+//    if (status != FX_SUCCESS) {
+//        return;
+//    }
 
     // 2. Create and Open File
     // fx_file_create will return an error if file exists, we ignore it and just open.
@@ -60,11 +74,11 @@ void uSD_Test(void) {
  * @param size_in_bytes: Total size to write (use: num_elements * sizeof(element))
  * @param is_last_chunk: If 1, closes the file; if 0, keeps it open for more data.
  */
-uint32_t SD_Stream_Data(char* filename, void* data, uint32_t size_in_bytes, uint8_t is_last_chunk) {
+uint32_t SD_Stream_Data(FX_FILE* file, char* filename, void* data, uint32_t size_in_bytes, uint8_t is_last_chunk) {
     uint32_t status;
+    static uint8_t file_is_open = 0;
 
-    // 1. Open the media if not already open
-    // Note: In a real app, you might move uSD_Init to your startup code
+    // Initialise SD if necessary
     if (sd_disk.fx_media_id != FX_MEDIA_ID) {
         status = uSD_Init();
         if (status != FX_SUCCESS) return status;
@@ -73,30 +87,110 @@ uint32_t SD_Stream_Data(char* filename, void* data, uint32_t size_in_bytes, uint
     // 2. Open or Create the file
     // FX_OPEN_FOR_WRITE starts at the beginning.
     // Use fx_file_relative_seek(&my_file, 0, FX_SEEK_END) if appending to existing data.
-    status = fx_file_open(&sd_disk, &my_file, filename, FX_OPEN_FOR_WRITE);
-    if (status == FX_NOT_FOUND) {
-        fx_file_create(&sd_disk, filename);
-        status = fx_file_open(&sd_disk, &my_file, filename, FX_OPEN_FOR_WRITE);
+    if (!file_is_open) {
+		status = fx_file_open(&sd_disk, file, filename, FX_OPEN_FOR_WRITE);
+		if (status == FX_NOT_FOUND) {
+			// File doesn't exist, create it
+			status = fx_file_create(&sd_disk, filename);
+
+			if (status != FX_SUCCESS) {
+				return status;
+			}
+			// Now open newly created file
+			status = fx_file_open(&sd_disk, file, filename, FX_OPEN_FOR_WRITE);
+			if (status != FX_SUCCESS) {
+				return status;
+			}
+
+		}
+		else if (status != FX_SUCCESS) {
+        	return status;
+        }
+        file_is_open = 1;
     }
 
-    if (status != FX_SUCCESS) return status;
+    // Seek to end of file
+	status = fx_file_relative_seek(file, 0, FX_SEEK_END);
+	if (status != FX_SUCCESS) {
+		file_is_open = 0;
+		return status;
+	}
 
     // 3. Write the buffer
     // FileX handles the byte-alignment internally
-    status = fx_file_write(&my_file, data, size_in_bytes);
-
-    // 4. Finalize
+    status = fx_file_write(file, data, size_in_bytes);
+    if (status != FX_SUCCESS) {
+        fx_file_close(file);
+        file_is_open = 0;
+        return status;
+    }
+    // 4. Check for last chunk and handle
     if (is_last_chunk) {
-        fx_file_close(&my_file);
-        fx_media_flush(&sd_disk);
-        fx_media_close(&sd_disk);
-    } else {
-        // Optional: Flush periodically to prevent data loss if power is cut
-        fx_media_flush(&sd_disk);
+        status = fx_file_close(file);
+        if (status != FX_SUCCESS) {
+            file_is_open = 0;
+            return status;
+        }
+
+        status = fx_media_flush(&sd_disk);
+        file_is_open = 0;
     }
 
     return status;
 }
+
+/**
+ * @brief Reads a binary file from the SD card into a buffer.
+ *
+ * @param filename: Name of the file (e.g., "LEO.YUV")
+ * @param data: Destination buffer
+ * @param size_in_bytes: Expected size to read
+ */
+uint32_t SD_Read_Data(char* filename, void* data, uint32_t size_in_bytes) {
+    uint32_t status;
+    uint32_t bytes_read = 0;
+
+    if (sd_disk.fx_media_id != FX_MEDIA_ID) {
+        status = uSD_Init();
+        if (status != FX_SUCCESS) return status;
+    }
+
+    status = fx_file_open(&sd_disk, &my_file, filename, FX_OPEN_FOR_READ);
+    if (status != FX_SUCCESS) return status;
+
+    status = fx_file_read(&my_file, data, size_in_bytes, &bytes_read);
+    fx_file_close(&my_file);
+
+    if (status == FX_SUCCESS && bytes_read != size_in_bytes) {
+        return FX_END_OF_FILE;
+    }
+
+    return status;
+}
+
+uint32_t SD_Open_YUV_Files(char* filenames[], FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v_file)
+{
+	uint32_t status = 0;
+
+	status = fx_file_open(&sd_disk, y_file, filenames[0], FX_OPEN_FOR_READ);
+	if (status != FX_SUCCESS) return status;
+
+	status = fx_file_open(&sd_disk, u_file, filenames[1], FX_OPEN_FOR_READ);
+	if (status != FX_SUCCESS) {
+		fx_file_close(y_file);
+		return status;
+	}
+
+	status = fx_file_open(&sd_disk, v_file, filenames[2], FX_OPEN_FOR_READ);
+	if (status != FX_SUCCESS) {
+        fx_file_close(y_file);
+        fx_file_close(u_file);
+		return status;
+	}
+
+	return FX_SUCCESS;
+}
+
 
 /**
  * @brief Simulates an image data stream and writes it to the SD card.
@@ -111,7 +205,7 @@ void Test_Image_Stream(void) {
     if (status != FX_SUCCESS) return;
 
     // 2. Create and Open a binary file
-    fx_file_create(&sd_disk, "IMAGE.BIN");
+    //fx_file_create(&sd_disk, "IMAGE.BIN");
     status = fx_file_open(&sd_disk, &my_file, "IMAGE.BIN", FX_OPEN_FOR_WRITE);
     if (status != FX_SUCCESS) return;
 

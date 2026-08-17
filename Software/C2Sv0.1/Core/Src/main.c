@@ -234,7 +234,7 @@ int main(void)
 
 	  // Read BOOT0 Pin State
 	  BOOT0 = HAL_GPIO_ReadPin(BOOT0_GPIO_Port, BOOT0_Pin);
-	  Test_ICER_Compress_From_YUV_File_SD();
+	  uint32_t stat = Benchmark_Test_Harness_Compress_From_SD();
 
 	  powerSum   += csa.sys_power;
 	  currentSum += csa.current;
