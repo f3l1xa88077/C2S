@@ -1,15 +1,8 @@
 /*
  * img_core.h
  *
- * v0.1 TEST COPY of the v1 software JPEG module.
- * Adapted for on-board testing on the C2Sv0.1 hardware:
- *   - source is a GRAYSCALE frame already in RAM/flash (the const test_image),
- *     not RGB565 staged in QSPI as on v1
- *   - no QSPI / AT25 dependency
- * Same JPEGENC encode + strip/MCU loop being exercised; only the pixel source
- * and pixel type differ from the v1 module.
- *
- *  Created: 2026-08-16
+ * Created on Aug 16, 2026
+ *      Author: gabe
  */
 #ifndef DRIVERS_CUSTOM_SRC_IMAGING_IMG_CORE_H_
 #define DRIVERS_CUSTOM_SRC_IMAGING_IMG_CORE_H_
