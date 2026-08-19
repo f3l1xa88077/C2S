@@ -1,0 +1,5 @@
+Although there are drivers out there for the INA219 like from \href{https://github.com/libdriver/ina219}{libdriver}, I developed the driver myself to get more experience in driver development and interpreting the datasheet.
+\nl
+The driver itself can be used with two functions to initialise the chip, and read data. Although there are several functions that are called internally, they have all been abstracted into a single read function that packages the results into a single struct for easy data access. 
+\nl
+The intialisation function configures the internal registers according to the pre-defined gain, and the read functions look at all the registers, package them into the struct, and calculate the power consumption (mW) and current draw (mA) of the board.

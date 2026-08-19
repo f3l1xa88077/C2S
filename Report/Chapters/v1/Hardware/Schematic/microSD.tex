@@ -1,1 +1,4 @@
 To minimise PCB footprint, the SparkFun \href{https://core-electronics.com.au/breakout-board-for-microsd-transflash.html}{BOB-00544} microSD module was chosen from existing PAST inventory. Since the CubeSat flight model does not require non-volatile storage, MCU pins were prioritised for critical systems; this ensures a seamless transition to the flight model by simply removing the auxiliary SPI lines.
+
+\paragraph{Remark}
+MicroSD cards require both MOSI and MISO connected, even if data is never being read from the card, because the card needs to send confirmation messages back to the microcontroller. The microSD card uses the MISO line to flag when it is busy/ready and response codes. Because of this, the microSD card did not work on v1.0.

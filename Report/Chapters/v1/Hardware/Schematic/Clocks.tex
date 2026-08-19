@@ -9,3 +9,6 @@ Since all three oscillators are TCXO, they already include internal circuitry (l
 Each oscillator should continuously produce a clock signal when its tri-state function is enabled. The tri-state pins are tied to VDD so the clocks are always enabled, allowing the MCU to use HSE and LSE during sleep.
 \nl
 Future versions of the project could connect to the tri-state to the OBC CS line via a NOT gate, which allows the clocks to be externally controlled by the OBC, or continuously run. This switch would allow the OBC to place the clocks into low power mode, and keep the clocks always running during programming when power consumption is not an issue. Then the MCU could switch between its internal and external clocks between sleep modes to save power. This is a complicated approach and was not a requirement for the current verison, so it was not implemented.
+
+\paragraph{Remark}
+As the Real Time Clock (RTC) is not used, it was not necessary to include an LSE.

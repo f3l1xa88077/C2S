@@ -231,6 +231,9 @@ void Cam_ThreadEntry()
 	extern QSPI_HandleTypeDef QSPI_Memory;
 	extern OSPI_RegularCmdTypeDef sCommand;
 
+	extern volatile bool c2s_should_sleep;
+	extern TIM_HandleTypeDef        htim17;
+
 	// Setup QSPI
 	QSPI_Init_Memory(&hospi1, &sCommand, &QSPI_Memory);
 	QSPI_Command(&QSPI_Memory, QSPI_ERASE_CHIP);
@@ -384,13 +387,9 @@ void Cam_ThreadEntry()
 			}
 
 		}
-		if (c2s_should_sleep)
-		{
-			// ENTER SLEEP/STOP HERE
-		}
 
-	// Free up thread
-	tx_thread_sleep_ms(50);
+		// Free up thread
+		tx_thread_sleep_ms(50);
 
 	}
 }

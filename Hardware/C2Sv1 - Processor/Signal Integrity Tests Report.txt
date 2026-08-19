@@ -1,0 +1,88 @@
+
+
+Falling Edge Overshoot
+
+The following nets have values outside defined tolerance levels :
+
+
+Falling Edge Undershoot
+
+The following nets have values outside defined tolerance levels :
+
+
+Rising Edge Overshoot
+
+The following nets have values outside defined tolerance levels :
+
+
+Rising Edge Undershoot
+
+The following nets have values outside defined tolerance levels :
+
+
+Base Value
+
+The following nets have values outside defined tolerance levels :
+USB_D_P         (Actual Value =  213.4u , Tolerance =  0.000  )
+USB_D_N         (Actual Value =  378.4u , Tolerance =  0.000  )
+SWDIO           (Actual Value =  8.314u , Tolerance =  0.000  )
+SPI1_SCK        (Actual Value =  10.34u , Tolerance =  0.000  )
+SPI1_MOSI       (Actual Value =  27.14u , Tolerance =  0.000  )
+NetQSPI_1       (Actual Value =  4.605u , Tolerance =  0.000  )
+QSPI_NCS        (Actual Value =  4.605u , Tolerance =  0.000  )
+NRST            (Actual Value =  17.50u , Tolerance =  0.000  )
+DCMI_D2         (Actual Value =  452.7n , Tolerance =  0.000  )
+NetJ5_19        (Actual Value =  452.7n , Tolerance =  0.000  )
+DCMI_D5         (Actual Value =  380.4n , Tolerance =  0.000  )
+NetJ5_16        (Actual Value =  380.4n , Tolerance =  0.000  )
+DCMI_D6         (Actual Value =  142.6n , Tolerance =  0.000  )
+NetJ5_15        (Actual Value =  142.6n , Tolerance =  0.000  )
+DCMI_D7         (Actual Value =  117.1n , Tolerance =  0.000  )
+NetJ5_14        (Actual Value =  117.1n , Tolerance =  0.000  )
+DCMI_D8         (Actual Value =  71.69n , Tolerance =  0.000  )
+NetJ5_13        (Actual Value =  71.69n , Tolerance =  0.000  )
+DCMI_D9         (Actual Value =  70.69n , Tolerance =  0.000  )
+NetJ5_12        (Actual Value =  70.69n , Tolerance =  0.000  )
+DCMI_VSYNC      (Actual Value =  356.8n , Tolerance =  0.000  )
+NetJ5_5         (Actual Value =  356.8n , Tolerance =  0.000  )
+NetJ4_1         (Actual Value =  1.723u , Tolerance =  0.000  )
+LSE             (Actual Value =  1.053u , Tolerance =  0.000  )
+I2C2_SDA        (Actual Value =  13.05m , Tolerance =  0.000  )
+I2C2_SCL        (Actual Value =  10.82m , Tolerance =  0.000  )
+DCMI_GPIO2      (Actual Value =  378.3u , Tolerance =  0.000  )
+DCMI_GPIO1      (Actual Value =  62.21u , Tolerance =  0.000  )
+
+
+Top Value
+
+The following nets have values outside defined tolerance levels :
+TRIG            (Actual Value =  0.000  , Tolerance =  3.300  )
+SPI2_SCK        (Actual Value =  0.000  , Tolerance =  3.300  )
+SPI2_MOSI       (Actual Value =  0.000  , Tolerance =  3.300  )
+SPI2_CS         (Actual Value =  0.000  , Tolerance =  3.300  )
+NetCS_1         (Actual Value =  0.000  , Tolerance =  3.300  )
+SPI1_CS         (Actual Value =  0.000  , Tolerance =  3.300  )
+NetP3_2         (Actual Value =  0.000  , Tolerance =  3.300  )
+SLAVE           (Actual Value =  0.000  , Tolerance =  3.300  )
+CD              (Actual Value =  0.000  , Tolerance =  3.300  )
+NetCD_1         (Actual Value =  0.000  , Tolerance =  3.300  )
+LED_ERR         (Actual Value =  0.000  , Tolerance =  3.300  )
+LED_MCU         (Actual Value =  0.000  , Tolerance =  3.300  )
+Net3V3_1        (Actual Value =  0.000  , Tolerance =  3.300  )
+
+
+The following nets were not able to be analysed :
+
+TRIG
+SPI2_SCK
+SPI2_MOSI
+SPI2_CS
+NetCS_1
+SPI1_CS
+NetP3_2
+SLAVE
+CD
+NetCD_1
+LED_ERR
+LED_MCU
+Net3V3_1

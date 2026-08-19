@@ -31,24 +31,14 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
     // Shutter button pressed
     if (GPIO_Pin == SHUTTER_Pin)
     {
-        uint32_t now = HAL_GetTick();
+    	c2s_should_sleep = !c2s_should_sleep;
 
-        // Software de-bounce check
-        if ((now - last_button_time) >= 200)
-        {
-        	if (!FrameProcessed)
-        	{
-        		// Open DMA and listen for image
-        		//HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t)pBuffer, MAX_PICTURE_BUFF); // Cast pBuffer to obtain address
-        	}
-
-        }
     }
 
     // Rising edge of NCS (Exit)
     else if (GPIO_Pin == WAKEUP_Pin)
     {
-    	c2s_should_sleep = 1;
+    	//c2s_should_sleep = 1;
     }
 }
 
@@ -66,7 +56,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
     // Shutter button released
     if (GPIO_Pin == SHUTTER_Pin)
     {
-        //
+    	//uint32_t now = HAL_GetTick();
     }
     // Falling edge of NCS (Enter)
     else if (GPIO_Pin == WAKEUP_Pin)
