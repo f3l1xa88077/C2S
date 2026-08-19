@@ -99,7 +99,13 @@ OSPI_RegularCmdTypeDef sCommand;
 // Image Sensor
 uint16_t sensor_temp = 0;
 
-
+const uint32_t clock_dividers[] =
+{
+    RCC_SYSCLK_DIV1,
+    RCC_SYSCLK_DIV2,
+    RCC_SYSCLK_DIV4,
+    RCC_SYSCLK_DIV8
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -123,7 +129,24 @@ static void MX_RTC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static void DWT_Init(void) {
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+}
 
+void Set_Prescalar(uint32_t divider) {
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = divider;
+
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+    SystemCoreClockUpdate();
+}
 /* USER CODE END 0 */
 
 /**
@@ -148,7 +171,7 @@ int main(void)
 
   /* Configure the system clock */
   SystemClock_Config();
-
+  DWT_Init();
   /* USER CODE BEGIN SysInit */
 
   /* USER CODE END SysInit */
@@ -184,6 +207,9 @@ int main(void)
   	  icer_init();
 
 	  uint32_t status = uSD_Init();
+
+	  // ICER Benchmarking variables
+
 	  // Image Sensor
 	  //SD_Stream_Data("test.jpg", jpeg_out, hjpeg.JpegOutCount, 1);
 //	  AR_Init_Temperature(&hi2c1);

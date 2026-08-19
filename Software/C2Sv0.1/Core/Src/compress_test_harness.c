@@ -12,8 +12,8 @@
 static icer_output_data_buf_typedef output;
 
 // Configure source image dimensions here
-#define SOURCE_IMG_WIDTH 1920
-#define SOURCE_IMG_HEIGHT 1080
+#define SOURCE_IMG_WIDTH 640
+#define SOURCE_IMG_HEIGHT 480
 
 
 
@@ -51,7 +51,7 @@ static uint16_t Get_Dimension_Divisor(void) {
  *
  * @return FX_SUCCESS on success, or a FileX error/status code on failure.
  */
-uint32_t Load_Data_Chunk_From_SD(FX_FILE* file, int chunk_row, int chunk_col, uint32_t chunk_width,
+static uint32_t Load_Data_Chunk_From_SD(FX_FILE* file, int chunk_row, int chunk_col, uint32_t chunk_width,
 		uint32_t chunk_height, uint16_t* buffer)
 {
 	uint32_t status = 0;
@@ -114,7 +114,9 @@ uint32_t Load_Data_Chunk_From_SD(FX_FILE* file, int chunk_row, int chunk_col, ui
  *         loading a chunk fails, or an ICER result code if initialisation
  *         or compression fails.
  */
-uint32_t Test_ICER_Compress_From_SD(FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v_file) {
+
+static uint32_t chunk_compression_cycles[20];
+static uint32_t Test_ICER_Compress_From_SD(FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v_file, uint16_t divisor) {
 	uint32_t status = 0;
 	int icer_res = 0;
 	// fx_file for the compressed output binary
@@ -126,8 +128,7 @@ uint32_t Test_ICER_Compress_From_SD(FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v
 	if (status != FX_SUCCESS) {
 	    return status;
 	}
-	// Represents the amount of chunks per row and column
-	uint16_t divisor = Get_Dimension_Divisor();
+
 
 	uint16_t chunk_height = SOURCE_IMG_HEIGHT / divisor;
 	uint16_t chunk_width = SOURCE_IMG_WIDTH / divisor;
@@ -181,8 +182,12 @@ uint32_t Test_ICER_Compress_From_SD(FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v
 			if (status != FX_SUCCESS) { return status; }
 
 			// Perform actual compression
+			uint32_t start = DWT->CYCCNT;
 			icer_res = icer_compress_image_yuv_uint16(Y, U, V, chunk_width, chunk_height, stages, filt, segments, &output);
+			uint32_t end = DWT->CYCCNT;
 			if (icer_res != ICER_RESULT_OK && icer_res != ICER_BYTE_QUOTA_EXCEEDED) return icer_res;
+
+			chunk_compression_cycles[(row * divisor) + col] = end - start;
 
 			// Encode start of chunk with chunk header
 			chunk_header.chunk_start = CHUNK_START_ID;
@@ -200,40 +205,143 @@ uint32_t Test_ICER_Compress_From_SD(FX_FILE* y_file, FX_FILE* u_file, FX_FILE* v
 			}
 		}
 	}
-	// Close output .bin file
-//	fx_file_close(&output_file);
-
 	return status;
 }
 
+#define NUM_CLOCK_TESTS 4
+static const uint32_t clock_dividers[NUM_CLOCK_TESTS] = {
+		RCC_SYSCLK_DIV1,
+		RCC_SYSCLK_DIV2,
+		RCC_SYSCLK_DIV4,
+		RCC_SYSCLK_DIV8
+};
+static uint32_t benchmark_clock[NUM_CLOCK_TESTS];
+static uint32_t benchmark_cycles[NUM_CLOCK_TESTS];
+static uint32_t benchmark_time_us[NUM_CLOCK_TESTS];
+
+/*
+ * @brief Writes benchmarking data to an SD card connected to board
+ *
+ * Assumes test was conducted with different clock speeds
+ * and that the above buffers were populated with benchmarking data
+ */
+static uint32_t Write_Benchmark_To_SD() {
+	uint32_t status;
+	FX_FILE csv_file;
+	const char* csv_filename = "benchmark.csv";
+	char line[128];
+	int len;
+
+	// Clear output file
+	status = Init_Output_File(&csv_file, csv_filename);
+	if (status != FX_SUCCESS) {
+		return status;
+	}
+
+	// Write headers to line buffer
+	len = snprintf(line, sizeof(line), "prescalar,chunk_idx,clock_hz,chunk_cycles,chunk_time_us");
+	status = SD_Stream_Data(&csv_file, (char*)csv_filename, line, len, 0);
+	if (status != FX_SUCCESS) {
+		return status;
+	}
+
+	// For each clock test write data to csv file
+	for (int i = 0; i < NUM_CLOCK_TESTS; i++) {
+		uint8_t is_last = (i == NUM_CLOCK_TESTS - 1);
+
+		// Write data to line buffer
+		len = snprintf(line, sizeof(line), "%lu,%lu,%lu,%lu\r\n",
+							(unsigned long)clock_dividers[i],
+							(unsigned long)benchmark_clock[i],
+							(unsigned long)benchmark_cycles[i],
+							(unsigned long)benchmark_time_us[i]);
+
+		status = SD_Stream_Data(&csv_file, (char*)csv_filename, line, len, is_last);
+		if (status != FX_SUCCESS) {
+			return status;
+		}
+	}
+	return status;
+}
+
+/*
+ * @brief Entry point to the ICER compression benchmark
+ *
+ * For each clock speed to be tested, the target Y, U and V
+ * image .bins are reset to the beginning and the entire image
+ * is compressed chunk-by-chunk
+ *
+ * The total compression cycles from each chunk are summed
+ * to obtain the total compression cycles for the image. Total
+ * compression time is then calculated from the measured CPU
+ * clock frequency
+ *
+ * Benchmark results for each clock speed are written to SD card
+ * after all clock tests have completed
+ *
+ * Change the YUV filenames and SOURCE_IMG_* dimensions to
+ * benchmark different image sizes
+ *
+ */
 uint32_t Benchmark_Test_Harness_Compress_From_SD(void) {
+
 	uint32_t status = 0;
 
 	FX_FILE  y_file;
 	FX_FILE  u_file;
 	FX_FILE  v_file;
 
-	char * filenames[] = {"Y_1920x1080.bin", "U_1920x1080.bin", "V_1920x1080.bin"};
+	// Change these and SOURCE_IMG_* at start of file to set different image sizes
+	char * filenames[] = {"Y_640x480.bin", "U_640x480.bin", "V_640x480.bin"};
 	// Open uncompressed Y  U and V files
-
+	// Represents the amount of chunks per row and column
+	uint16_t divisor = Get_Dimension_Divisor();
+	uint16_t num_chunks = divisor * divisor;
 	status = SD_Open_YUV_Files(filenames, &y_file, &u_file, &v_file);
 	if (status != FX_SUCCESS) {
 		return status;
 	}
-
 	// Start benchmark
-	status = Test_ICER_Compress_From_SD(&y_file, &u_file, &v_file);
-	// End benchmark
+    for (int i = 0; i < NUM_CLOCK_TESTS; i++) {
 
+    	// For benchmarking different clock speeds
+    	Set_Prescalar(clock_dividers[i]);
+    	benchmark_clock[i] = SystemCoreClock;
+
+        status = fx_file_seek(&y_file, 0);
+        if (status != FX_SUCCESS) { return status; }
+        status = fx_file_seek(&u_file, 0);
+        if (status != FX_SUCCESS) { return status; }
+        status = fx_file_seek(&v_file, 0);
+        if (status != FX_SUCCESS) { return status; }
+
+    	status = Test_ICER_Compress_From_SD(&y_file, &u_file, &v_file, divisor);
+        if (status != FX_SUCCESS) {
+        	fx_file_close(&y_file);
+        	fx_file_close(&u_file);
+        	fx_file_close(&v_file);
+            return status;
+        }
+        // Sum data from each chunk
+        uint32_t total_cycles = 0;
+        for (int c = 0; c < num_chunks; c++) {
+
+        	total_cycles += chunk_compression_cycles[c];
+        }
+
+        // Store in benchmark data arrays
+        benchmark_cycles[i] = total_cycles;
+        benchmark_time_us[i] =
+            ((uint64_t)total_cycles * 1000000ULL) / benchmark_clock[i];
+    }
+
+	// End benchmark
+    Write_Benchmark_To_SD();
 	fx_file_close(&y_file);
 	fx_file_close(&u_file);
 	fx_file_close(&v_file);
 	return status;
-
 }
-
-
-
 
 
 //void Test_ICER_Compress_From_YUV_File_SD(void) {
