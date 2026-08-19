@@ -1,5 +1,17 @@
 # Changelog
 
+## RGB565 hardware JPEG encoding, streamed from SD
+
+### Changed
+- `jpeg_codec` now encodes RGB565 as YCbCr 4:2:0 (was grayscale), via the
+  hardware codec + `jpeg_utils` RGB->MCU conversion; new API `JPEG_Encode_RGB`.
+- Source is streamed band-by-band from an SD file (FileX), so frames too large
+  for flash/RAM (up to 2560x1440) can be encoded. `JPEG_RGB_FORMAT` set to
+  `JPEG_RGB565` in `jpeg_utils_conf.h`.
+
+### Notes
+- Hardware verified
+
 ## Stream JPEG encoding band-by-band to support high-quality image inputs
 
 ### Added
@@ -12,7 +24,6 @@
 ### Notes
 - Still a static test image and harness, no live DCMI capture.
 - Verified on board
-
 
 
 ## Fix JPEG encoded-length reporting
