@@ -90,7 +90,7 @@
 #define CFG_TUD_DWC2_BYTES_EP0      64
 
 // TX FIFOs for Endpoints (Endpoint 0, CDC Notify, CDC Data)
-#define CFG_TUD_DWC2_TX_FIFO_SIZES  { 16, 16, 64 }
+#define CFG_TUD_DWC2_TX_FIFO_SIZES  { 16, 16, 256 } // Upgrade from FIFO size of 64 to 256
 
 // RX FIFO size (Shared by all OUT endpoints)
 #define CFG_TUD_DWC2_RX_FIFO_SIZE   128
@@ -109,8 +109,8 @@
 #define CFG_TUD_CDC_NOTIFY        1 // Enable use of notification endpoint
 
 // CDC FIFO size of TX and RX
-#define CFG_TUD_CDC_RX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
-#define CFG_TUD_CDC_TX_BUFSIZE   (TUD_OPT_HIGH_SPEED ? 512 : 64)
+#define CFG_TUD_CDC_RX_BUFSIZE   512 // (TUD_OPT_HIGH_SPEED ? 512 : 64)
+#define CFG_TUD_CDC_TX_BUFSIZE   4096 // (TUD_OPT_HIGH_SPEED ? 512 : 64)
 
 // CDC Endpoint transfer buffer size, default to max bulk packet size (HS 512, FS 64). Larger is faster.
 // Larger RX_EPSIZE requires CFG_TUD_CDC_RX_NEED_ZLP = 1 and host ZLP support
@@ -119,6 +119,12 @@
 
 // MSC Buffer size of Device Mass storage
 #define CFG_TUD_MSC_EP_BUFSIZE   512
+
+//// Enable the Synopsys core's internal hardware DMA
+//#define CFG_TUD_DWC2_DMA_ENABLE    1
+//
+//// Explicitly disable slave mode since DMA is handling memory transfers
+//#define CFG_TUD_DWC2_SLAVE_ENABLE  0
 
 #ifdef __cplusplus
  }
