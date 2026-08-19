@@ -20,6 +20,8 @@
 #include "main.h"
 #include "jpeg_utils_conf.h"
 #include "app_filex.h"
+#include "jpeg_codec.h"
+#include "test_image.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -94,10 +96,10 @@ OSPI_RegularCmdTypeDef sCommand;
 // Image Sensor
 uint16_t sensor_temp = 0;
 
-static uint8_t gray[128*128];;
-static uint8_t jpeg_out[20000];
-uint32_t jpeg_size = 20000;
-JPEG_ConfTypeDef conf;
+#define JPEG_OUT_CAP (512 * 1024)
+uint32_t jpeg_size = 0;
+static uint8_t jpeg_out[JPEG_OUT_CAP];
+
 
 /* USER CODE END PV */
 
@@ -179,18 +181,10 @@ int main(void)
 
   // Initialise subsystems
 
-	  // Image Sensor
-	  for (int y=0; y<128;y++) {
-		for (int x=0;x<128;x++){
-			gray[y*128+x] = (x % 32 < 16) ? 50: 200;
-		}
-	  }
-	  conf.ColorSpace = JPEG_GRAYSCALE_COLORSPACE;
-	  conf.ChromaSubsampling = JPEG_444_SUBSAMPLING;
-	  HAL_JPEG_ConfigEncoding(&hjpeg, &conf);
-	  HAL_JPEG_Encode(&hjpeg, gray, 128*128, jpeg_out, jpeg_size, HAL_MAX_DELAY);
+// Image Sensor
+	  JPEG_Encode_Gray(&hjpeg, test_image, 1024, 720, 30, jpeg_out, sizeof(jpeg_out), &jpeg_size);
 	  uSD_Init();
-	  SD_Stream_Data("test.jpg", jpeg_out, hjpeg.JpegOutCount, 1);
+	  SD_Stream_Data("testimg.jpg", jpeg_out, jpeg_size, 1);
 //	  AR_Init_Temperature(&hi2c1);
 //	  AR_Read_Temperature(&hi2c1, &sensor_temp);
 //	  AR_Init_ImageSensor(&hi2c1);
