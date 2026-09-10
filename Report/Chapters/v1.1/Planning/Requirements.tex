@@ -3,82 +3,82 @@ The compiled requirements focus on the sub-systems, as the system requirements w
 \subsubsubsection{Camera}
 
 \requirement{JPEG Codec}
-{Hardware accelerated JPEG compression on the STM32 is much faster than by software. The STM has a co-processor specifically for this, meaning the chip is running for less time and less power is consumed.}
+{Hardware accelerated JPEG compression on the STM32 is much faster than by software, meaning the chip is running for less time and less power is consumed.}
 {TBD if needed, yet to be tested}
 
 \requirement{Colour Format}
-{The colour format images will be captured in needs to be defined. Different formats take up different amounts of space, sets requirements for memory.}
+{The images will be captured in RGB and YUV colour format. YUV is required for ICER and JPEG compression, and RGB as a backup for JPEG.}
 {Needs to be justified by v1.0 and v0.1 testing. As we are using OV7670: RGB565, RGB555, YUV422}
 
 \requirement{DCMI Camera}
-{Avoiding CSI-2. It would open C2S up to really good image sensors, but adding a bridge introduced more complexity. As the mission requirements are to capture an image, we should aim to do that in the easiest way. Although CSI-2 could give us really good images, DCMI can deliver and that's all we need right now. It's been verified to work on v1.0, so pivoting to a new interface risks needing more versions.}
-{Architecture should support images around the 2K mark - support, not "must be 2K". According to Phase B requirements, it must be smaller than $\sim$1.62 MB, this just sets the upper limit of the data, not the limit of the resolution. The resolution can be as small or large as possible, just as long as it adheres to the data requirement. For ideal quality, it should be around 2K as this is a sweet spot for resolution and quality.}
+{As the mission requirements are to capture an image, we should aim to do that in the easiest way. Although CSI-2 could give us really good images, DCMI can deliver and that's all we need right now. It's been verified to work on v1.0, so pivoting to a new interface risks needing more versions.}
+{Architecture should support images up to 5 MP. According to Phase B requirements, the ouput image must be smaller than $\sim$1.62 MB.}
 
 \requirement{Image Metadata}
 {Attaching important information alongside the photo is important for identifying when it was taken, so we can estimate what it is taking a photo of.}
 {Request RTC time from OBC and attach to image metadata. Image size, colour space, etc.}
 
 \requirement{OV7670 Camera}
-{Developed working code for the camera module, don't have the budget for an additional camera module.}
-{Should have AGC, AWB, AEC properly configured.}
+{There is already a functioning driver for the camera. Additionally, we don't currently have the budget for an additional camera module.}
+{Same module from v1.}
 
 \subsubsubsection{Memory}
 
 \requirement{High Data Rate External Memory}
 {High bandwidth and fast memory is required to rapidly buffer image data, as testing from v1.0 showed that direct CPU writing to QSPI took far too long.}
-{Needs to be compatible with FSMC/FMC. Needs to buffer at least twice the size of expected RAW image data for sufficient overhead.}
+{Needs to be compatible with FSMC/FMC. Needs to buffer at least the maximum size of expected RAW image data.}
 
-\requirement{Non-volatile external memory}
-{As the internal memory of STM32s are not large enough to store one or more images, external memory is required. This must be non-volatile to ensure data is not lost over time e.g., waiting for transmit window.}
-{Needs to buffer at least four times the size of the expected RAW memory size for sufficient overhear. One max RAW for the raw image data, another for the compressed image, another for the Comms data, and one for overhead. ..}
+\requirement{High Capacity External memory}
+{The internal memory of STM32s are not large enough to store one or more images. An additionaly lower data rate, but higher capacity external memory reduces costs compared to one single large capacity, high data rate extended memory option.}
+{Needs to buffer the output of at least 4 images (NEED TO CONFIRM WITH COMMS).}
 
 \requirement{SD Card}
-{Allows us to write several images to external, non-volatile memory, where easy data recovery and data integrity is a priority. Very good for HAB flights and testing.}
-{SDMMC. SPI did not work on v1.0. 4-bit wide if possible, 1-bit is the required minimum.}
+{Allows us to write several images to external, non-volatile memory, where easy data recovery and data integrity is a priority. Very applicable for HAB missions and isolated testing.}
+{SDMMC as it worked on v0.1 and is native to the STM32. 4-bit width to ensure writing does not block or halt the processor for longer than necessary.}
 
 \requirement{File Management}
-{As large amounts of memory will be moved around, an effective file/memory management system should be implemented to avoid memory overhead. A cleaner memory management reduces the risk of memory leaks.}
+{As large amounts of memory will be moved around, an effective file/memory management system should be implemented to avoid memory overhead. A cleaner memory management reduces the risk of memory leaks or corruption.}
 {Dynamic memory allocation and storage. Moving memory between different addresses and keeping track of locations and metadata.}
 
 \subsubsubsection{Power}
 
 \requirement{Current per MHz}
 {Reducing this draws the power consumption away from the STM32, what is typically the most power hungry component.}
-{ALARP}
+{As low as reasonably practical.}
 
 \requirement{CSA}
-{For power characterisation}
-{Continue to use INA219 as it worked well with v1.}
-
-\requirement{LDO}
-{Need to regulate the EPS voltage down to required voltages for operation.}
-{Individual supply for the camera and rest of the board. Board can operate in normal noise (acceptable levels). Camera should operate on low noise LDO. Power specifications of the camera mean we can select LDO based on known current consumption.}
+{For board power characterisation.}
+{Continue to use the INA219 as worked with v1.}
 
 \requirement{Buck Converter}
 {To reduce power loss from LDO directly - 33\% of power was estimated to be from the LDO alone on V1.}
-{Should regulate VEPS to 0.3-0.5V above LDO output i.e., to LDO output voltage. The lower the dropout, the lower the power loss.}
+{Should regulate VEPS to 0.3-0.5V above LDO output voltage.}
+
+\requirement{LDO}
+{Need to filter noise from the EPS voltage supply.}
+{Very low drop-out voltage and high PSSR.}
 
 \subsubsubsection{Interfaces}
 
 \requirement{DCMI}
-{Needs to receive image data.}
-{14-bit - will make it compatible with most DCMI modules.}
+{The STM32 needs to receive parallel image data on its dedicated DCMI peripheral.}
+{Highest bit-width possible. Master clock output as XCLK.}
 
-\requirement{USB FS}
-{Allows me to preview images and efficiently test the board}
-{At least FS.}
+\requirement{USB-FS}
+{Allows images to be output directly to a dashboard during testing to accelerate the programming process.}
+{The STM32 needs to operate in device mode. VBUS sensing not required.}
 
 \requirement{EPS}
-{Needs to be powered by EPS}
-{Needs to use EPS 4-pin Pico lock connector.}
+{Needs to be powered by EPS.}
+{Needs to use dedicated and adhere to the 4-pin EPS connector.}
 
 \requirement{OBC}
-{Needs to communicate with OBC}
-{Needs to use inverted OBC connector. Communicate over SPI.}
+{Needs to communicate with OBC.}
+{Needs to use inverted OBC connector (slave-side).}
 
 \requirement{C2I}
-{Need to be able to connect to camera breakout. Using 5V instead of 3V3. Allows us to isolate the camera power from the rest of the board. Allows us to regulate voltages like 3V8 for the IMX900. Also allows us to characterise the power of the board and sensor individually, increasing the resolution of the power characterisation.}
-{Should accommodate full DCMI 14-bit bus, plus 4 GPIOs, and use the 5V from EPS. Doesn't need to match up with CSI bridge, excluding CSI from current scope to reduce complexity.}
+{Standard camera interface should allow different camera modules to be swapped out.}
+{Should accommodate C2I 1.0 requirements, with two 3V3 pins should we exchanged for 5V, to allow camera modules requiring voltages like 3V8 to be used.}
 
 \requirement{OBC Connector Fully Connected}
 {Allows the UART pins to be configured as GPIOs for miscellaneous use if needed.}
@@ -96,35 +96,39 @@ The compiled requirements focus on the sub-systems, as the system requirements w
 
 \subsubsubsection{PCB Layout \& Physical Design}
 
-\requirement{Clear silkscreen}
+\requirement{Silkscreen}
 {Silkscreens on v1.0 did not print properly as they were on the edge of JLC requirements.}
 {Slightly larger silkscreen text.}
 
 \requirement{Non-through hole headers}
-{Through holes take up a lot of space as they go through each layer. As they won't be used on the CubeSat version, no point allocating so much space for them if they can just be a surface mount component. Frees up space on other layers.}
-{Surface mount, 0.1inch.}
+{Through holes take up a lot of space as they go through each layer. As they won't be used on the CubeSat version, no point allocating through-hole space for them if they can just be a surface mount component. Frees up space on other layers and allows the board to sit flush on a surface.}
+{Surface mount, 0.1 inch.}
 
 \requirement{Mounting holes}
 {Needs to be secured to a payload bay and vibration table}
-{Coordinate with mechanical for mounting pattern dimensions. Standard 4-corner.}
+{Must be in a square pattern for FlatSat mounting (according to Mission Manager, Liria S). Standard 4-corner.}
 
 \requirement{Connector Placement}
 {External connectors should be placed where we expect the cables to be to reduce cable length and promote organisation and ease of integration.}
-{Connectors should be placed on as few sides as possible. The ideal case is a single edge. If connectors are placed on all sides/edges, it "expands" the actual size of the board, as the new cables sprout outwards from each direction, meaning there's extra cable / wraparound on each edge.}
+{Connectors should be placed on as few sides as possible. The ideal case is a single edge. If connectors are placed on all sides/edges, it effectively expands the actual size of the board, as the new cables sprout outwards from each direction, meaning there's extra cable space / wraparound on each edge.}
+
+\requirement{No BGAs}
+{BGA components are no rated for satellites.}
+{Selecting packages like LQFP that have stronger solder joints.}
 
 \subsubsubsection{Debugging}
 
 \requirement{SWD}
 {For easy programming and live-debugging.}
-{No large header, small to reduce PCB size.}
+{No large 20-pin header, 4-pin (SWD, SWCLK, VDD, GND) to reduce PCB size.}
 
 \requirement{Test Points}
-{For logic analyser probing}
+{To debug using a logic analyser.}
 {Broken out on all signal lines, small test point only e.g., 2mm pad.}
 
 \requirement{Telemetry Logging}
 {Shall be capable of relaying heartbeat statuses to OBC to identify and resolve potential issues.}
-{Be capable of checking heartbeats upon request and sending results to OBC. Voltage sensing for 3V3 supplies?}
+{Be capable of checking heartbeats upon request and sending results to OBC. Voltage sensing for 3V3 supply.}
 
 \requirement{Remote debugging / control}
 {In the event of a fault or error, C2S shall be capable of being restarted or corrected to ensure it operates correctly in the future.}
@@ -133,7 +137,7 @@ The compiled requirements focus on the sub-systems, as the system requirements w
 \subsubsubsection{Environmental}
 
 \requirement{Temperature}
-{Needs to withstand space environment}
-{-40 to 85deg}
+{Needs to withstand space environment.}
+{Components must have a thermal grade accomodating temperatures of s-40 to 85deg.}
 
 The capabilities from \autoref{sec:v1.1-capabilities} also act as system requirements, however, these have already been defined in the Phase B work package.
